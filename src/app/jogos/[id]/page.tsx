@@ -12,6 +12,7 @@ import { ZONES } from "@/lib/court";
 import { gameInsights, type Insight } from "@/lib/insights";
 import { useSeason } from "@/lib/season";
 import { useAccess } from "@/lib/auth";
+import { ask } from "@/components/Dialog";
 
 export default function GamePage() {
   const { id } = useParams<{ id: string }>();
@@ -48,7 +49,7 @@ export default function GamePage() {
     <div className="grid gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <Link href="/jogos" className="text-sm text-muted hover:text-fg print:hidden">← Jogos</Link>
+          <Link href="/jogos" className="tap text-sm text-muted hover:text-fg print:hidden">← Jogos</Link>
           <h1 className="mt-1 text-2xl font-semibold">{game.home ? "vs" : "@"} {game.opponent}</h1>
           <p className="text-sm text-muted">
             {new Date(game.date + "T12:00").toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
@@ -123,7 +124,7 @@ export default function GamePage() {
               <div className="mt-1 flex items-center justify-between text-[11px] text-muted">
                 <span>{shotEvents.filter((e) => e.x === undefined).length} lançamentos sem local marcado.</span>
                 {shotEvents.length > 0 && (
-                  <Link className="text-brand print:hidden" href={`/jogos/${id}/logger?${new URLSearchParams({ tipo: "SHOT", play: "1", ...(shotFilter === "us" || shotFilter === "opp" ? { lado: shotFilter } : { jogador: shotFilter }) })}`}>
+                  <Link className="tap text-brand print:hidden" href={`/jogos/${id}/logger?${new URLSearchParams({ tipo: "SHOT", play: "1", ...(shotFilter === "us" || shotFilter === "opp" ? { lado: shotFilter } : { jogador: shotFilter }) })}`}>
                     ▶ Ver estes lançamentos
                   </Link>
                 )}
@@ -153,7 +154,7 @@ export default function GamePage() {
         </>
       )}
 
-      {access.canEdit && <GameInfo gameId={id} onDelete={async () => { if (confirm("Apagar este jogo e todos os eventos?")) { await deleteGame(id); router.push("/jogos"); } }} />}
+      {access.canEdit && <GameInfo gameId={id} onDelete={async () => { if (await ask("Apagar este jogo e todos os eventos?", { confirmText: "Apagar", danger: true })) { await deleteGame(id); router.push("/jogos"); } }} />}
     </div>
   );
 }
@@ -193,7 +194,7 @@ function GameInfo({ gameId, onDelete }: { gameId: string; onDelete: () => void }
   const upd = (patch: Parameters<typeof db.games.update>[1]) => db.games.update(gameId, patch);
   return (
     <section className="card p-4">
-      <button className="text-sm font-semibold" onClick={() => setOpen(!open)}>{open ? "▾" : "▸"} Dados do jogo e notas</button>
+      <button className="tap w-full text-left text-sm font-semibold" onClick={() => setOpen(!open)}>{open ? "▾" : "▸"} Dados do jogo e notas</button>
       {open && (
         <div className="mt-3 grid gap-3 sm:grid-cols-4">
           <div><label className="label">Adversário</label><input className="input" value={game.opponent} onChange={(e) => upd({ opponent: e.target.value })} /></div>
@@ -230,7 +231,7 @@ function Report({ insights, gameId }: { insights: Insight[]; gameId: string }) {
             <div className="text-sm font-semibold">{it.title}</div>
             <p className="mt-0.5 text-xs text-muted">{it.text}</p>
             {it.clips && (
-              <Link href={`/jogos/${gameId}/logger?${it.clips}`} className="mt-1 inline-block text-xs text-brand print:hidden">▶ Ver jogadas</Link>
+              <Link href={`/jogos/${gameId}/logger?${it.clips}`} className="tap mt-1 inline-block text-xs text-brand print:hidden">▶ Ver jogadas</Link>
             )}
           </div>
         ))}

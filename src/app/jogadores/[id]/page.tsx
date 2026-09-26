@@ -28,7 +28,7 @@ export default function PlayerPage() {
   return (
     <div className="grid gap-6">
       <div>
-        <Link href="/equipa" className="text-sm text-muted hover:text-fg">← Plantel</Link>
+        <Link href="/equipa" className="tap text-sm text-muted hover:text-fg">← Plantel</Link>
         <div className="mt-2 flex items-center gap-4">
           <span className="grid h-14 w-14 place-items-center rounded-full bg-brand font-mono text-2xl font-bold text-black">{player.number}</span>
           <div>

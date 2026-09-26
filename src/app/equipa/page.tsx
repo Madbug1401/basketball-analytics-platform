@@ -65,8 +65,8 @@ export default function RosterPage() {
             <h1 className="text-2xl font-semibold">Plantel</h1>
             <p className="text-sm text-muted">{players.filter((p) => p.active).length} jogadores ativos</p>
           </div>
-          <label className="flex items-center gap-2 text-sm text-muted">
-            <input type="checkbox" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} /> Mostrar inativos
+          <label className="flex min-h-10 cursor-pointer items-center gap-2 text-sm text-muted">
+            <input type="checkbox" className="h-4 w-4" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} /> Mostrar inativos
           </label>
         </div>
         <div className="card overflow-x-auto">

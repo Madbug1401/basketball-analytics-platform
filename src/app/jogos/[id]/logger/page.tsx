@@ -331,13 +331,28 @@ function Logger({ game, players, events, readOnly }: { game: Game; players: Play
       {/* video (top-left) */}
       <div className="min-w-0 xl:col-start-1 xl:row-start-1">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <Link href={`/jogos/${game.id}`} className="text-sm text-muted hover:text-fg">← Estatísticas do jogo</Link>
+          <Link href={`/jogos/${game.id}`} className="tap text-sm text-muted hover:text-fg">← Estatísticas do jogo</Link>
           <div className="flex items-center gap-2 text-xs text-muted">
             <span>Vídeo {fmtTs(now)} · {rate}x</span>
-            <button className="btn py-1 text-xs" onClick={() => setHelp(true)}>Atalhos <span className="kbd">?</span></button>
+            <button className="btn py-1 text-xs pointer-coarse:hidden" onClick={() => setHelp(true)}>Atalhos <span className="kbd">?</span></button>
           </div>
         </div>
         <VideoArea game={game} playerRef={video} />
+        {game.video.kind !== "none" && (
+          <div className="mt-2 hidden grid-cols-5 gap-1.5 pointer-coarse:grid">
+            <button className="btn px-1 text-xs" onClick={() => video.current?.nudge(-5)} aria-label="Recuar 5 segundos">−5s</button>
+            <button className="btn px-1 text-xs" onClick={() => video.current?.nudge(-1)} aria-label="Recuar 1 segundo">−1s</button>
+            <button className="btn btn-primary px-1" onClick={() => video.current?.toggle()} aria-label="Play / pausa">▶❚❚</button>
+            <button className="btn px-1 text-xs" onClick={() => video.current?.nudge(1)} aria-label="Avançar 1 segundo">+1s</button>
+            <button className="btn px-1 text-xs" onClick={() => video.current?.nudge(5)} aria-label="Avançar 5 segundos">+5s</button>
+            <div className="col-span-5 flex gap-1.5">
+              {RATES.map((r) => (
+                <button key={r} className={`btn flex-1 px-1 text-xs ${rate === r ? "border-brand text-brand" : ""}`}
+                  onClick={() => { video.current?.setRate(r); setRate(r); }}>{r}x</button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* RIGHT: control pad */}

@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import type { EventType, GameEvent, ID, Player } from "@/lib/types";
 import { describe, EVENT_LABEL, fmtTs } from "@/lib/stats";
 import type { PlayerHandle } from "./VideoPlayer";
+import { ask } from "./Dialog";
 
 export const CLIP_BEFORE = 6; // segundos antes do evento
 export const CLIP_AFTER = 2; // segundos depois
@@ -105,7 +106,7 @@ export function EventLog({
         <h3 className="mr-auto text-sm font-semibold">Eventos ({filtered ? `${playlist.length} de ${events.filter((e) => e.type !== "PERIOD_START").length}` : events.length})</h3>
         <div className="flex gap-1">
           {(["all", "us", "opp"] as const).map((s) => (
-            <button key={s} onClick={() => setF({ ...f, side: s })} className={`rounded px-2 py-0.5 text-xs ${f.side === s ? "bg-panel-2" : "text-muted"}`}>
+            <button key={s} onClick={() => setF({ ...f, side: s })} className={`rounded px-2 py-0.5 text-xs pointer-coarse:px-3 pointer-coarse:py-1.5 ${f.side === s ? "bg-panel-2" : "text-muted"}`}>
               {s === "all" ? "Todos" : s === "us" ? "Nós" : "Adv."}
             </button>
           ))}
@@ -137,7 +138,7 @@ export function EventLog({
           return (
             <div key={e.id}>
               <div className={`group flex items-center gap-2 sm:gap-3 border-b border-line/40 px-3 py-1.5 text-sm ${past ? "" : "opacity-45"} ${e.type === "PERIOD_START" ? "bg-panel-2/60" : ""} ${playing ? "bg-brand/15 opacity-100!" : ""}`}>
-                <button onClick={() => { setClip(null); video.current?.seek(e.videoTs - 4); video.current?.play(); }} className="w-[4.75rem] shrink-0 whitespace-nowrap text-left font-mono text-xs text-brand hover:underline" title="Ver jogada">
+                <button onClick={() => { setClip(null); video.current?.seek(e.videoTs - 4); video.current?.play(); }} className="-my-1.5 w-[4.75rem] shrink-0 whitespace-nowrap py-2 text-left font-mono text-xs text-brand hover:underline" title="Ver jogada">
                   ▶ {fmtTs(e.videoTs)}
                 </button>
                 <span className="w-6 shrink-0 font-mono text-xs text-muted">P{e.period}</span>
@@ -147,8 +148,8 @@ export function EventLog({
                 <span className="flex-1 truncate text-muted">
                   {describe(e, name)}{e.type === "SHOT" && e.x === undefined ? " · sem local" : ""}
                 </span>
-                {!readOnly && <><button onClick={() => setEditing(editing === e.id ? null : e.id)} className={`${editing === e.id ? "visible text-brand" : "invisible"} text-muted hover:text-fg group-hover:visible`} title="Editar">✎</button>
-                <button onClick={() => db.events.delete(e.id)} className="invisible text-muted hover:text-bad group-hover:visible" title="Apagar">✕</button></>}
+                {!readOnly && <><button onClick={() => setEditing(editing === e.id ? null : e.id)} className={`${editing === e.id ? "visible text-brand" : "invisible pointer-coarse:visible"} -my-1.5 grid h-8 w-7 shrink-0 place-items-center text-muted hover:text-fg group-hover:visible`} title="Editar" aria-label="Editar">✎</button>
+                <button onClick={async () => { if (!matchMedia("(pointer: coarse)").matches || await ask("Apagar este evento?", { confirmText: "Apagar", danger: true })) void db.events.delete(e.id); }} className="invisible -my-1.5 grid h-8 w-7 shrink-0 place-items-center text-muted hover:text-bad group-hover:visible pointer-coarse:visible" title="Apagar" aria-label="Apagar">✕</button></>}
               </div>
               {editing === e.id && <EventEditor e={e} players={players} now={now} onClose={() => setEditing(null)} />}
             </div>

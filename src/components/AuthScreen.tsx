@@ -92,7 +92,7 @@ export function AuthScreen() {
           </form>
           <div className="mt-3 text-center text-xs text-muted">
             {tab === "forgot"
-              ? <button className="hover:text-fg" onClick={() => setTab("login")}>← Voltar</button>
+              ? <button className="tap hover:text-fg" onClick={() => setTab("login")}>← Voltar</button>
               : <button className="hover:text-fg" onClick={() => setTab("forgot")}>Esqueci-me da password</button>}
           </div>
         </div>

@@ -97,7 +97,7 @@ export default function Dashboard() {
       <div className="card">
         <div className="flex items-center justify-between border-b border-line px-4 py-2">
           <h3 className="font-semibold">Últimos jogos</h3>
-          <Link href="/jogos" className="text-sm text-brand">Ver todos</Link>
+          <Link href="/jogos" className="tap text-sm text-brand">Ver todos</Link>
         </div>
         {[...s.games].reverse().slice(0, 5).map(({ game, stats }) => {
           const w = stats.us.pts > stats.opp.pts;

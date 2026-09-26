@@ -6,6 +6,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db, deletePractice } from "@/lib/db";
 import { ATTENDANCE_LABEL, type AttendanceStatus, type Practice } from "@/lib/types";
 import { StaffOnly } from "@/components/Guard";
+import { ask } from "@/components/Dialog";
 
 const ORDER: AttendanceStatus[] = ["present", "late", "absent", "excused"];
 const STYLE: Record<AttendanceStatus, string> = {
@@ -47,7 +48,7 @@ function PracticeDetail() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <Link href="/treinos" className="text-sm text-muted hover:text-fg">← Treinos</Link>
+      <Link href="/treinos" className="tap text-sm text-muted hover:text-fg">← Treinos</Link>
       <div className="card mt-3 grid gap-3 p-4 sm:grid-cols-4">
         <div className="sm:col-span-2">
           <label className="label">Título</label>
@@ -104,7 +105,7 @@ function PracticeDetail() {
         {players.length === 0 && <p className="text-muted">Adiciona jogadores no <Link className="text-brand" href="/equipa">Plantel</Link>.</p>}
       </div>
 
-      <button className="btn btn-danger mt-8" onClick={async () => { if (confirm("Apagar este treino?")) { await deletePractice(id); router.push("/treinos"); } }}>
+      <button className="btn btn-danger mt-8" onClick={async () => { if (await ask("Apagar este treino?", { confirmText: "Apagar", danger: true })) { await deletePractice(id); router.push("/treinos"); } }}>
         Apagar treino
       </button>
     </div>

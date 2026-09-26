@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useSyncExternalStore, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode, type RefObject } from "react";
 import { TeamProvider, useTeam } from "@/lib/team";
 import { AuthProvider, useAccess, useAuth, ROLE_LABEL } from "@/lib/auth";
 import { db, importAll, uid } from "@/lib/db";
 import { syncStore, syncNow } from "@/lib/sync";
 import { AuthScreen, JoinWithCode } from "./AuthScreen";
+import { ask, notify, DialogHost } from "@/components/Dialog";
 
 type NavItem = { href: string; label: string; staff?: boolean };
 const NAV: NavItem[] = [
@@ -28,6 +29,7 @@ export function Shell({ children }: { children: ReactNode }) {
     <AuthProvider>
       <TeamProvider>
         <Inner>{children}</Inner>
+        <DialogHost />
       </TeamProvider>
     </AuthProvider>
   );
@@ -42,6 +44,15 @@ function Inner({ children }: { children: ReactNode }) {
   const compact = path.endsWith("/logger");
   const teamless = TEAMLESS.some((p) => path.startsWith(p));
   const [menu, setMenu] = useState(false);
+  const [menuPath, setMenuPath] = useState(path);
+  if (menuPath !== path) { setMenuPath(path); if (menu) setMenu(false); }
+  useEffect(() => {
+    if (!menu) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMenu(false); };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [menu]);
 
   if (mode === "cloud" && !ready) return <Splash text="A iniciar…" />;
   if (mode === "cloud" && !session && !path.startsWith("/conta")) return <AuthScreen />;
@@ -78,7 +89,7 @@ function Inner({ children }: { children: ReactNode }) {
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
             </button>
           )}
-          <Link href="/" className="flex min-w-0 items-center gap-2 font-semibold tracking-tight">
+          <Link href="/" className="flex h-9 min-w-9 items-center gap-2 font-semibold tracking-tight">
             <Ball /> <span className="hidden sm:inline">Courtside</span>
           </Link>
           {team && <span className="min-w-0 flex-1 truncate text-sm text-muted lg:hidden">{team.name} {team.category}</span>}
@@ -129,6 +140,18 @@ function Inner({ children }: { children: ReactNode }) {
   );
 }
 
+/** Close a popover when tapping outside it or pressing Escape. */
+function useDismiss(open: boolean, close: () => void, ref: RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) close(); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
+    document.addEventListener("pointerdown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("pointerdown", onDown); document.removeEventListener("keydown", onKey); };
+  }, [open, close, ref]);
+}
+
 function Splash({ text, inline }: { text: string; inline?: boolean }) {
   return (
     <div className={`grid place-items-center text-muted ${inline ? "py-24" : "min-h-screen"}`}>
@@ -140,6 +163,9 @@ function Splash({ text, inline }: { text: string; inline?: boolean }) {
 function SyncBadge() {
   const s = useSyncExternalStore(syncStore.subscribe, syncStore.get, syncStore.get);
   const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const close = useCallback(() => setOpen(false), []);
+  useDismiss(open, close, ref);
   const dot = s.state === "error" ? "bg-bad" : s.state === "offline" ? "bg-brand" : s.pending > 0 || s.state === "syncing" ? "bg-opp animate-pulse" : "bg-good";
   const label = s.state === "offline" ? "Sem internet — guardado neste dispositivo"
     : s.state === "error" ? "Erro de sincronização"
@@ -147,13 +173,13 @@ function SyncBadge() {
     : s.pending > 0 ? `${s.pending} alterações por enviar`
     : "Tudo guardado na cloud";
   return (
-    <div className="relative">
-      <button className="flex items-center gap-2 rounded-md px-2 py-1.5 text-xs text-muted hover:bg-panel-2" onClick={() => setOpen(!open)} title={label}>
+    <div className="relative" ref={ref}>
+      <button className="flex h-9 min-w-9 items-center justify-center gap-2 rounded-md px-2 text-xs text-muted hover:bg-panel-2" onClick={() => setOpen(!open)} title={label}>
         <span className={`h-2 w-2 rounded-full ${dot}`} />
         <span className="hidden lg:inline">{s.state === "offline" ? "Offline" : s.pending ? `${s.pending} por enviar` : "Sincronizado"}</span>
       </button>
       {open && (
-        <div className="card absolute right-0 top-10 z-40 w-72 p-3 text-sm shadow-xl">
+        <div className="card absolute right-0 top-11 z-40 w-[min(18rem,calc(100vw-1.5rem))] p-3 text-sm shadow-xl">
           <div className="font-medium">{label}</div>
           {s.lastSync && <div className="mt-1 text-xs text-muted">Última sincronização: {new Date(s.lastSync).toLocaleTimeString("pt-PT")}</div>}
           {s.error && <div className="mt-2 text-xs text-bad">{s.error}</div>}
@@ -168,19 +194,22 @@ function SyncBadge() {
 function UserMenu({ role }: { role?: string }) {
   const { profile, signOut } = useAuth();
   const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const close = useCallback(() => setOpen(false), []);
+  useDismiss(open, close, ref);
   const s = useSyncExternalStore(syncStore.subscribe, syncStore.get, syncStore.get);
   const initials = (profile?.fullName || profile?.email || "?").split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
   const out = async () => {
-    if (s.pending > 0 && !confirm(`Há ${s.pending} alterações ainda não enviadas. Se saíres agora perdem-se. Sair mesmo assim?`)) return;
+    if (s.pending > 0 && !(await ask(`Há ${s.pending} alterações ainda não enviadas. Se saíres agora perdem-se. Sair mesmo assim?`, { confirmText: "Sair", danger: true }))) return;
     await signOut();
   };
   return (
-    <div className="relative">
-      <button onClick={() => setOpen(!open)} className="grid h-8 w-8 place-items-center rounded-full bg-panel-2 text-xs font-semibold hover:bg-line" aria-label="Conta">
+    <div className="relative" ref={ref}>
+      <button onClick={() => setOpen(!open)} className="grid h-9 w-9 place-items-center rounded-full bg-panel-2 text-xs font-semibold hover:bg-line" aria-label="Conta">
         {initials}
       </button>
       {open && (
-        <div className="card absolute right-0 top-10 z-40 w-64 p-3 text-sm shadow-xl" onClick={() => setOpen(false)}>
+        <div className="card absolute right-0 top-11 z-40 w-[min(16rem,calc(100vw-1.5rem))] p-3 text-sm shadow-xl" onClick={() => setOpen(false)}>
           <div className="font-medium">{profile?.fullName || "Sem nome"}</div>
           <div className="truncate text-xs text-muted">{profile?.email}</div>
           {role && <div className="mt-1 text-xs text-brand">{role}</div>}
@@ -262,7 +291,7 @@ export function CreateTeam({ onCreated }: { onCreated: (id: string) => void }) {
             data.teams?.forEach((t: { id: string }) => markOwned(t.id));
             await importAll(data);
             if (data.teams?.[0]?.id) onCreated(data.teams[0].id);
-          } catch (err) { alert(`Erro ao importar: ${(err as Error).message}`); }
+          } catch (err) { void notify(`Erro ao importar: ${(err as Error).message}`); }
         }} />
       </label>
       {mode === "cloud" && <p className="mt-2 text-center text-xs text-muted">A cópia importada é enviada para a tua conta.</p>}

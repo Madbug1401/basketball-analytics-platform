@@ -50,7 +50,7 @@ export function BoxTable({
           {rows.map(({ p, l }) => (
             <tr key={p.id}>
               <td className="whitespace-nowrap">
-                <Link href={`/jogadores/${p.id}`} className="hover:text-brand">
+                <Link href={`/jogadores/${p.id}`} className="-my-1 inline-block py-1 hover:text-brand pointer-coarse:py-2">
                   <span className="mr-2 inline-block w-6 font-mono text-muted">{p.number}</span>{p.name}
                 </Link>
               </td>

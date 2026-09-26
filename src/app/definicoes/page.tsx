@@ -11,6 +11,7 @@ import { seenTeamIds, uploadTeam } from "@/lib/sync";
 import { supabase } from "@/lib/supabase";
 import { CreateTeam } from "@/components/Shell";
 import { InviteDialog } from "@/components/InviteDialog";
+import { ask, notify } from "@/components/Dialog";
 
 export default function SettingsPage() {
   const { team, teams, setTeamId } = useTeam();
@@ -127,7 +128,7 @@ function Members({ teamId, teamName, canManage, myId }: { teamId: string; teamNa
     void reload();
   };
   const remove = async (userId: string, label: string) => {
-    if (!confirm(`Remover ${label} da equipa?`)) return;
+    if (!(await ask(`Remover ${label} da equipa?`, { confirmText: "Remover", danger: true }))) return;
     await supabase!.from("team_members").delete().eq("team_id", teamId).eq("user_id", userId);
     void reload();
   };
@@ -245,8 +246,8 @@ function DangerZone({ teamId, teamName, isOwner, isMember, myId }: { teamId: str
         <h2 className="font-semibold text-bad">Sair da equipa</h2>
         <p className="mt-1 text-sm text-muted">Deixas de ter acesso aos dados desta equipa. Para voltar precisas de um novo convite.</p>
         <button className="btn btn-danger mt-3" onClick={async () => {
-          if (!confirm(`Sair da equipa ${teamName}?`)) return;
-          try { await leaveTeam(teamId, myId); afterRemoval(); } catch (e) { alert((e as Error).message); }
+          if (!(await ask(`Sair da equipa ${teamName}?`, { confirmText: "Sair", danger: true }))) return;
+          try { await leaveTeam(teamId, myId); afterRemoval(); } catch (e) { void notify((e as Error).message); }
         }}>Sair da equipa</button>
       </section>
     );

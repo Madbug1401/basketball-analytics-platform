@@ -8,6 +8,7 @@ import { useTeam } from "@/lib/team";
 import { deleteTeam } from "@/lib/teamAdmin";
 import { syncNow } from "@/lib/sync";
 import { Kpi } from "@/components/Kpi";
+import { ask, askText } from "@/components/Dialog";
 
 interface AdminTeam { id: string; name: string; category: string; season: string; owner_email: string | null; members: number; players: number; games: number; events: number; created_at: number }
 interface AdminUser { id: string; email: string; full_name: string; is_admin: boolean; created_at: string; teams: string }
@@ -44,13 +45,13 @@ export default function AdminPage() {
   const fUsers = users.filter((u) => !s || `${u.email} ${u.full_name} ${u.teams}`.toLowerCase().includes(s));
 
   const toggleAdmin = async (u: AdminUser) => {
-    if (u.id === profile.id && !confirm("Vais retirar-te o acesso de administrador. Continuar?")) return;
+    if (u.id === profile.id && !(await ask("Vais retirar-te o acesso de administrador. Continuar?", { danger: true }))) return;
     const { error } = await supabase!.from("profiles").update({ is_admin: !u.is_admin }).eq("id", u.id);
     if (error) setErr(error.message); else void load();
   };
 
   const removeTeam = async (t: AdminTeam) => {
-    const typed = prompt(`Eliminar "${t.name} ${t.category}" (${t.players} jogadores, ${t.games} jogos) para sempre?\nEscreve o nome da equipa para confirmar:`);
+    const typed = await askText(`Eliminar "${t.name} ${t.category}" (${t.players} jogadores, ${t.games} jogos) para sempre?\nEscreve o nome da equipa para confirmar:`, { expected: t.name, confirmText: "Eliminar", danger: true });
     if (typed?.trim() !== t.name.trim()) return;
     try { await deleteTeam(t.id); void load(); } catch (e) { setErr((e as Error).message); }
   };

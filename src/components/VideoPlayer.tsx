@@ -127,7 +127,7 @@ export const Html5Player = forwardRef<PlayerHandle, { src: string }>(function Ht
     setRate: (r) => { if (v.current) v.current.playbackRate = r; },
     getRate: () => v.current?.playbackRate ?? 1,
   }));
-  return <video ref={v} src={src} controls className="aspect-video w-full rounded-lg bg-black" />;
+  return <video ref={v} src={src} controls playsInline preload="metadata" className="aspect-video w-full rounded-lg bg-black" />;
 });
 
 /* ---------- No video: a stopwatch so events still get an order/time ---------- */
@@ -163,7 +163,12 @@ export const StopwatchPlayer = forwardRef<PlayerHandle, object>(function Stopwat
       <div className="font-mono text-5xl tabular-nums">
         {Math.floor(t / 60)}:{String(Math.floor(t % 60)).padStart(2, "0")}
       </div>
-      <p className="text-sm text-muted">Sem vídeo — cronómetro interno ({running ? "a correr" : "parado"}). Espaço para iniciar/parar.</p>
+      <div className="flex items-center gap-2">
+        <button type="button" className="btn" onClick={() => api.nudge(-5)} aria-label="Recuar 5 segundos">−5s</button>
+        <button type="button" className={`btn min-w-28 ${running ? "" : "btn-primary"}`} onClick={() => api.toggle()}>{running ? "❚❚ Parar" : "▶ Iniciar"}</button>
+        <button type="button" className="btn" onClick={() => api.nudge(5)} aria-label="Avançar 5 segundos">+5s</button>
+      </div>
+      <p className="px-3 text-center text-xs text-muted">Sem vídeo — cronómetro interno<span className="pointer-coarse:hidden"> · Espaço para iniciar/parar</span></p>
     </div>
   );
 });

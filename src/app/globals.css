@@ -20,6 +20,15 @@ html { color-scheme: dark; -webkit-text-size-adjust: 100%; }
 /* grid/flex children must be allowed to shrink below their content (wide tables scroll inside their card) */
 .grid > * { min-width: 0; }
 .overflow-x-auto { -webkit-overflow-scrolling: touch; }
+/* touch: no double-tap zoom on controls (fast repeated taps in the logger), no grey tap flash */
+button, a, label, select, input, summary, [role="button"] { touch-action: manipulation; }
+html { -webkit-tap-highlight-color: transparent; }
+@media (pointer: coarse) {
+  /* iOS zooms the page when focusing inputs under 16px */
+  input, select, textarea { font-size: 16px !important; }
+  summary { padding-block: 0.4rem; }
+  .tap { display: inline-flex; align-items: center; min-height: 2.5rem; }
+}
 body {
   overflow-x: clip;
   background: var(--color-bg);
@@ -33,6 +42,7 @@ body {
     @apply inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-panel-2 px-3 py-2 text-sm font-medium
       transition hover:border-muted disabled:opacity-40 disabled:pointer-events-none cursor-pointer select-none;
   }
+  @media (pointer: coarse) { .btn { min-height: 2.5rem; } }
   .btn-primary { @apply border-brand bg-brand text-black hover:bg-brand-2 hover:border-brand-2; }
   .btn-ghost { @apply border-transparent bg-transparent hover:bg-panel-2; }
   .btn-danger { @apply text-bad hover:border-bad; }
