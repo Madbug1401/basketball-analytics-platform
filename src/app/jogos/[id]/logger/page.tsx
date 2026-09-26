@@ -9,6 +9,7 @@ import type { EventType, Game, GameEvent, ID, Player, Side } from "@/lib/types";
 import { describe, fmtTs, pointsOf, sortEvents, walk } from "@/lib/stats";
 import { isThree } from "@/lib/court";
 import { Court } from "@/components/Court";
+import { EventLog } from "@/components/EventLog";
 import { Html5Player, StopwatchPlayer, YouTubePlayer, youtubeId, type PlayerHandle } from "@/components/VideoPlayer";
 
 type Actor = { kind: "slot"; i: number } | { kind: "player"; id: ID } | { kind: "opp" };
@@ -309,6 +310,10 @@ function Logger({ game, players, events }: { game: Game; players: Player[]; even
     id: e.id, x: e.x!, y: e.y!, made: !!e.meta?.made, side: e.side, highlight: Math.abs(e.videoTs - now) < 3,
   }));
 
+  const firstStart = sorted.find((e) => e.type === "PERIOD_START");
+  const lastEvent = sorted[sorted.length - 1];
+  const seekTo = (t: number) => video.current?.seek(t);
+
   const actorLabel = actor.kind === "opp" ? "Adversário" : name(actorPlayer());
 
   return (
@@ -323,7 +328,7 @@ function Logger({ game, players, events }: { game: Game; players: Player[]; even
           </div>
         </div>
         <VideoArea game={game} playerRef={video} />
-        <EventLog events={sorted} now={now} name={name} onSeek={(t) => { video.current?.seek(t - 4); video.current?.play(); }} />
+        <EventLog events={sorted} players={players} now={now} name={name} video={video} />
       </div>
 
       {/* RIGHT: control pad */}
@@ -332,7 +337,7 @@ function Logger({ game, players, events }: { game: Game; players: Player[]; even
           <div className="text-center">
             <div className="text-xs text-muted">NÓS</div>
             <div className="font-mono text-3xl font-bold tabular-nums">{state.us}</div>
-            <div className="text-[10px] text-muted">faltas {state.teamFouls.us}</div>
+            <div className={`text-[10px] ${state.teamFouls.us >= 4 ? "font-semibold text-bad" : "text-muted"}`}>faltas {state.teamFouls.us}{state.teamFouls.us >= 4 ? " · bónus adv." : ""}</div>
           </div>
           <div className="text-center">
             <div className="rounded bg-panel-2 px-2 py-0.5 font-mono text-sm">{started ? `P${periodNow}` : "—"}</div>
@@ -343,16 +348,24 @@ function Logger({ game, players, events }: { game: Game; players: Player[]; even
           <div className="text-center">
             <div className="max-w-28 truncate text-xs text-muted">{game.opponent.toUpperCase()}</div>
             <div className="font-mono text-3xl font-bold tabular-nums text-opp">{state.opp}</div>
-            <div className="text-[10px] text-muted">faltas {state.teamFouls.opp}</div>
+            <div className={`text-[10px] ${state.teamFouls.opp >= 4 ? "font-semibold text-good" : "text-muted"}`}>faltas {state.teamFouls.opp}{state.teamFouls.opp >= 4 ? " · bónus nosso" : ""}</div>
           </div>
         </div>
 
-        {!started && !lineupDraft && (
-          <div className="card border-brand/50 p-4 text-sm">
-            <b>Passo 1:</b> avança o vídeo até ao salto inicial e define o 5 inicial.
-            <button className="btn btn-primary mt-3 w-full" onClick={() => setLineupDraft([])}>Definir 5 inicial</button>
-          </div>
-        )}
+        {!started && !lineupDraft && (firstStart && lastEvent ? (
+            <div className="card border-brand/50 p-4 text-sm">
+              Este jogo já tem <b>{sorted.length} eventos</b>. O vídeo está antes do início ({fmtTs(firstStart.videoTs)}).
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <button className="btn" onClick={() => seekTo(firstStart.videoTs)}>Ir para o início</button>
+                <button className="btn btn-primary" onClick={() => seekTo(lastEvent.videoTs + 1)}>Continuar ({fmtTs(lastEvent.videoTs)})</button>
+              </div>
+            </div>
+          ) : (
+            <div className="card border-brand/50 p-4 text-sm">
+              <b>Passo 1:</b> avança o vídeo até ao salto inicial e define o 5 inicial.
+              <button className="btn btn-primary mt-3 w-full" onClick={() => setLineupDraft([])}>Definir 5 inicial</button>
+            </div>
+          ))}
 
         {lineupDraft && (
           <LineupPicker players={players} value={lineupDraft} onChange={setLineupDraft}
@@ -552,46 +565,6 @@ function LineupPicker({ players, value, onChange, onConfirm, onCancel, title }: 
   );
 }
 
-function EventLog({ events, now, name, onSeek }: { events: GameEvent[]; now: number; name: (id?: ID) => string; onSeek: (t: number) => void }) {
-  const [filter, setFilter] = useState<"all" | "us" | "opp">("all");
-  const list = [...events].reverse().filter((e) => filter === "all" || e.side === filter || e.type === "PERIOD_START");
-  return (
-    <div className="card mt-3">
-      <div className="flex items-center justify-between border-b border-line px-3 py-2">
-        <h3 className="text-sm font-semibold">Eventos ({events.length})</h3>
-        <div className="flex gap-1">
-          {(["all", "us", "opp"] as const).map((f) => (
-            <button key={f} onClick={() => setFilter(f)} className={`rounded px-2 py-0.5 text-xs ${filter === f ? "bg-panel-2" : "text-muted"}`}>
-              {f === "all" ? "Todos" : f === "us" ? "Nós" : "Adv."}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="max-h-[340px] overflow-y-auto">
-        {list.map((e) => {
-          const past = e.videoTs <= now + 0.05;
-          return (
-            <div key={e.id} className={`group flex items-center gap-3 border-b border-line/40 px-3 py-1.5 text-sm ${past ? "" : "opacity-45"} ${e.type === "PERIOD_START" ? "bg-panel-2/60" : ""}`}>
-              <button onClick={() => onSeek(e.videoTs)} className="w-16 shrink-0 text-left font-mono text-xs text-brand hover:underline" title="Ver jogada">
-                ▶ {fmtTs(e.videoTs)}
-              </button>
-              <span className="w-6 shrink-0 font-mono text-xs text-muted">P{e.period}</span>
-              <span className={`w-36 shrink-0 truncate ${e.side === "opp" ? "text-opp" : ""}`}>
-                {e.type === "SUB" || e.type === "PERIOD_START" ? "" : e.side === "opp" ? "Adversário" : name(e.playerId)}
-              </span>
-              <span className="flex-1 truncate text-muted">
-                {describe(e, name)}{e.type === "SHOT" && e.x === undefined ? " · sem local" : ""}
-              </span>
-              <button onClick={() => db.events.delete(e.id)} className="invisible text-muted hover:text-bad group-hover:visible" title="Apagar">✕</button>
-            </div>
-          );
-        })}
-        {list.length === 0 && <p className="p-6 text-center text-sm text-muted">Ainda sem eventos.</p>}
-      </div>
-    </div>
-  );
-}
-
 function HelpOverlay({ onClose }: { onClose: () => void }) {
   const rows: [string, string][] = [
     ["1 – 5", "Escolher jogador em campo (ou assistência / ressalto logo após um lançamento)"],
@@ -609,6 +582,8 @@ function HelpOverlay({ onClose }: { onClose: () => void }) {
     [", / .", "Mais lento / mais rápido"],
     ["Ctrl + Z", "Anular último evento"],
     ["Esc", "Cancelar o que está pendente"],
+    ["✎ na lista", "Editar um evento (jogador, tipo, resultado, tempo)"],
+    ["Ver sequência", "Filtra a lista (ex.: perdas do #7) e vê as jogadas seguidas"],
   ];
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" onClick={onClose}>

@@ -20,14 +20,16 @@ Precisas do Node 20 ou mais recente. Para usar no dia a dia sem o modo dev: `npm
 
 Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/outra.json 42` (o último número é a seed).
 
-## O que já faz (v0.1)
+## O que já faz (v0.2)
 
 | Área | Funcionalidades |
 |---|---|
 | **Plantel** | Jogadores com nº, posição, ano, altura e notas; ativar/desativar; várias equipas |
 | **Treinos** | Criar treino, presenças (presente / atrasado / falta / justificada), intensidade, exercícios, assiduidade da época |
 | **Game Logger** | Vídeo do YouTube, MP4 local, link direto ou sem vídeo (cronómetro) · 5 inicial e substituições · atalhos de teclado · mapa de lançamentos (2/3 pontos detetado pela posição) · adversário · anular · "▶ ver jogada" em cada evento |
-| **Jogo** | Parciais, comparação de equipas, box score, +/-, eficiência, mapa de lançamentos por zona, quintetos (+/-) |
+| **Jogo** | Relatório automático (parciais decisivos, perdas, ressaltos, LL, quintetos, jogadores acima/abaixo da média) com "▶ ver jogadas" · parciais · box score com minutos estimados, +/-, eficiência · mapa de lançamentos · quintetos · imprimir em A4 |
+| **Vídeo** | Editar qualquer evento (✎) · filtrar por jogador/tipo e **ver a sequência** das jogadas (ex.: todas as perdas do #7) · links do relatório abrem a sequência certa |
+| **Adversários** | Registo contra cada equipa, onde lançam (mapa + zonas), médias por período, notas rápidas |
 | **Época** | Médias/totais, pontos por jogo, vitórias vs derrotas, assiduidade × produção |
 | **Jogador** | Perfil, evolução por jogo, mapa de lançamentos da época, jogo a jogo |
 | **Dados** | Exportar/importar tudo em JSON |
@@ -48,6 +50,7 @@ Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/out
 | clique no campo | local do lançamento → `Enter` convertido, `⌫` falhado |
 | `Espaço` `←` `→` `,` `.` | play/pausa, ±5s (Shift ±1s), velocidade |
 | `Ctrl+Z` · `Esc` | anular último · cancelar pendente |
+| ✎ na lista | editar evento |
 
 Fluxo típico: `2` → `Q` → `4` (assistência) → clique no campo. Lançamento falhado: `W` → `3` (ressalto).
 

@@ -9,6 +9,8 @@ import { fmtPct, gameStats, possessions, reb, shotZones, type Line } from "@/lib
 import { Court } from "@/components/Court";
 import { BoxTable, sortRows } from "@/components/BoxScore";
 import { ZONES } from "@/lib/court";
+import { gameInsights, type Insight } from "@/lib/insights";
+import { useSeason } from "@/lib/season";
 
 export default function GamePage() {
   const { id } = useParams<{ id: string }>();
@@ -23,14 +25,17 @@ export default function GamePage() {
     return { game, players, events };
   }, [id]);
   const [shotFilter, setShotFilter] = useState<string>("us");
+  const season = useSeason(data?.game?.teamId);
 
-  const stats = useMemo(() => (data?.game ? gameStats(data.events!, data.game.periods) : null), [data]);
+  const stats = useMemo(() => (data?.game ? gameStats(data.events!, data.game.periods, data.game.periodMinutes) : null), [data]);
 
   if (!data) return null;
   if (!data.game || !stats) return <p className="text-muted">Jogo não encontrado.</p>;
   const { game, players = [], events = [] } = data;
   const byId = new Map(players.map((p) => [p.id, p]));
   const rows = sortRows(players, stats.players);
+  const seasonAvg = season ? new Map([...season.totals].map(([pid, l]) => [pid, { ...l, games: l.gp }])) : undefined;
+  const insights = events.length ? gameInsights(game, stats, events, players, seasonAvg) : [];
 
   const shotEvents = events.filter((e) => e.type === "SHOT" && (shotFilter === "opp" ? e.side === "opp" : shotFilter === "us" ? e.side === "us" : e.playerId === shotFilter));
   const zones = shotZones(shotEvents);
@@ -41,7 +46,7 @@ export default function GamePage() {
     <div className="grid gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <Link href="/jogos" className="text-sm text-muted hover:text-fg">← Jogos</Link>
+          <Link href="/jogos" className="text-sm text-muted hover:text-fg print:hidden">← Jogos</Link>
           <h1 className="mt-1 text-2xl font-semibold">{game.home ? "vs" : "@"} {game.opponent}</h1>
           <p className="text-sm text-muted">
             {new Date(game.date + "T12:00").toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
@@ -58,7 +63,10 @@ export default function GamePage() {
             <div className="text-xs text-muted">{game.opponent.toUpperCase()}</div>
             <div className="font-mono text-4xl font-bold text-opp">{stats.opp.pts}</div>
           </div>
-          <Link href={`/jogos/${id}/logger`} className="btn btn-primary">Abrir registo</Link>
+          <div className="flex gap-2 print:hidden">
+            <button className="btn" onClick={() => window.print()}>Imprimir</button>
+            <Link href={`/jogos/${id}/logger`} className="btn btn-primary">Abrir registo</Link>
+          </div>
         </div>
       </div>
 
@@ -82,6 +90,8 @@ export default function GamePage() {
             </div>
             <TeamCompare us={stats.us} opp={stats.opp} opponent={game.opponent} />
           </div>
+
+          {insights.length > 0 && <Report insights={insights} gameId={id} />}
 
           <section>
             <h2 className="mb-3 text-lg font-semibold">Box score</h2>
@@ -108,7 +118,14 @@ export default function GamePage() {
                   })}
                 </tbody>
               </table>
-              <p className="mt-1 text-[11px] text-muted">{shotEvents.filter((e) => e.x === undefined).length} lançamentos sem local marcado.</p>
+              <div className="mt-1 flex items-center justify-between text-[11px] text-muted">
+                <span>{shotEvents.filter((e) => e.x === undefined).length} lançamentos sem local marcado.</span>
+                {shotEvents.length > 0 && (
+                  <Link className="text-brand print:hidden" href={`/jogos/${id}/logger?${new URLSearchParams({ tipo: "SHOT", play: "1", ...(shotFilter === "us" || shotFilter === "opp" ? { lado: shotFilter } : { jogador: shotFilter }) })}`}>
+                    ▶ Ver estes lançamentos
+                  </Link>
+                )}
+              </div>
             </div>
 
             <div className="card h-fit overflow-x-auto">
@@ -190,6 +207,32 @@ function GameInfo({ gameId, onDelete }: { gameId: string; onDelete: () => void }
           <div className="sm:col-span-4"><button className="btn btn-danger" onClick={onDelete}>Apagar jogo</button></div>
         </div>
       )}
+    </section>
+  );
+}
+
+const TONE: Record<Insight["tone"], string> = {
+  good: "border-l-good",
+  bad: "border-l-bad",
+  info: "border-l-opp",
+};
+
+function Report({ insights, gameId }: { insights: Insight[]; gameId: string }) {
+  return (
+    <section>
+      <h2 className="mb-1 text-lg font-semibold">Relatório do jogo</h2>
+      <p className="mb-3 text-xs text-muted">Gerado automaticamente a partir dos eventos. Os links abrem a sequência das jogadas no vídeo.</p>
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        {insights.map((it, i) => (
+          <div key={i} className={`card border-l-4 px-3 py-2.5 ${TONE[it.tone]}`}>
+            <div className="text-sm font-semibold">{it.title}</div>
+            <p className="mt-0.5 text-xs text-muted">{it.text}</p>
+            {it.clips && (
+              <Link href={`/jogos/${gameId}/logger?${it.clips}`} className="mt-1 inline-block text-xs text-brand print:hidden">▶ Ver jogadas</Link>
+            )}
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

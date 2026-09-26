@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ID, Player } from "@/lib/types";
-import { eff, fmtPct, reb, type Line } from "@/lib/stats";
+import { eff, fmtMin, fmtPct, reb, type Line } from "@/lib/stats";
 
 export function BoxTable({
   rows,
@@ -17,6 +17,7 @@ export function BoxTable({
   const cells = (l: Line, gp: number) => (
     <>
       {perGame && <td>{l.gp}</td>}
+      <td className="text-muted">{perGame ? (gp && l.min ? (l.min / gp).toFixed(1) : "–") : fmtMin(l.min)}</td>
       <td className="font-semibold">{f(l.pts, gp)}</td>
       <td>{perGame ? f(l.fgm, gp) + "/" + f(l.fga, gp) : `${l.fgm}/${l.fga}`}</td>
       <td className="text-muted">{fmtPct(l.fgm, l.fga)}</td>
@@ -41,7 +42,7 @@ export function BoxTable({
       <table className="tbl">
         <thead>
           <tr>
-            <th>Jogador</th>{perGame && <th>J</th>}<th>PTS</th><th>LC</th><th>%</th><th>3P</th><th>%</th><th>LL</th><th>%</th>
+            <th>Jogador</th>{perGame && <th>J</th>}<th title="Minutos estimados pelo tempo de vídeo">MIN</th><th>PTS</th><th>LC</th><th>%</th><th>3P</th><th>%</th><th>LL</th><th>%</th>
             <th>RO</th><th>RD</th><th>RT</th><th>AST</th><th>ROU</th><th>DES</th><th>PB</th><th>F</th><th>+/-</th><th>EF</th>
           </tr>
         </thead>
@@ -65,7 +66,7 @@ export function BoxTable({
         </tbody>
       </table>
       <p className="border-t border-line px-3 py-2 text-[11px] text-muted">
-        LC lançamentos de campo · RO/RD/RT ressaltos of./def./total · ROU roubos · DES desarmes · PB perdas de bola · EF eficiência (PTS+RT+AST+ROU+DES−falhados−PB)
+        LC lançamentos de campo · RO/RD/RT ressaltos of./def./total · ROU roubos · DES desarmes · PB perdas de bola · EF eficiência (PTS+RT+AST+ROU+DES−falhados−PB) · MIN estimados pelo tempo de vídeo (±1–2 min)
       </p>
     </div>
   );

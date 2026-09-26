@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { useSeason } from "@/lib/season";
-import { eff, fmtPct, reb, shotZones } from "@/lib/stats";
+import { eff, fmtMin, fmtPct, reb, shotZones } from "@/lib/stats";
 import { ZONES } from "@/lib/court";
 import { Court } from "@/components/Court";
 import { Trend } from "@/components/Trend";
@@ -41,7 +41,7 @@ export default function PlayerPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
-        <Kpi label="Jogos" value={String(gp)} />
+        <Kpi label="Jogos" value={String(gp)} sub={t?.min ? `${pg(t.min)} min/jogo` : undefined} />
         <Kpi label="PTS" value={pg(t?.pts ?? 0)} />
         <Kpi label="RT" value={pg(t ? reb(t) : 0)} />
         <Kpi label="AST" value={pg(t?.ast ?? 0)} />
@@ -81,17 +81,18 @@ export default function PlayerPage() {
       <section className="card overflow-x-auto">
         <div className="border-b border-line px-3 py-2"><h2 className="font-semibold">Jogo a jogo</h2></div>
         <table className="tbl">
-          <thead><tr><th>Jogo</th><th>PTS</th><th>LC</th><th>3P</th><th>LL</th><th>RT</th><th>AST</th><th>ROU</th><th>PB</th><th>F</th><th>+/-</th><th>EF</th></tr></thead>
+          <thead><tr><th>Jogo</th><th>MIN</th><th>PTS</th><th>LC</th><th>3P</th><th>LL</th><th>RT</th><th>AST</th><th>ROU</th><th>PB</th><th>F</th><th>+/-</th><th>EF</th></tr></thead>
           <tbody>
             {log.map(({ game, l }) => (
               <tr key={game.id}>
                 <td><Link className="hover:text-brand" href={`/jogos/${game.id}`}>{game.home ? "vs" : "@"} {game.opponent} <span className="text-muted">· {game.date}</span></Link></td>
+                <td className="text-muted">{fmtMin(l!.min)}</td>
                 <td className="font-semibold">{l!.pts}</td><td>{l!.fgm}/{l!.fga}</td><td>{l!.p3m}/{l!.p3a}</td><td>{l!.ftm}/{l!.fta}</td>
                 <td>{reb(l!)}</td><td>{l!.ast}</td><td>{l!.stl}</td><td>{l!.tov}</td><td>{l!.pf}</td>
                 <td className={l!.pm > 0 ? "text-good" : l!.pm < 0 ? "text-bad" : ""}>{l!.pm > 0 ? "+" : ""}{l!.pm}</td><td>{eff(l!)}</td>
               </tr>
             ))}
-            {log.length === 0 && <tr><td colSpan={12} className="py-6 text-center! text-muted">Ainda sem jogos registados.</td></tr>}
+            {log.length === 0 && <tr><td colSpan={13} className="py-6 text-center! text-muted">Ainda sem jogos registados.</td></tr>}
           </tbody>
         </table>
       </section>

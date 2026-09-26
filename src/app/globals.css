@@ -45,3 +45,24 @@ body {
   .tbl th:first-child, .tbl td:first-child { @apply text-left; }
   .tbl tbody tr:hover { @apply bg-panel-2/60; }
 }
+
+@media print {
+  :root {
+    --color-bg: #ffffff;
+    --color-panel: #ffffff;
+    --color-panel-2: #f1f3f6;
+    --color-line: #d5dae2;
+    --color-muted: #5b6474;
+    --color-fg: #111111;
+    --color-opp: #1d4ed8;
+    --color-good: #047857;
+    --color-bad: #b91c1c;
+  }
+  html { color-scheme: light; }
+  header, .print\:hidden { display: none !important; }
+  main { max-width: none !important; padding: 0 !important; }
+  .card { break-inside: avoid; }
+  @page { size: A4 landscape; margin: 10mm; }
+  .overflow-x-auto { overflow: visible !important; }
+  .tbl { font-size: 11px; }
+}

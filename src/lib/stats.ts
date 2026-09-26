@@ -12,11 +12,12 @@ export interface Line {
   pf: number; fd: number;
   pm: number; // plus/minus
   gp: number; // games with at least one event or on-court appearance
+  min: number; // estimated minutes (see playerMinutes)
 }
 
 export const emptyLine = (): Line => ({
   pts: 0, fgm: 0, fga: 0, p2m: 0, p2a: 0, p3m: 0, p3a: 0, ftm: 0, fta: 0,
-  oreb: 0, dreb: 0, ast: 0, stl: 0, blk: 0, tov: 0, pf: 0, fd: 0, pm: 0, gp: 0,
+  oreb: 0, dreb: 0, ast: 0, stl: 0, blk: 0, tov: 0, pf: 0, fd: 0, pm: 0, gp: 0, min: 0,
 });
 
 export const reb = (l: Line) => l.oreb + l.dreb;
@@ -86,7 +87,7 @@ export interface GameStats {
   lineups: Map<string, { ids: ID[]; pf: number; pa: number; events: number }>;
 }
 
-export function gameStats(events: GameEvent[], periods = 4): GameStats {
+export function gameStats(events: GameEvent[], periods = 4, periodMinutes = 10): GameStats {
   const us = emptyLine();
   const opp = emptyLine();
   const players = new Map<ID, Line>();
@@ -133,6 +134,7 @@ export function gameStats(events: GameEvent[], periods = 4): GameStats {
     }
   });
   appeared.forEach((id) => (get(id).gp = 1));
+  playerMinutes(events, periodMinutes).forEach((m, id) => (get(id).min = m));
   us.pm = us.pts - opp.pts; // team +/- is the point differential
   opp.pm = -us.pm;
   return { us, opp, players, byPeriod, lineups };
@@ -184,3 +186,50 @@ export function describe(e: GameEvent, name: (id?: ID) => string) {
     default: return EVENT_LABEL[e.type];
   }
 }
+
+/**
+ * Minutes are estimated from video time: for each period, a player's share of the
+ * period's video duration (first to last event) on court × period length.
+ * Stoppages are spread evenly, so it is an approximation (±1–2 min).
+ */
+export function playerMinutes(events: GameEvent[], periodMinutes = 10) {
+  const total = new Map<ID, number>();
+  const sorted = sortEvents(events);
+  let onCourt: ID[] = [];
+  let periodStart = 0;
+  let lastTs = 0;
+  let entered = new Map<ID, number>();
+  let acc = new Map<ID, number>();
+  let open = false;
+
+  const closePeriod = (end: number) => {
+    if (!open) return;
+    onCourt.forEach((id) => acc.set(id, (acc.get(id) ?? 0) + (end - (entered.get(id) ?? end))));
+    const dur = end - periodStart;
+    if (dur > 0) acc.forEach((sec, id) => total.set(id, (total.get(id) ?? 0) + (sec / dur) * periodMinutes));
+    acc = new Map();
+    entered = new Map();
+    open = false;
+  };
+
+  for (const e of sorted) {
+    if (e.type === "PERIOD_START") {
+      closePeriod(lastTs);
+      periodStart = e.videoTs;
+      onCourt = [...(e.meta?.lineup ?? [])];
+      onCourt.forEach((id) => entered.set(id, e.videoTs));
+      open = true;
+    } else if (e.type === "SUB" && e.meta?.in && e.meta?.out && open) {
+      const out = e.meta.out;
+      acc.set(out, (acc.get(out) ?? 0) + (e.videoTs - (entered.get(out) ?? e.videoTs)));
+      entered.delete(out);
+      onCourt = onCourt.map((p) => (p === out ? e.meta!.in! : p));
+      entered.set(e.meta.in, e.videoTs);
+    }
+    lastTs = e.videoTs;
+  }
+  closePeriod(lastTs);
+  return total;
+}
+
+export const fmtMin = (m: number) => (m ? String(Math.round(m)) : "–");

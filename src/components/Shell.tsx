@@ -11,6 +11,7 @@ const NAV = [
   { href: "/equipa", label: "Plantel" },
   { href: "/treinos", label: "Treinos" },
   { href: "/jogos", label: "Jogos" },
+  { href: "/adversarios", label: "Adversários" },
   { href: "/estatisticas", label: "Estatísticas" },
   { href: "/definicoes", label: "Definições" },
 ];

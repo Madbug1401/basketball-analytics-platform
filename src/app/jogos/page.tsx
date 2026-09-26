@@ -19,7 +19,7 @@ export default function GamesPage() {
     const events = await db.events.where("teamId").equals(team.id).toArray();
     return games.map((g) => {
       const ev = events.filter((e) => e.gameId === g.id);
-      const s = gameStats(ev, g.periods);
+      const s = gameStats(ev, g.periods, g.periodMinutes);
       return { g, us: s.us.pts, opp: s.opp.pts, n: ev.length };
     });
   }, [team?.id]);

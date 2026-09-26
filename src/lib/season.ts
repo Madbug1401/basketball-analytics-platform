@@ -35,7 +35,7 @@ export function useSeason(teamId?: string): SeasonData | undefined {
     for (const game of games) {
       const ev = byGame.get(game.id);
       if (!ev?.length) continue;
-      const stats = gameStats(ev, game.periods);
+      const stats = gameStats(ev, game.periods, game.periodMinutes);
       played.push({ game, stats, events: ev });
       stats.players.forEach((l, pid) => totals.set(pid, addLines(totals.get(pid) ?? emptyLine(), l)));
       addLines(team, stats.us);

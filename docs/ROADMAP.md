@@ -6,11 +6,15 @@
 - [ ] Lista de "o que foi irritante / o que faltou" depois de cada jogo e treino
 
 ## Fase 1.5: detalhes que vão aparecer no uso real
-- [ ] Editar evento (trocar jogador/tipo) em vez de apagar e voltar a registar
-- [ ] Minutos jogados (marcar o relógio de jogo no início de cada período e nas paragens)
-- [ ] Faltas por período com aviso de bónus
-- [ ] Imprimir/PDF do box score para o balneário
-- [ ] PWA instalável no telemóvel (presenças no pavilhão, offline)
+- [x] Editar evento (jogador, tipo, resultado, tempo, período) — v0.2
+- [x] Minutos jogados *estimados* pelo tempo de vídeo — v0.2 (precisão ±1–2 min)
+- [ ] Minutos exatos (marcar o relógio de jogo nas paragens) — só se a estimativa não chegar
+- [x] Faltas por período com aviso de bónus — v0.2
+- [x] Imprimir/PDF do box score (A4 horizontal) — v0.2
+- [x] Relatório automático pós-jogo com links para as jogadas — v0.2
+- [x] Sequência de clips: filtrar eventos e ver as jogadas seguidas — v0.2
+- [x] Instalável como app (manifest + ícones) — v0.2
+- [ ] Funcionar offline no pavilhão (service worker)
 
 ## Fase 2: cloud e multi-treinador
 - [ ] Supabase: login, `supabase/schema.sql`, sync dos dados locais
@@ -19,10 +23,10 @@
 - [ ] Análise do adversário: mapa de lançamentos e tendências por equipa adversária
 
 ## Fase 3: vídeo
-- [ ] Clips/playlist: "todos os turnovers do #7" → sequência de jogadas
+- [x] Clips/playlist: "todos os turnovers do #7" → sequência de jogadas (v0.2)
 - [ ] Marcadores e notas no vídeo
 - [ ] Partilhar um clip com um jogador
 
 ## Fase 4: intelligence
-- [ ] Relatório automático pós-jogo
+- [x] Relatório automático pós-jogo (regras simples, v0.2)
 - [ ] Assistente da época (perguntas em linguagem natural sobre os dados)
