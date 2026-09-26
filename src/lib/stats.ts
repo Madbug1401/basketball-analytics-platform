@@ -1,0 +1,186 @@
+import type { GameEvent, ID, Player } from "./types";
+import { zoneOf, type Zone } from "./court";
+
+export interface Line {
+  pts: number;
+  fgm: number; fga: number;
+  p2m: number; p2a: number;
+  p3m: number; p3a: number;
+  ftm: number; fta: number;
+  oreb: number; dreb: number;
+  ast: number; stl: number; blk: number; tov: number;
+  pf: number; fd: number;
+  pm: number; // plus/minus
+  gp: number; // games with at least one event or on-court appearance
+}
+
+export const emptyLine = (): Line => ({
+  pts: 0, fgm: 0, fga: 0, p2m: 0, p2a: 0, p3m: 0, p3a: 0, ftm: 0, fta: 0,
+  oreb: 0, dreb: 0, ast: 0, stl: 0, blk: 0, tov: 0, pf: 0, fd: 0, pm: 0, gp: 0,
+});
+
+export const reb = (l: Line) => l.oreb + l.dreb;
+export const pct = (m: number, a: number) => (a ? Math.round((m / a) * 1000) / 10 : null);
+export const fmtPct = (m: number, a: number) => {
+  const p = pct(m, a);
+  return p === null ? "–" : `${p.toFixed(1)}%`;
+};
+/** Simple efficiency: PTS + REB + AST + STL + BLK − missed FG − missed FT − TOV */
+export const eff = (l: Line) =>
+  l.pts + reb(l) + l.ast + l.stl + l.blk - (l.fga - l.fgm) - (l.fta - l.ftm) - l.tov;
+/** Possessions estimate (team level) */
+export const possessions = (l: Line) => l.fga - l.oreb + l.tov + 0.44 * l.fta;
+
+export function sortEvents(events: GameEvent[]) {
+  return [...events].sort((a, b) => a.videoTs - b.videoTs || a.createdAt - b.createdAt);
+}
+
+export function apply(line: Line, e: GameEvent) {
+  const m = e.meta ?? {};
+  switch (e.type) {
+    case "SHOT":
+      line.fga++;
+      if (m.pts === 3) line.p3a++; else line.p2a++;
+      if (m.made) {
+        line.fgm++;
+        line.pts += m.pts ?? 2;
+        if (m.pts === 3) line.p3m++; else line.p2m++;
+      }
+      break;
+    case "FT":
+      line.fta++;
+      if (m.made) { line.ftm++; line.pts++; }
+      break;
+    case "REB": if (m.off) line.oreb++; else line.dreb++; break;
+    case "AST": line.ast++; break;
+    case "STL": line.stl++; break;
+    case "BLK": line.blk++; break;
+    case "TOV": line.tov++; break;
+    case "FOUL": line.pf++; break;
+    case "FOUL_DRAWN": line.fd++; break;
+  }
+}
+
+export const pointsOf = (e: GameEvent) =>
+  e.type === "SHOT" && e.meta?.made ? (e.meta.pts ?? 2) : e.type === "FT" && e.meta?.made ? 1 : 0;
+
+/** Walks the sorted log, tracking who is on court, and hands each event the lineup at that moment. */
+export function walk(events: GameEvent[], fn: (e: GameEvent, onCourt: ID[]) => void) {
+  let onCourt: ID[] = [];
+  for (const e of sortEvents(events)) {
+    if (e.type === "PERIOD_START") onCourt = [...(e.meta?.lineup ?? [])];
+    else if (e.type === "SUB" && e.meta?.in && e.meta?.out) {
+      onCourt = onCourt.map((p) => (p === e.meta!.out ? e.meta!.in! : p));
+      if (!onCourt.includes(e.meta.in)) onCourt.push(e.meta.in);
+    }
+    fn(e, onCourt);
+  }
+  return onCourt;
+}
+
+export interface GameStats {
+  us: Line;
+  opp: Line;
+  players: Map<ID, Line>;
+  byPeriod: { us: number; opp: number }[];
+  lineups: Map<string, { ids: ID[]; pf: number; pa: number; events: number }>;
+}
+
+export function gameStats(events: GameEvent[], periods = 4): GameStats {
+  const us = emptyLine();
+  const opp = emptyLine();
+  const players = new Map<ID, Line>();
+  const byPeriod = Array.from({ length: Math.max(periods, 1) }, () => ({ us: 0, opp: 0 }));
+  const lineups: GameStats["lineups"] = new Map();
+  const appeared = new Set<ID>();
+  const get = (id: ID) => {
+    let l = players.get(id);
+    if (!l) { l = emptyLine(); players.set(id, l); }
+    return l;
+  };
+
+  walk(events, (e, onCourt) => {
+    onCourt.forEach((id) => appeared.add(id));
+    if (e.type === "PERIOD_START" || e.type === "SUB") {
+      if (e.type === "SUB" && e.meta?.in) appeared.add(e.meta.in);
+      return;
+    }
+    const pts = pointsOf(e);
+    while (byPeriod.length < e.period) byPeriod.push({ us: 0, opp: 0 });
+    if (e.side === "us") {
+      apply(us, e);
+      if (e.playerId) { apply(get(e.playerId), e); appeared.add(e.playerId); }
+      if (pts) byPeriod[e.period - 1].us += pts;
+    } else {
+      apply(opp, e);
+      if (pts) byPeriod[e.period - 1].opp += pts;
+    }
+    if (pts && onCourt.length) {
+      const sign = e.side === "us" ? 1 : -1;
+      onCourt.forEach((id) => (get(id).pm += sign * pts));
+      if (onCourt.length === 5) {
+        const key = [...onCourt].sort().join("|");
+        const lu = lineups.get(key) ?? { ids: [...onCourt], pf: 0, pa: 0, events: 0 };
+        if (sign > 0) lu.pf += pts; else lu.pa += pts;
+        lineups.set(key, lu);
+      }
+    }
+    if (onCourt.length === 5) {
+      const key = [...onCourt].sort().join("|");
+      const lu = lineups.get(key) ?? { ids: [...onCourt], pf: 0, pa: 0, events: 0 };
+      lu.events++;
+      lineups.set(key, lu);
+    }
+  });
+  appeared.forEach((id) => (get(id).gp = 1));
+  us.pm = us.pts - opp.pts; // team +/- is the point differential
+  opp.pm = -us.pm;
+  return { us, opp, players, byPeriod, lineups };
+}
+
+export function addLines(a: Line, b: Line) {
+  (Object.keys(a) as (keyof Line)[]).forEach((k) => (a[k] += b[k]));
+  return a;
+}
+
+export interface ShotAgg { zone: Zone; m: number; a: number }
+export function shotZones(shots: GameEvent[]): ShotAgg[] {
+  const map = new Map<Zone, ShotAgg>();
+  for (const s of shots) {
+    if (s.type !== "SHOT" || s.x === undefined || s.y === undefined) continue;
+    const z = zoneOf(s.x, s.y);
+    const agg = map.get(z) ?? { zone: z, m: 0, a: 0 };
+    agg.a++;
+    if (s.meta?.made) agg.m++;
+    map.set(z, agg);
+  }
+  return [...map.values()];
+}
+
+export const playerLabel = (p?: Player) => (p ? `#${p.number} ${p.name}` : "—");
+
+export function fmtTs(s: number) {
+  if (!isFinite(s)) return "0:00";
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = Math.floor(s % 60);
+  return (h ? `${h}:${String(m).padStart(2, "0")}` : `${m}`) + `:${String(sec).padStart(2, "0")}`;
+}
+
+export const EVENT_LABEL: Record<string, string> = {
+  SHOT: "Lançamento", FT: "Lance livre", REB: "Ressalto", AST: "Assistência", STL: "Roubo",
+  BLK: "Desarme", TOV: "Perda de bola", FOUL: "Falta", FOUL_DRAWN: "Falta sofrida",
+  SUB: "Substituição", PERIOD_START: "Início período",
+};
+
+export function describe(e: GameEvent, name: (id?: ID) => string) {
+  const m = e.meta ?? {};
+  switch (e.type) {
+    case "SHOT": return `${m.pts === 3 ? "3PT" : "2PT"} ${m.made ? "✓ convertido" : "✗ falhado"}`;
+    case "FT": return `LL ${m.made ? "✓" : "✗"}`;
+    case "REB": return `Ressalto ${m.off ? "ofensivo" : "defensivo"}`;
+    case "SUB": return `Entra ${name(m.in)} · Sai ${name(m.out)}`;
+    case "PERIOD_START": return `Início ${e.period}.º período — ${(m.lineup ?? []).map((id) => name(id)).join(", ")}`;
+    default: return EVENT_LABEL[e.type];
+  }
+}

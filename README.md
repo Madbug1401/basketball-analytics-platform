@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Courtside — Basketball Analytics Platform
 
-## Getting Started
+Gestão de equipa e análise de basquetebol. Primeira equipa: **ABC Sub-16 Masculino** (Cabo Verde), época 2026/27.
 
-First, run the development server:
+> "Courtside" é um nome provisório: muda-o em `src/components/Shell.tsx` e `src/app/layout.tsx`.
+
+## Arrancar
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# abre http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Precisas do Node 20 ou mais recente. Para usar no dia a dia sem o modo dev: `npm run build && npm start`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## O que já faz (v0.1)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Área | Funcionalidades |
+|---|---|
+| **Plantel** | Jogadores com nº, posição, ano, altura e notas; ativar/desativar; várias equipas |
+| **Treinos** | Criar treino, presenças (presente / atrasado / falta / justificada), intensidade, exercícios, assiduidade da época |
+| **Game Logger** | Vídeo do YouTube, MP4 local, link direto ou sem vídeo (cronómetro) · 5 inicial e substituições · atalhos de teclado · mapa de lançamentos (2/3 pontos detetado pela posição) · adversário · anular · "▶ ver jogada" em cada evento |
+| **Jogo** | Parciais, comparação de equipas, box score, +/-, eficiência, mapa de lançamentos por zona, quintetos (+/-) |
+| **Época** | Médias/totais, pontos por jogo, vitórias vs derrotas, assiduidade × produção |
+| **Jogador** | Perfil, evolução por jogo, mapa de lançamentos da época, jogo a jogo |
+| **Dados** | Exportar/importar tudo em JSON |
 
-## Learn More
+## Atalhos do logger
 
-To learn more about Next.js, take a look at the following resources:
+| Tecla | Ação |
+|---|---|
+| `1`–`5` | jogador em campo (ou assistência/ressalto logo após um lançamento) |
+| `0` | adversário |
+| `Q` `W` | 2PT convertido / falhado |
+| `E` `R` | 3PT convertido / falhado |
+| `T` `Y` | lance livre convertido / falhado |
+| `O` `D` | ressalto ofensivo / defensivo |
+| `A` `S` `B` `P` | assistência · roubo · desarme · perda de bola |
+| `F` `G` | falta / falta sofrida |
+| `U` | substituição (1–5 sai, nº + Enter entra) |
+| clique no campo | local do lançamento → `Enter` convertido, `⌫` falhado |
+| `Espaço` `←` `→` `,` `.` | play/pausa, ±5s (Shift ±1s), velocidade |
+| `Ctrl+Z` · `Esc` | anular último · cancelar pendente |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Fluxo típico: `2` → `Q` → `4` (assistência) → clique no campo. Lançamento falhado: `W` → `3` (ressalto).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Arquitetura
 
-## Deploy on Vercel
+- **Next.js 16 + React 19 + Tailwind 4**, tudo no cliente.
+- **Local-first**: IndexedDB via Dexie (`src/lib/db.ts`). Funciona offline. Os dados ficam **no browser**, por isso **exporta cópias** em Definições.
+- **Eventos como fonte da verdade** (`game_events`): estatísticas, +/-, quintetos e mapas de lançamento são calculados (`src/lib/stats.ts`). Corrigir um evento corrige tudo.
+- Cada evento guarda `video_ts` (segundo do vídeo), `period`, `x/y` (metros FIBA) e quem estava em campo é reconstruído a partir de `PERIOD_START` + `SUB`.
+- Multi-equipa: tudo tem `teamId`. O esquema Postgres/Supabase com RLS está em `supabase/schema.sql`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/
+  app/            páginas (painel, equipa, treinos, jogos, logger, estatisticas, jogadores, definicoes)
+  components/     Court (campo SVG), VideoPlayer (YouTube/HTML5/cronómetro), BoxScore, Trend, Shell
+  lib/            types, db (Dexie), stats (motor de estatísticas), court (geometria FIBA), season
+supabase/         schema.sql para a fase cloud
+docs/ROADMAP.md   próximos passos
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Privacidade
+
+São jogadores menores de idade. Guardamos só o ano de nascimento, nada de contactos. Pede autorização aos pais antes de partilhar dados fora da equipa técnica.

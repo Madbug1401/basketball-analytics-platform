@@ -1,26 +1,47 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-bg: #0b0e13;
+  --color-panel: #131821;
+  --color-panel-2: #1a2130;
+  --color-line: #263044;
+  --color-muted: #8a96ab;
+  --color-fg: #e8edf5;
+  --color-brand: #ff7a1a;
+  --color-brand-2: #ffa25c;
+  --color-good: #34d399;
+  --color-bad: #f87171;
+  --color-opp: #60a5fa;
+  --font-sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html { color-scheme: dark; }
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+}
+
+@layer components {
+  .card { @apply rounded-xl border border-line bg-panel; }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-panel-2 px-3 py-2 text-sm font-medium
+      transition hover:border-muted disabled:opacity-40 disabled:pointer-events-none cursor-pointer select-none;
+  }
+  .btn-primary { @apply border-brand bg-brand text-black hover:bg-brand-2 hover:border-brand-2; }
+  .btn-ghost { @apply border-transparent bg-transparent hover:bg-panel-2; }
+  .btn-danger { @apply text-bad hover:border-bad; }
+  .input {
+    @apply w-full rounded-lg border border-line bg-bg px-3 py-2 text-sm outline-none focus:border-brand;
+  }
+  .label { @apply mb-1 block text-xs font-medium uppercase tracking-wide text-muted; }
+  .kbd {
+    @apply inline-flex min-w-5 items-center justify-center rounded border border-line bg-bg px-1 font-mono text-[10px] text-muted;
+  }
+  .tbl { @apply w-full text-sm tabular-nums; }
+  .tbl th { @apply border-b border-line px-2 py-2 text-right text-xs font-medium uppercase tracking-wide text-muted; }
+  .tbl td { @apply border-b border-line/50 px-2 py-1.5 text-right; }
+  .tbl th:first-child, .tbl td:first-child { @apply text-left; }
+  .tbl tbody tr:hover { @apply bg-panel-2/60; }
 }
