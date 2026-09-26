@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { TeamProvider, useTeam } from "@/lib/team";
-import { db, uid } from "@/lib/db";
+import { db, importAll, uid } from "@/lib/db";
 
 const NAV = [
   { href: "/", label: "Painel" },
@@ -108,6 +108,18 @@ export function CreateTeam({ onCreated }: { onCreated: (id: string) => void }) {
         </div>
         <button className="btn btn-primary">Criar equipa</button>
       </form>
+      <label className="mt-4 block cursor-pointer text-center text-sm text-muted hover:text-fg">
+        …ou <span className="text-brand underline">importar uma cópia (.json)</span>
+        <input type="file" accept="application/json" className="hidden" onChange={async (e) => {
+          const f = e.target.files?.[0];
+          if (!f) return;
+          try {
+            const data = JSON.parse(await f.text());
+            await importAll(data);
+            if (data.teams?.[0]?.id) onCreated(data.teams[0].id);
+          } catch (err) { alert(`Erro ao importar: ${(err as Error).message}`); }
+        }} />
+      </label>
     </div>
   );
 }

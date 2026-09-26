@@ -14,6 +14,12 @@ npm run dev
 
 Precisas do Node 20 ou mais recente. Para usar no dia a dia sem o modo dev: `npm run build && npm start`.
 
+## Dados de teste
+
+`dados-teste/abc-sub16-demo.json` tem uma época fictícia do ABC Sub-16: 12 jogadores, cerca de 40 treinos com presenças e 10 jogos com todos os eventos (lançamentos com local, substituições, adversário). No primeiro ecrã, carrega em **importar uma cópia (.json)**; se já tens uma equipa, usa Definições → Importar.
+
+Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/outra.json 42` (o último número é a seed).
+
 ## O que já faz (v0.1)
 
 | Área | Funcionalidades |
