@@ -78,7 +78,7 @@ function PracticeDetail() {
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-semibold">Presenças</h2>
-        <div className="flex items-center gap-3 text-sm text-muted">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted">
           {ORDER.map((s) => <span key={s}>{ATTENDANCE_LABEL[s]}: <b className="text-fg">{count(s)}</b></span>)}
           <button className="btn" onClick={allPresent}>Restantes presentes</button>
         </div>
@@ -89,11 +89,11 @@ function PracticeDetail() {
           return (
             <div key={p.id} className="card flex flex-wrap items-center gap-3 px-3 py-2">
               <span className="grid h-9 w-9 place-items-center rounded-full bg-panel-2 font-mono font-semibold">{p.number}</span>
-              <span className="min-w-32 flex-1 font-medium">{p.name}</span>
-              <div className="flex gap-1">
+              <span className="min-w-0 flex-1 truncate font-medium">{p.name}</span>
+              <div className="grid w-full grid-cols-4 gap-1 sm:flex sm:w-auto">
                 {ORDER.map((s) => (
                   <button key={s} onClick={() => set(p.id, s)}
-                    className={`rounded-lg border px-3 py-2 text-sm ${cur === s ? STYLE[s] : "border-line text-muted hover:text-fg"}`}>
+                    className={`rounded-lg border px-1 py-2 text-xs sm:px-3 sm:text-sm ${cur === s ? STYLE[s] : "border-line text-muted hover:text-fg"}`}>
                     {ATTENDANCE_LABEL[s]}
                   </button>
                 ))}

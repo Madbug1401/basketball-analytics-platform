@@ -55,7 +55,7 @@ export default function GamePage() {
             {game.competition ? ` · ${game.competition}` : ""}
           </p>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex flex-wrap items-center gap-4 sm:gap-6">
           <div className="text-center">
             <div className="text-xs text-muted">NÓS</div>
             <div className="font-mono text-4xl font-bold">{stats.us.pts}</div>
@@ -102,9 +102,9 @@ export default function GamePage() {
 
           <section className="grid gap-4 lg:grid-cols-[420px_1fr]">
             <div className="card p-3">
-              <div className="mb-2 flex items-center justify-between gap-2">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                 <h2 className="font-semibold">Mapa de lançamentos</h2>
-                <select className="input w-auto py-1" value={shotFilter} onChange={(e) => setShotFilter(e.target.value)}>
+                <select className="input w-full py-1 sm:w-auto" value={shotFilter} onChange={(e) => setShotFilter(e.target.value)}>
                   <option value="us">Equipa</option>
                   {rows.map(({ p }) => <option key={p.id} value={p.id}>#{p.number} {p.name}</option>)}
                   <option value="opp">Adversário</option>

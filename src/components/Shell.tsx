@@ -41,6 +41,7 @@ function Inner({ children }: { children: ReactNode }) {
   const sync = useSyncExternalStore(syncStore.subscribe, syncStore.get, syncStore.get);
   const compact = path.endsWith("/logger");
   const teamless = TEAMLESS.some((p) => path.startsWith(p));
+  const [menu, setMenu] = useState(false);
 
   if (mode === "cloud" && !ready) return <Splash text="A iniciar…" />;
   if (mode === "cloud" && !session && !path.startsWith("/conta")) return <AuthScreen />;
@@ -53,41 +54,77 @@ function Inner({ children }: { children: ReactNode }) {
   else if (team || teamless) body = children;
   else body = <Onboarding onCreated={setTeamId} />;
 
+  const links = [
+    ...(team ? nav : []),
+    ...(profile?.isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
+  ];
+  const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
+  const teamSelect = (cls: string) =>
+    teams.length > 0 && (
+      <select className={`input py-1.5 ${cls}`} value={team?.id} onChange={(e) => setTeamId(e.target.value)} aria-label="Equipa">
+        {teams.map((t) => (
+          <option key={t.id} value={t.id}>{t.name} {t.category} {t.gender} · {t.season}</option>
+        ))}
+      </select>
+    );
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur print:hidden">
-        <div className={`mx-auto flex h-14 items-center gap-3 px-4 ${compact ? "" : "max-w-7xl"}`}>
-          <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+        <div className={`mx-auto flex h-14 items-center gap-2 px-3 sm:gap-3 sm:px-4 ${compact ? "" : "max-w-7xl"}`}>
+          {links.length > 0 && (
+            <button className="-ml-1 grid h-9 w-9 shrink-0 place-items-center rounded-md text-muted hover:bg-panel-2 hover:text-fg lg:hidden"
+              onClick={() => setMenu(true)} aria-label="Abrir menu">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+            </button>
+          )}
+          <Link href="/" className="flex min-w-0 items-center gap-2 font-semibold tracking-tight">
             <Ball /> <span className="hidden sm:inline">Courtside</span>
           </Link>
-          <nav className="flex flex-1 gap-1 overflow-x-auto">
-            {team && nav.map((n) => {
-              const active = n.href === "/" ? path === "/" : path.startsWith(n.href);
-              return (
-                <Link key={n.href} href={n.href}
-                  className={`whitespace-nowrap rounded-md px-3 py-1.5 text-sm ${active ? "bg-panel-2 text-fg" : "text-muted hover:text-fg"}`}>
-                  {n.label}
-                </Link>
-              );
-            })}
-            {profile?.isAdmin && (
-              <Link href="/admin" className={`whitespace-nowrap rounded-md px-3 py-1.5 text-sm ${path.startsWith("/admin") ? "bg-panel-2 text-fg" : "text-brand hover:text-brand-2"}`}>
-                Admin
+          {team && <span className="min-w-0 flex-1 truncate text-sm text-muted lg:hidden">{team.name} {team.category}</span>}
+          <nav className="hidden flex-1 gap-1 overflow-x-auto lg:flex">
+            {links.map((n) => (
+              <Link key={n.href} href={n.href}
+                className={`whitespace-nowrap rounded-md px-3 py-1.5 text-sm ${isActive(n.href) ? "bg-panel-2 text-fg" : n.href === "/admin" ? "text-brand hover:text-brand-2" : "text-muted hover:text-fg"}`}>
+                {n.label}
               </Link>
-            )}
+            ))}
           </nav>
-          {teams.length > 0 && (
-            <select className="input w-auto max-w-52 py-1.5" value={team?.id} onChange={(e) => setTeamId(e.target.value)} aria-label="Equipa">
-              {teams.map((t) => (
-                <option key={t.id} value={t.id}>{t.name} {t.category} {t.gender} · {t.season}</option>
-              ))}
-            </select>
-          )}
+          {!team && <span className="flex-1" />}
+          {teamSelect("hidden w-auto max-w-52 lg:block")}
           {mode === "cloud" && <SyncBadge />}
           {mode === "cloud" && <UserMenu role={team ? ROLE_LABEL[access.role] : undefined} />}
         </div>
       </header>
-      <main className={`mx-auto w-full flex-1 px-4 py-6 ${compact ? "py-3" : "max-w-7xl"}`}>{body}</main>
+
+      {menu && (
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
+          <button className="absolute inset-0 bg-black/60" onClick={() => setMenu(false)} aria-label="Fechar menu" />
+          <aside className="absolute inset-y-0 left-0 flex w-[82%] max-w-xs flex-col gap-4 overflow-y-auto border-r border-line bg-bg p-4 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-2 font-semibold"><Ball /> Courtside</span>
+              <button className="grid h-9 w-9 place-items-center rounded-md text-muted hover:bg-panel-2" onClick={() => setMenu(false)} aria-label="Fechar">✕</button>
+            </div>
+            {teams.length > 0 && (
+              <div>
+                <label className="label">Equipa</label>
+                {teamSelect("w-full")}
+              </div>
+            )}
+            <nav className="grid gap-1">
+              {links.map((n) => (
+                <Link key={n.href} href={n.href} onClick={() => setMenu(false)}
+                  className={`rounded-lg px-3 py-3 text-base ${isActive(n.href) ? "bg-panel-2 font-medium text-fg" : n.href === "/admin" ? "text-brand" : "text-muted hover:bg-panel-2 hover:text-fg"}`}>
+                  {n.label}
+                </Link>
+              ))}
+            </nav>
+            {team && mode === "cloud" && <p className="mt-auto text-xs text-muted">O teu papel: {ROLE_LABEL[access.role]}</p>}
+          </aside>
+        </div>
+      )}
+
+      <main className={`mx-auto w-full min-w-0 flex-1 px-3 py-5 sm:px-4 sm:py-6 ${compact ? "py-3" : "max-w-7xl"}`}>{body}</main>
     </div>
   );
 }

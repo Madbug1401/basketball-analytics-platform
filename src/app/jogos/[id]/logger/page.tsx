@@ -327,10 +327,10 @@ function Logger({ game, players, events, readOnly }: { game: Game; players: Play
   const actorLabel = actor.kind === "opp" ? "Adversário" : name(actorPlayer());
 
   return (
-    <div className={`grid gap-4 ${readOnly ? "mx-auto max-w-5xl" : "xl:grid-cols-[1fr_440px]"}`}>
-      {/* LEFT: video + log */}
-      <div className="min-w-0">
-        <div className="mb-2 flex items-center justify-between gap-2">
+    <div className={`grid gap-4 ${readOnly ? "mx-auto max-w-5xl" : "xl:grid-cols-[1fr_440px] xl:grid-rows-[auto_1fr]"}`}>
+      {/* video (top-left) */}
+      <div className="min-w-0 xl:col-start-1 xl:row-start-1">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <Link href={`/jogos/${game.id}`} className="text-sm text-muted hover:text-fg">← Estatísticas do jogo</Link>
           <div className="flex items-center gap-2 text-xs text-muted">
             <span>Vídeo {fmtTs(now)} · {rate}x</span>
@@ -338,12 +338,11 @@ function Logger({ game, players, events, readOnly }: { game: Game; players: Play
           </div>
         </div>
         <VideoArea game={game} playerRef={video} />
-        <EventLog events={sorted} players={players} now={now} name={name} video={video} readOnly={readOnly} />
       </div>
 
       {/* RIGHT: control pad */}
       {!readOnly && (
-      <div className="grid h-fit gap-3 xl:sticky xl:top-[4.25rem] xl:max-h-[calc(100vh-5rem)] xl:overflow-y-auto xl:pr-1">
+      <div className="grid h-fit gap-3 xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:sticky xl:top-[4.25rem] xl:max-h-[calc(100vh-5rem)] xl:overflow-y-auto xl:pr-1">
         <div className="card flex items-center justify-between px-4 py-3">
           <div className="text-center">
             <div className="text-xs text-muted">NÓS</div>
@@ -411,7 +410,7 @@ function Logger({ game, players, events, readOnly }: { game: Game; players: Play
               <div className="mb-1 flex items-center justify-between text-xs text-muted">
                 <span>EM CAMPO</span>
                 <button className={`btn px-2 py-0.5 text-xs ${sub ? "btn-primary" : ""}`} onClick={() => setSub(sub ? null : {})}>
-                  Substituição <span className="kbd">U</span>
+                  Substituição <span className="kbd pointer-coarse:hidden">U</span>
                 </button>
               </div>
               <div className="grid grid-cols-6 gap-1.5">
@@ -424,7 +423,7 @@ function Logger({ game, players, events, readOnly }: { game: Game; players: Play
                   return (
                     <button key={i} onClick={() => clickOnCourt(i)}
                       className={`relative rounded-lg border px-1 py-2 text-center ${out ? "border-bad bg-bad/15" : sel ? "border-brand bg-brand/15" : "border-line bg-panel hover:border-muted"}`}>
-                      <span className="kbd absolute left-1 top-1">{i + 1}</span>
+                      <span className="kbd absolute left-1 top-1 pointer-coarse:hidden">{i + 1}</span>
                       <div className="font-mono text-xl font-bold">{p?.number ?? "–"}</div>
                       <div className="truncate text-[11px] text-muted">{p?.name.split(" ")[0] ?? ""}</div>
                       {f > 0 && <div className={`absolute right-1 top-1 text-[10px] ${f >= 4 ? "text-bad" : "text-muted"}`}>{"●".repeat(Math.min(f, 5))}</div>}
@@ -433,7 +432,7 @@ function Logger({ game, players, events, readOnly }: { game: Game; players: Play
                 })}
                 <button onClick={() => setActor({ kind: "opp" })}
                   className={`relative rounded-lg border px-1 py-2 text-center ${actor.kind === "opp" ? "border-opp bg-opp/15" : "border-line bg-panel hover:border-muted"}`}>
-                  <span className="kbd absolute left-1 top-1">0</span>
+                  <span className="kbd absolute left-1 top-1 pointer-coarse:hidden">0</span>
                   <div className="font-mono text-xl font-bold text-opp">ADV</div>
                   <div className="truncate text-[11px] text-muted">equipa</div>
                 </button>
@@ -468,11 +467,11 @@ function Logger({ game, players, events, readOnly }: { game: Game; players: Play
                 <button key={a.key} onClick={() => doAction(a)}
                   className={`flex flex-col items-center gap-0.5 rounded-lg border border-line bg-panel px-1 py-1.5 text-sm font-medium hover:border-muted active:scale-95 ${a.tone === "good" ? "text-good" : a.tone === "bad" ? "text-bad" : ""}`}>
                   <span className="whitespace-nowrap">{a.label}</span>
-                  <span className="kbd uppercase">{a.key}</span>
+                  <span className="kbd uppercase pointer-coarse:hidden">{a.key}</span>
                 </button>
               ))}
               <button onClick={undo} className="col-span-2 rounded-lg border border-line bg-panel px-1 py-2.5 text-sm text-muted hover:border-muted">
-                Anular último <span className="kbd">Ctrl Z</span>
+                Anular último <span className="kbd pointer-coarse:hidden">Ctrl Z</span>
               </button>
             </div>
 
@@ -480,6 +479,11 @@ function Logger({ game, players, events, readOnly }: { game: Game; players: Play
         )}
       </div>
       )}
+
+      {/* event log (below the video on desktop, below the pad on phones) */}
+      <div className="min-w-0 xl:col-start-1 xl:row-start-2 [&>.card]:mt-0">
+        <EventLog events={sorted} players={players} now={now} name={name} video={video} readOnly={readOnly} />
+      </div>
 
       {help && <HelpOverlay onClose={() => setHelp(false)} />}
     </div>

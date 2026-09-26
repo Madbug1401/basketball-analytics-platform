@@ -62,7 +62,7 @@ export default function AdminPage() {
           <h1 className="text-2xl font-semibold">Administração</h1>
           <p className="text-sm text-muted">Controlo total da plataforma. Só tu (e outros administradores) vês esta página.</p>
         </div>
-        <input className="input w-64" placeholder="Pesquisar…" value={q} onChange={(e) => setQ(e.target.value)} />
+        <input className="input w-full sm:w-64" placeholder="Pesquisar…" value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
       {err && <p className="text-sm text-bad">{err}</p>}
 

@@ -136,12 +136,12 @@ export function EventLog({
           const playing = clip !== null && playlist[clip]?.id === e.id;
           return (
             <div key={e.id}>
-              <div className={`group flex items-center gap-3 border-b border-line/40 px-3 py-1.5 text-sm ${past ? "" : "opacity-45"} ${e.type === "PERIOD_START" ? "bg-panel-2/60" : ""} ${playing ? "bg-brand/15 opacity-100!" : ""}`}>
+              <div className={`group flex items-center gap-2 sm:gap-3 border-b border-line/40 px-3 py-1.5 text-sm ${past ? "" : "opacity-45"} ${e.type === "PERIOD_START" ? "bg-panel-2/60" : ""} ${playing ? "bg-brand/15 opacity-100!" : ""}`}>
                 <button onClick={() => { setClip(null); video.current?.seek(e.videoTs - 4); video.current?.play(); }} className="w-[4.75rem] shrink-0 whitespace-nowrap text-left font-mono text-xs text-brand hover:underline" title="Ver jogada">
                   ▶ {fmtTs(e.videoTs)}
                 </button>
                 <span className="w-6 shrink-0 font-mono text-xs text-muted">P{e.period}</span>
-                <span className={`w-36 shrink-0 truncate ${e.side === "opp" ? "text-opp" : ""}`}>
+                <span className={`w-24 shrink-0 truncate sm:w-36 ${e.side === "opp" ? "text-opp" : ""}`}>
                   {e.type === "SUB" || e.type === "PERIOD_START" ? "" : e.side === "opp" ? "Adversário" : name(e.playerId)}
                 </span>
                 <span className="flex-1 truncate text-muted">
