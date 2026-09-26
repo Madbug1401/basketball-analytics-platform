@@ -24,8 +24,13 @@ export default function SettingsPage() {
 
   const doImport = async (f: File) => {
     try {
-      await importAll(JSON.parse(await f.text()));
-      setMsg("Dados importados com sucesso.");
+      const data = JSON.parse(await f.text());
+      await importAll(data);
+      const imported = data.teams?.[0];
+      if (imported?.id) {
+        setTeamId(imported.id);
+        setMsg(`Importado: ${imported.name} ${imported.category} · ${imported.season} (${data.games?.length ?? 0} jogos, ${data.events?.length ?? 0} eventos). Esta equipa ficou selecionada — podes trocar no seletor do topo.`);
+      } else setMsg("Dados importados com sucesso.");
     } catch (e) {
       setMsg(`Erro: ${(e as Error).message}`);
     }
@@ -61,7 +66,7 @@ export default function SettingsPage() {
         <div className="mt-3 flex gap-2">
           <button className="btn btn-primary" onClick={doExport}>Exportar tudo (.json)</button>
           <button className="btn" onClick={() => file.current?.click()}>Importar…</button>
-          <input ref={file} type="file" accept="application/json" className="hidden" onChange={(e) => e.target.files?.[0] && doImport(e.target.files[0])} />
+          <input ref={file} type="file" accept="application/json" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) doImport(f); }} />
         </div>
         {msg && <p className="mt-2 text-sm text-muted">{msg}</p>}
       </section>
