@@ -12,7 +12,11 @@ npm run dev
 # abre http://localhost:3000
 ```
 
-Precisas do Node 20 ou mais recente. Para usar no dia a dia sem o modo dev: `npm run build && npm start`.
+Precisas do Node 20 ou mais recente.
+
+- **Sem configuração** → "modo local": tudo fica no browser, sem login (como na v0.1).
+- **Com Supabase** (`.env.local`, ver `.env.example`) → versão online: contas, papéis (admin, dono, treinador, analista, jogador), convites por código e sync na cloud.
+  Guia completo para pôr online (Supabase + Vercel): **[docs/DEPLOY.md](docs/DEPLOY.md)**.
 
 ## Dados de teste
 
@@ -20,7 +24,7 @@ Precisas do Node 20 ou mais recente. Para usar no dia a dia sem o modo dev: `npm
 
 Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/outra.json 42` (o último número é a seed).
 
-## O que já faz (v0.2)
+## O que já faz (v0.3)
 
 | Área | Funcionalidades |
 |---|---|
@@ -32,7 +36,9 @@ Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/out
 | **Adversários** | Registo contra cada equipa, onde lançam (mapa + zonas), médias por período, notas rápidas |
 | **Época** | Médias/totais, pontos por jogo, vitórias vs derrotas, assiduidade × produção |
 | **Jogador** | Perfil, evolução por jogo, mapa de lançamentos da época, jogo a jogo |
-| **Dados** | Exportar/importar tudo em JSON |
+| **Contas e papéis** | Login por email · admin da plataforma · dono/treinador/analista/jogador por equipa · convites por código (WhatsApp) · o jogador vê os seus dados e os da equipa, sem notas do treinador |
+| **Online** | Supabase (Postgres + RLS) · sync em segundo plano, funciona offline · página Admin · eliminar equipa (dono) · sair da equipa |
+| **Dados** | Exportar/importar equipa em JSON |
 
 ## Atalhos do logger
 
@@ -57,18 +63,18 @@ Fluxo típico: `2` → `Q` → `4` (assistência) → clique no campo. Lançamen
 ## Arquitetura
 
 - **Next.js 16 + React 19 + Tailwind 4**, tudo no cliente.
-- **Local-first**: IndexedDB via Dexie (`src/lib/db.ts`). Funciona offline. Os dados ficam **no browser**, por isso **exporta cópias** em Definições.
-- **Eventos como fonte da verdade** (`game_events`): estatísticas, +/-, quintetos e mapas de lançamento são calculados (`src/lib/stats.ts`). Corrigir um evento corrige tudo.
-- Cada evento guarda `video_ts` (segundo do vídeo), `period`, `x/y` (metros FIBA) e quem estava em campo é reconstruído a partir de `PERIOD_START` + `SUB`.
-- Multi-equipa: tudo tem `teamId`. O esquema Postgres/Supabase com RLS está em `supabase/schema.sql`.
+- **Local-first**: IndexedDB via Dexie (`src/lib/db.ts`) é sempre a fonte imediata — a app funciona sem internet.
+- **Sync** (`src/lib/sync.ts`): cada escrita local entra numa fila (`outbox`, via hooks do Dexie) e é enviada ao Supabase em lotes; o pull é incremental (`updated_at`) e as remoções chegam por `tombstones`.
+- **Permissões no servidor** (`supabase/schema.sql`): Row Level Security por equipa; notas do treinador em tabelas à parte (`players_private`, `games_private`) que os jogadores não conseguem ler; convites e visão de admin por funções `security definer`.
+- **Eventos como fonte da verdade** (`events`): estatísticas, +/-, minutos, quintetos e mapas são calculados (`src/lib/stats.ts`).
 
 ```
 src/
-  app/            páginas (painel, equipa, treinos, jogos, logger, estatisticas, jogadores, definicoes)
-  components/     Court (campo SVG), VideoPlayer (YouTube/HTML5/cronómetro), BoxScore, Trend, Shell
-  lib/            types, db (Dexie), stats (motor de estatísticas), court (geometria FIBA), season
-supabase/         schema.sql para a fase cloud
-docs/ROADMAP.md   próximos passos
+  app/            páginas (painel, equipa, treinos, jogos, logger, adversarios, estatisticas, jogadores, definicoes, admin, convite, conta)
+  components/     Shell (auth + navegação por papel), AuthScreen, InviteDialog, Court, VideoPlayer, EventLog, BoxScore, Trend
+  lib/            db (Dexie + fila), sync, auth (sessão/papéis), members, teamAdmin, stats, insights, court, season
+supabase/         schema.sql (tabelas, RLS, triggers, RPCs)
+docs/             DEPLOY.md, ROADMAP.md
 ```
 
 ## Privacidade

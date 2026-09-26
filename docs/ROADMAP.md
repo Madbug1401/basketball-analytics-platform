@@ -17,8 +17,11 @@
 - [ ] Funcionar offline no pavilhão (service worker)
 
 ## Fase 2: cloud e multi-treinador
-- [ ] Supabase: login, `supabase/schema.sql`, sync dos dados locais
-- [ ] Partilha da equipa com o Melvyn (papéis: coach, analyst, viewer)
+- [x] Supabase: login, `supabase/schema.sql`, sync local-first (v0.3)
+- [x] Papéis: admin, dono, treinador, analista, jogador + convites por código (v0.3)
+- [x] Página de admin; eliminar equipa; sair da equipa (v0.3)
+- [ ] Pôr online (Supabase + Vercel) — ver docs/DEPLOY.md
+- [ ] Emails próprios (SMTP) para confirmação e recuperação de password
 - [ ] Contexto das jogadas (contra-ataque, pick & roll, isolamento…) como etiquetas nos eventos
 - [ ] Análise do adversário: mapa de lançamentos e tendências por equipa adversária
 

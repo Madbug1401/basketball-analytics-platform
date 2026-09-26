@@ -4,12 +4,14 @@ import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { useTeam } from "@/lib/team";
+import { useAccess } from "@/lib/auth";
 import { useSeason } from "@/lib/season";
 import { reb, type Line } from "@/lib/stats";
 import { Kpi } from "@/components/Kpi";
 
 export default function Dashboard() {
   const { team } = useTeam();
+  const access = useAccess(team?.id);
   const s = useSeason(team?.id);
   const practices = useLiveQuery(() => (team ? db.practices.where("teamId").equals(team.id).count() : 0), [team?.id]);
   if (!team || !s) return null;
@@ -37,7 +39,25 @@ export default function Dashboard() {
         <p className="text-sm text-muted">Época {team.season}</p>
       </div>
 
-      {steps.some((x) => !x.done) && (
+      {access.isPlayer && (() => {
+        const me = s.players.find((p) => p.id === access.playerId);
+        const l = me ? s.totals.get(me.id) : undefined;
+        const att = me ? s.attendancePct.get(me.id) : null;
+        return (
+          <Link href={me ? `/jogadores/${me.id}` : "/equipa"} className="card flex flex-wrap items-center gap-4 border-brand/60 p-4 hover:bg-panel-2">
+            <span className="grid h-12 w-12 place-items-center rounded-full bg-brand font-mono text-xl font-bold text-black">{me?.number ?? "?"}</span>
+            <div className="flex-1">
+              <div className="font-semibold">Olá{me ? `, ${me.name.split(" ")[0]}` : ""}! Vê a tua evolução →</div>
+              <div className="text-sm text-muted">
+                {l?.gp ? `${l.gp} jogos · ${(l.pts / l.gp).toFixed(1)} pts · ${(reb(l) / l.gp).toFixed(1)} ress. · ${(l.ast / l.gp).toFixed(1)} ast.` : "Ainda sem jogos registados."}
+                {att !== null && att !== undefined ? ` · assiduidade ${att}%` : ""}
+              </div>
+            </div>
+          </Link>
+        );
+      })()}
+
+      {access.canEdit && steps.some((x) => !x.done) && (
         <div className="card p-4">
           <h2 className="mb-2 font-semibold">Primeiros passos</h2>
           <ol className="grid gap-1.5 text-sm">

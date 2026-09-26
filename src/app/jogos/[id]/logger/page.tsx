@@ -11,6 +11,7 @@ import { isThree } from "@/lib/court";
 import { Court } from "@/components/Court";
 import { EventLog } from "@/components/EventLog";
 import { Html5Player, StopwatchPlayer, YouTubePlayer, youtubeId, type PlayerHandle } from "@/components/VideoPlayer";
+import { useAccess } from "@/lib/auth";
 
 type Actor = { kind: "slot"; i: number } | { kind: "player"; id: ID } | { kind: "opp" };
 
@@ -46,7 +47,11 @@ type Follow =
   | { kind: "rebound"; shotSide: Side }
   | null;
 
-export default function LoggerPage() {
+export default function LoggerPageGuarded() {
+  return <LoggerPage />;
+}
+
+function LoggerPage() {
   const { id } = useParams<{ id: string }>();
   const game = useLiveQuery(() => db.games.get(id), [id]);
   const players = useLiveQuery(
@@ -57,10 +62,15 @@ export default function LoggerPage() {
 
   if (game === undefined || !players || !events) return null;
   if (!game) return <p className="text-muted">Jogo não encontrado.</p>;
-  return <Logger game={game} players={players} events={events} />;
+  return <Access game={game} players={players} events={events} />;
 }
 
-function Logger({ game, players, events }: { game: Game; players: Player[]; events: GameEvent[] }) {
+function Access(props: { game: Game; players: Player[]; events: GameEvent[] }) {
+  const a = useAccess(props.game.teamId);
+  return <Logger {...props} readOnly={!a.canEdit} />;
+}
+
+function Logger({ game, players, events, readOnly }: { game: Game; players: Player[]; events: GameEvent[]; readOnly: boolean }) {
   const video = useRef<PlayerHandle>(null);
   const [now, setNow] = useState(0);
   const [rate, setRate] = useState(1);
@@ -264,7 +274,7 @@ function Logger({ game, players, events }: { game: Game; players: Player[]; even
     if (k === "?" ) { setHelp((h) => !h); return; }
     if (k === "escape") { setFollow(null); setPendingShot(null); setPendingLoc(null); setSub(null); setNumBuf(""); setHelp(false); return; }
 
-    if (!started) return;
+    if (readOnly || !started) return;
 
     // substitution: jersey number typing
     if (sub && /^[0-9]$/.test(k) && (sub.out || sub.in)) {
@@ -317,7 +327,7 @@ function Logger({ game, players, events }: { game: Game; players: Player[]; even
   const actorLabel = actor.kind === "opp" ? "Adversário" : name(actorPlayer());
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[1fr_440px]">
+    <div className={`grid gap-4 ${readOnly ? "mx-auto max-w-5xl" : "xl:grid-cols-[1fr_440px]"}`}>
       {/* LEFT: video + log */}
       <div className="min-w-0">
         <div className="mb-2 flex items-center justify-between gap-2">
@@ -328,10 +338,11 @@ function Logger({ game, players, events }: { game: Game; players: Player[]; even
           </div>
         </div>
         <VideoArea game={game} playerRef={video} />
-        <EventLog events={sorted} players={players} now={now} name={name} video={video} />
+        <EventLog events={sorted} players={players} now={now} name={name} video={video} readOnly={readOnly} />
       </div>
 
       {/* RIGHT: control pad */}
+      {!readOnly && (
       <div className="grid h-fit gap-3 xl:sticky xl:top-[4.25rem] xl:max-h-[calc(100vh-5rem)] xl:overflow-y-auto xl:pr-1">
         <div className="card flex items-center justify-between px-4 py-3">
           <div className="text-center">
@@ -468,6 +479,7 @@ function Logger({ game, players, events }: { game: Game; players: Player[]; even
           </>
         )}
       </div>
+      )}
 
       {help && <HelpOverlay onClose={() => setHelp(false)} />}
     </div>

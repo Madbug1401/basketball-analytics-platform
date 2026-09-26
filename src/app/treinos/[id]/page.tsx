@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, deletePractice } from "@/lib/db";
 import { ATTENDANCE_LABEL, type AttendanceStatus, type Practice } from "@/lib/types";
+import { StaffOnly } from "@/components/Guard";
 
 const ORDER: AttendanceStatus[] = ["present", "late", "absent", "excused"];
 const STYLE: Record<AttendanceStatus, string> = {
@@ -14,7 +15,11 @@ const STYLE: Record<AttendanceStatus, string> = {
   excused: "border-opp bg-opp/15 text-opp",
 };
 
-export default function PracticeDetail() {
+export default function PracticeDetailGuarded() {
+  return <StaffOnly><PracticeDetail /></StaffOnly>;
+}
+
+function PracticeDetail() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const data = useLiveQuery(async () => {

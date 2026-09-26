@@ -6,12 +6,14 @@ import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, today, uid } from "@/lib/db";
 import { useTeam } from "@/lib/team";
+import { useAccess } from "@/lib/auth";
 import { gameStats } from "@/lib/stats";
 import { youtubeId } from "@/components/VideoPlayer";
 import type { VideoSource } from "@/lib/types";
 
 export default function GamesPage() {
   const { team } = useTeam();
+  const access = useAccess(team?.id);
   const router = useRouter();
   const data = useLiveQuery(async () => {
     if (!team) return null;
@@ -47,7 +49,7 @@ export default function GamesPage() {
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+    <div className={`grid gap-6 ${access.canEdit ? "lg:grid-cols-[1fr_360px]" : ""}`}>
       <section>
         <h1 className="mb-4 text-2xl font-semibold">Jogos</h1>
         <div className="card divide-y divide-line">
@@ -68,7 +70,7 @@ export default function GamesPage() {
                 <div className="font-mono text-lg tabular-nums">{n ? `${us}–${opp}` : ""}</div>
                 <div className="flex gap-2">
                   <Link href={`/jogos/${g.id}`} className="btn">Estatísticas</Link>
-                  <Link href={`/jogos/${g.id}/logger`} className="btn btn-primary">Registar</Link>
+                  {access.canEdit && <Link href={`/jogos/${g.id}/logger`} className="btn btn-primary">Registar</Link>}
                 </div>
               </div>
             );
@@ -77,7 +79,7 @@ export default function GamesPage() {
         </div>
       </section>
 
-      <form onSubmit={create} className="card grid h-fit gap-3 p-4">
+      {access.canEdit && <form onSubmit={create} className="card grid h-fit gap-3 p-4">
         <h2 className="font-semibold">Novo jogo</h2>
         <div>
           <label className="label">Adversário</label>
@@ -120,7 +122,7 @@ export default function GamesPage() {
         {f.videoKind === "file" && <p className="text-xs text-muted">Vais escolher o ficheiro MP4 no ecrã de registo. O vídeo não sai do teu computador.</p>}
         {err && <p className="text-sm text-bad">{err}</p>}
         <button className="btn btn-primary">Criar e abrir registo</button>
-      </form>
+      </form>}
     </div>
   );
 }

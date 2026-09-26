@@ -52,13 +52,14 @@ function matches(e: GameEvent, f: LogFilter) {
 }
 
 export function EventLog({
-  events, players, now, name, video,
+  events, players, now, name, video, readOnly = false,
 }: {
   events: GameEvent[];
   players: Player[];
   now: number;
   name: (id?: ID) => string;
   video: RefObject<PlayerHandle | null>;
+  readOnly?: boolean;
 }) {
   const [init] = useState(readFilterFromUrl);
   const [f, setF] = useState<LogFilter>({ side: init.side ?? "all", player: init.player ?? "all", type: init.type ?? "all" });
@@ -146,8 +147,8 @@ export function EventLog({
                 <span className="flex-1 truncate text-muted">
                   {describe(e, name)}{e.type === "SHOT" && e.x === undefined ? " · sem local" : ""}
                 </span>
-                <button onClick={() => setEditing(editing === e.id ? null : e.id)} className={`${editing === e.id ? "visible text-brand" : "invisible"} text-muted hover:text-fg group-hover:visible`} title="Editar">✎</button>
-                <button onClick={() => db.events.delete(e.id)} className="invisible text-muted hover:text-bad group-hover:visible" title="Apagar">✕</button>
+                {!readOnly && <><button onClick={() => setEditing(editing === e.id ? null : e.id)} className={`${editing === e.id ? "visible text-brand" : "invisible"} text-muted hover:text-fg group-hover:visible`} title="Editar">✎</button>
+                <button onClick={() => db.events.delete(e.id)} className="invisible text-muted hover:text-bad group-hover:visible" title="Apagar">✕</button></>}
               </div>
               {editing === e.id && <EventEditor e={e} players={players} now={now} onClose={() => setEditing(null)} />}
             </div>

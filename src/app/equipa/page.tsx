@@ -5,6 +5,9 @@ import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, uid } from "@/lib/db";
 import { useTeam } from "@/lib/team";
+import { useAccess, useAuth } from "@/lib/auth";
+import { useTeamMembers } from "@/lib/members";
+import { InviteDialog } from "@/components/InviteDialog";
 import { POSITIONS, type Player, type Position } from "@/lib/types";
 
 type Draft = { name: string; number: string; position: Position; birthYear: string; heightCm: string; notes: string };
@@ -12,6 +15,10 @@ const blank: Draft = { name: "", number: "", position: "", birthYear: "", height
 
 export default function RosterPage() {
   const { team } = useTeam();
+  const access = useAccess(team?.id);
+  const { mode } = useAuth();
+  const { members, reload } = useTeamMembers(mode === "cloud" && access.canEdit ? team?.id : undefined);
+  const [inviting, setInviting] = useState<Player | null>(null);
   const players = useLiveQuery(
     () => (team ? db.players.where("teamId").equals(team.id).sortBy("number") : []),
     [team?.id],
@@ -51,7 +58,7 @@ export default function RosterPage() {
   const list = players.filter((p) => showInactive || p.active);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+    <div className={`grid gap-6 ${access.canEdit ? "lg:grid-cols-[1fr_340px]" : ""}`}>
       <section>
         <div className="mb-4 flex items-end justify-between">
           <div>
@@ -82,10 +89,21 @@ export default function RosterPage() {
                   <td>{p.birthYear ?? "–"}</td>
                   <td>{p.heightCm ? `${p.heightCm} cm` : "–"}</td>
                   <td className="whitespace-nowrap">
-                    <button className="btn btn-ghost py-1" onClick={() => edit(p)}>Editar</button>
-                    <button className="btn btn-ghost py-1" onClick={() => db.players.update(p.id, { active: !p.active })}>
-                      {p.active ? "Desativar" : "Ativar"}
-                    </button>
+                    {access.canEdit && mode === "cloud" && (() => {
+                      const linked = members.find((m) => m.playerId === p.id);
+                      return linked
+                        ? <span className="mr-2 text-xs text-good" title={linked.email}>✓ conta ligada</span>
+                        : <button className="btn btn-ghost py-1 text-brand" onClick={() => setInviting(p)}>Convidar</button>;
+                    })()}
+                    {access.canEdit && (
+                      <>
+                        <button className="btn btn-ghost py-1" onClick={() => edit(p)}>Editar</button>
+                        <button className="btn btn-ghost py-1" onClick={() => db.players.update(p.id, { active: !p.active })}>
+                          {p.active ? "Desativar" : "Ativar"}
+                        </button>
+                      </>
+                    )}
+                    {access.isPlayer && access.playerId === p.id && <span className="text-xs text-brand">és tu</span>}
                   </td>
                 </tr>
               ))}
@@ -97,7 +115,7 @@ export default function RosterPage() {
         </div>
       </section>
 
-      <form onSubmit={save} className="card grid h-fit gap-3 p-4">
+      {access.canEdit && <form onSubmit={save} className="card grid h-fit gap-3 p-4">
         <h2 className="font-semibold">{editing ? "Editar jogador" : "Adicionar jogador"}</h2>
         <div className="grid grid-cols-[80px_1fr] gap-3">
           <div>
@@ -137,7 +155,11 @@ export default function RosterPage() {
           {editing && <button type="button" className="btn" onClick={() => { setEditing(null); setDraft(blank); }}>Cancelar</button>}
         </div>
         <p className="text-xs text-muted">Só guardamos o ano de nascimento (não a data completa) — menos dados pessoais de menores.</p>
-      </form>
+      </form>}
+      {inviting && team && (
+        <InviteDialog teamId={team.id} teamName={`${team.name} ${team.category}`} role="player" playerId={inviting.id}
+          who={inviting.name.split(" ")[0]} onClose={() => { setInviting(null); void reload(); }} />
+      )}
     </div>
   );
 }

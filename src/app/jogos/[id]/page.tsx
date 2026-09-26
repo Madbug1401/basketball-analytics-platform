@@ -11,6 +11,7 @@ import { BoxTable, sortRows } from "@/components/BoxScore";
 import { ZONES } from "@/lib/court";
 import { gameInsights, type Insight } from "@/lib/insights";
 import { useSeason } from "@/lib/season";
+import { useAccess } from "@/lib/auth";
 
 export default function GamePage() {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +27,7 @@ export default function GamePage() {
   }, [id]);
   const [shotFilter, setShotFilter] = useState<string>("us");
   const season = useSeason(data?.game?.teamId);
+  const access = useAccess(data?.game?.teamId);
 
   const stats = useMemo(() => (data?.game ? gameStats(data.events!, data.game.periods, data.game.periodMinutes) : null), [data]);
 
@@ -65,7 +67,7 @@ export default function GamePage() {
           </div>
           <div className="flex gap-2 print:hidden">
             <button className="btn" onClick={() => window.print()}>Imprimir</button>
-            <Link href={`/jogos/${id}/logger`} className="btn btn-primary">Abrir registo</Link>
+            {access.canEdit && <Link href={`/jogos/${id}/logger`} className="btn btn-primary">Abrir registo</Link>}
           </div>
         </div>
       </div>
@@ -151,7 +153,7 @@ export default function GamePage() {
         </>
       )}
 
-      <GameInfo gameId={id} onDelete={async () => { if (confirm("Apagar este jogo e todos os eventos?")) { await deleteGame(id); router.push("/jogos"); } }} />
+      {access.canEdit && <GameInfo gameId={id} onDelete={async () => { if (confirm("Apagar este jogo e todos os eventos?")) { await deleteGame(id); router.push("/jogos"); } }} />}
     </div>
   );
 }

@@ -5,8 +5,13 @@ import { useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, today, uid } from "@/lib/db";
 import { useTeam } from "@/lib/team";
+import { StaffOnly } from "@/components/Guard";
 
-export default function PracticesPage() {
+export default function PracticesPageGuarded() {
+  return <StaffOnly><PracticesPage /></StaffOnly>;
+}
+
+function PracticesPage() {
   const { team } = useTeam();
   const router = useRouter();
   const data = useLiveQuery(async () => {
