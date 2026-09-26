@@ -28,6 +28,29 @@ const Ctx = createContext<AuthCtx>({
 });
 
 export const PENDING_INVITE_KEY = "bap.pendingInvite";
+const ACCESS_CACHE_KEY = "bap.access";
+
+/* Offline support: remember who the user is and their roles, so the app keeps working
+   (and staff can keep recording) when the phone has no network at the gym. */
+function cacheAccess(uid: string, profile: Profile, memberships: Membership[]) {
+  try { localStorage.setItem(ACCESS_CACHE_KEY, JSON.stringify({ uid, profile, memberships })); } catch {}
+}
+function cachedAccess(uid: string): { profile: Profile; memberships: Membership[] } | null {
+  try {
+    const c = JSON.parse(localStorage.getItem(ACCESS_CACHE_KEY) ?? "null");
+    return c?.uid === uid ? c : null;
+  } catch { return null; }
+}
+/** The session supabase-js keeps in storage, even if its access token expired while offline. */
+function storedSession(): Session | null {
+  try {
+    const key = (supabase?.auth as unknown as { storageKey?: string })?.storageKey;
+    const raw = key ? localStorage.getItem(key) : null;
+    const s = raw ? JSON.parse(raw) : null;
+    return s?.user?.id && s?.refresh_token ? (s as Session) : null;
+  } catch { return null; }
+}
+const offline = () => typeof navigator !== "undefined" && !navigator.onLine;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(!cloudConfigured);
@@ -38,12 +61,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const load = useCallback(async (s: Session | null) => {
     if (!supabase || !s) { setProfile(null); setMemberships([]); return; }
     const uid = s.user.id;
-    const [{ data: p }, { data: m }] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
-      supabase.from("team_members").select("team_id, role, player_id").eq("user_id", uid),
+    const applyCache = () => {
+      const c = cachedAccess(uid);
+      setProfile(c?.profile ?? { id: uid, email: s.user.email ?? "", fullName: "", isAdmin: false });
+      setMemberships(c?.memberships ?? []);
+    };
+    // offline, requests would wait for a token refresh that can't happen: use the cache right away
+    if (offline()) { applyCache(); return; }
+    const res = await Promise.race([
+      Promise.all([
+        supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
+        supabase.from("team_members").select("team_id, role, player_id").eq("user_id", uid),
+      ]),
+      new Promise<null>((r) => setTimeout(() => r(null), 8000)),
     ]);
-    setProfile(p ? { id: p.id, email: p.email ?? s.user.email ?? "", fullName: p.full_name ?? "", isAdmin: !!p.is_admin } : { id: uid, email: s.user.email ?? "", fullName: "", isAdmin: false });
-    setMemberships((m ?? []).map((r) => ({ teamId: r.team_id, role: r.role as Role, playerId: r.player_id ?? undefined })));
+    if (!res) { applyCache(); return; }
+    const [pr, mr] = res;
+    if (pr.error || mr.error) {
+      // no network (or server hiccup): keep working with what we knew last time
+      applyCache();
+      return;
+    }
+    const p = pr.data;
+    const profile: Profile = p ? { id: p.id, email: p.email ?? s.user.email ?? "", fullName: p.full_name ?? "", isAdmin: !!p.is_admin } : { id: uid, email: s.user.email ?? "", fullName: "", isAdmin: false };
+    const memberships: Membership[] = (mr.data ?? []).map((r) => ({ teamId: r.team_id, role: r.role as Role, playerId: r.player_id ?? undefined }));
+    setProfile(profile);
+    setMemberships(memberships);
+    cacheAccess(uid, profile, memberships);
   }, []);
 
   const claimInvite = useCallback(async (code: string) => {
@@ -83,7 +127,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!supabase) return;
     let current: string | null = null;
-    const handle = async (s: Session | null) => {
+    const handle = async (s: Session | null, event?: string) => {
+      // an expired token can't be refreshed without network: keep the stored session
+      // instead of logging out (it refreshes by itself when the connection returns)
+      if (!s && event !== "SIGNED_OUT") {
+        const st = storedSession();
+        if (st && (offline() || current === st.user.id || !event)) s = st;
+      }
       setSession(s);
       const uid = s?.user.id ?? null;
       if (uid && uid !== current) {
@@ -95,14 +145,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (pending) { try { await claimInvite(pending); } catch { /* shown on the invite page */ } }
         await startSync(supabase!, uid);
       } else if (!uid) {
-        if (current) { stopSync(); await clearAllLocal(); }
+        // only an explicit sign-out wipes this device's data
+        if (current && event === "SIGNED_OUT") { stopSync(); await clearAllLocal(); try { localStorage.removeItem(ACCESS_CACHE_KEY); } catch {} }
+        else if (current) stopSync();
         current = null;
         await load(null);
         setReady(true);
       }
     };
+    // fast start: use the stored session straight away (getSession can take long without network,
+    // while supabase-js retries refreshing an expired token); getSession then confirms or corrects it
+    const st = storedSession();
+    if (st) void handle(st);
     supabase.auth.getSession().then(({ data }) => handle(data.session));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => { void handle(s); });
+    const { data: sub } = supabase.auth.onAuthStateChange((e, s) => { void handle(s, e); });
     return () => sub.subscription.unsubscribe();
   }, [load, claimInvite]);
 

@@ -8,13 +8,21 @@ import { useAccess } from "@/lib/auth";
 import { useSeason } from "@/lib/season";
 import { reb, type Line } from "@/lib/stats";
 import { Kpi } from "@/components/Kpi";
+import { GoalCard } from "@/components/Goals";
 
 export default function Dashboard() {
   const { team } = useTeam();
   const access = useAccess(team?.id);
   const s = useSeason(team?.id);
   const practices = useLiveQuery(() => (team ? db.practices.where("teamId").equals(team.id).count() : 0), [team?.id]);
+  const goals = useLiveQuery(() => (team ? db.goals.where("teamId").equals(team.id).filter((g) => g.active).toArray() : []), [team?.id]);
   if (!team || !s) return null;
+  const byId = new Map(s.players.map((p) => [p.id, p]));
+  // players: their own goals first; staff: the team's goals
+  const shownGoals = (goals ?? [])
+    .filter((g) => (access.isPlayer ? g.playerId === access.playerId || !g.playerId : !g.playerId))
+    .sort((a, b) => Number(!a.playerId) - Number(!b.playerId))
+    .slice(0, 3);
 
   const active = s.players.filter((p) => p.active);
   const gp = s.games.length;
@@ -69,6 +77,18 @@ export default function Dashboard() {
             ))}
           </ol>
         </div>
+      )}
+
+      {shownGoals.length > 0 && (
+        <section>
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="font-semibold">{access.isPlayer ? "Os teus objetivos" : "Objetivos da equipa"}</h2>
+            <Link href="/objetivos" className="tap text-sm text-brand">Ver todos</Link>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {shownGoals.map((g) => <GoalCard key={g.id} goal={g} season={s} players={byId} />)}
+          </div>
+        </section>
       )}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">

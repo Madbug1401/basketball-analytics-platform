@@ -1,4 +1,4 @@
-import type { GameEvent, ID, Player } from "./types";
+import type { GameEvent, ID, Player, PlayTag } from "./types";
 import { zoneOf, type Zone } from "./court";
 
 export interface Line {
@@ -172,7 +172,7 @@ export function fmtTs(s: number) {
 export const EVENT_LABEL: Record<string, string> = {
   SHOT: "Lançamento", FT: "Lance livre", REB: "Ressalto", AST: "Assistência", STL: "Roubo",
   BLK: "Desarme", TOV: "Perda de bola", FOUL: "Falta", FOUL_DRAWN: "Falta sofrida",
-  SUB: "Substituição", PERIOD_START: "Início período",
+  SUB: "Substituição", PERIOD_START: "Início período", PERIOD_END: "Fim do período", TIMEOUT: "Desconto de tempo",
 };
 
 export function describe(e: GameEvent, name: (id?: ID) => string) {
@@ -183,6 +183,8 @@ export function describe(e: GameEvent, name: (id?: ID) => string) {
     case "REB": return `Ressalto ${m.off ? "ofensivo" : "defensivo"}`;
     case "SUB": return `Entra ${name(m.in)} · Sai ${name(m.out)}`;
     case "PERIOD_START": return `Início ${e.period}.º período — ${(m.lineup ?? []).map((id) => name(id)).join(", ")}`;
+    case "PERIOD_END": return `Fim do ${e.period}.º período`;
+    case "TIMEOUT": return "Desconto de tempo";
     default: return EVENT_LABEL[e.type];
   }
 }
@@ -233,3 +235,31 @@ export function playerMinutes(events: GameEvent[], periodMinutes = 10) {
 }
 
 export const fmtMin = (m: number) => (m ? String(Math.round(m)) : "–");
+
+/* ---------- play context (tags) ---------- */
+
+export interface TagAgg { tag: PlayTag; fga: number; fgm: number; fta: number; ftm: number; tov: number; pts: number; plays: number }
+
+/** Offensive efficiency per play context, for one side. plays ≈ FGA + TOV + 0.44·FTA. */
+export function tagStats(events: GameEvent[], side: "us" | "opp"): { tags: TagAgg[]; tagged: number; total: number } {
+  const map = new Map<PlayTag, TagAgg>();
+  let tagged = 0, total = 0;
+  for (const e of events) {
+    if (e.side !== side || !(e.type === "SHOT" || e.type === "FT" || e.type === "TOV")) continue;
+    if (e.type !== "FT") total++;
+    const tags = e.meta?.tags ?? [];
+    if (tags.length && e.type !== "FT") tagged++;
+    for (const tag of tags) {
+      const a = map.get(tag) ?? { tag, fga: 0, fgm: 0, fta: 0, ftm: 0, tov: 0, pts: 0, plays: 0 };
+      if (e.type === "SHOT") { a.fga++; if (e.meta?.made) { a.fgm++; a.pts += e.meta.pts ?? 2; } }
+      else if (e.type === "FT") { a.fta++; if (e.meta?.made) { a.ftm++; a.pts++; } }
+      else a.tov++;
+      a.plays = a.fga + a.tov + 0.44 * a.fta;
+      map.set(tag, a);
+    }
+  }
+  return { tags: [...map.values()].sort((a, b) => b.plays - a.plays), tagged, total };
+}
+
+/** Points per play, formatted. */
+export const ppp = (a: TagAgg) => (a.plays ? (a.pts / a.plays).toFixed(2) : "–");

@@ -8,21 +8,24 @@
 ## Fase 1.5: detalhes que vão aparecer no uso real
 - [x] Editar evento (jogador, tipo, resultado, tempo, período) — v0.2
 - [x] Minutos jogados *estimados* pelo tempo de vídeo — v0.2 (precisão ±1–2 min)
-- [ ] Minutos exatos (marcar o relógio de jogo nas paragens) — só se a estimativa não chegar
+- [x] Minutos exatos — no modo ao vivo (v0.4); no vídeo continuam estimados
 - [x] Faltas por período com aviso de bónus — v0.2
 - [x] Imprimir/PDF do box score (A4 horizontal) — v0.2
 - [x] Relatório automático pós-jogo com links para as jogadas — v0.2
 - [x] Sequência de clips: filtrar eventos e ver as jogadas seguidas — v0.2
 - [x] Instalável como app (manifest + ícones) — v0.2
-- [ ] Funcionar offline no pavilhão (service worker)
+- [x] Funcionar offline no pavilhão (service worker) — v0.4
+- [x] Modo ao vivo no banco: relógio de jogo, faltas, descontos, minutos exatos — v0.4
+- [x] Imagem do jogo para partilhar no WhatsApp — v0.4
+- [x] Objetivos individuais e da equipa com progresso automático — v0.4
 
 ## Fase 2: cloud e multi-treinador
 - [x] Supabase: login, `supabase/schema.sql`, sync local-first (v0.3)
 - [x] Papéis: admin, dono, treinador, analista, jogador + convites por código (v0.3)
 - [x] Página de admin; eliminar equipa; sair da equipa (v0.3)
-- [ ] Pôr online (Supabase + Vercel) — ver docs/DEPLOY.md
+- [x] Pôr online (Supabase + Vercel) — ver docs/DEPLOY.md
 - [ ] Emails próprios (SMTP) para confirmação e recuperação de password
-- [ ] Contexto das jogadas (contra-ataque, pick & roll, isolamento…) como etiquetas nos eventos
+- [x] Contexto das jogadas (contra-ataque, pick & roll, isolamento…) como etiquetas nos eventos — v0.4
 - [ ] Análise do adversário: mapa de lançamentos e tendências por equipa adversária
 
 ## Fase 3: vídeo

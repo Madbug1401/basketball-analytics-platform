@@ -26,7 +26,7 @@ export default function GamesPage() {
     });
   }, [team?.id]);
 
-  const [f, setF] = useState({ opponent: "", date: today(), home: true, competition: "Regional", videoKind: "youtube" as VideoSource["kind"], url: "", periodMinutes: 10 });
+  const [f, setF] = useState({ opponent: "", date: today(), home: true, competition: "Regional", videoKind: "youtube" as VideoSource["kind"] | "live", url: "", periodMinutes: 10 });
   const [err, setErr] = useState("");
 
   if (!team || !data) return null;
@@ -45,7 +45,7 @@ export default function GamesPage() {
       id, teamId: team.id, date: f.date, opponent: f.opponent.trim(), home: f.home,
       competition: f.competition || undefined, periods: 4, periodMinutes: f.periodMinutes, video, createdAt: Date.now(),
     });
-    router.push(`/jogos/${id}/logger`);
+    router.push(`/jogos/${id}/${f.videoKind === "live" ? "ao-vivo" : "logger"}`);
   };
 
   return (
@@ -68,9 +68,11 @@ export default function GamesPage() {
                   </div>
                 </Link>
                 <div className="font-mono text-lg tabular-nums">{n ? `${us}–${opp}` : ""}</div>
-                <div className="flex gap-2">
-                  <Link href={`/jogos/${g.id}`} className="btn">Estatísticas</Link>
-                  {access.canEdit && <Link href={`/jogos/${g.id}/logger`} className="btn btn-primary">Registar</Link>}
+                <div className="flex w-full gap-2 sm:w-auto">
+                  <Link href={`/jogos/${g.id}`} className="btn flex-1 sm:flex-none">Estatísticas</Link>
+                  {access.canEdit && (g.video.kind === "none"
+                    ? <Link href={`/jogos/${g.id}/ao-vivo`} className="btn btn-primary flex-1 sm:flex-none">Ao vivo</Link>
+                    : <Link href={`/jogos/${g.id}/logger`} className="btn btn-primary flex-1 sm:flex-none">Registar</Link>)}
                 </div>
               </div>
             );
@@ -108,7 +110,8 @@ export default function GamesPage() {
           </div>
         </div>
         <div>
-          <label className="label">Vídeo</label>
+          <label className="label">Como vais registar?</label>
+          <button type="button" onClick={() => setF({ ...f, videoKind: "live" })} className={`btn mb-1 w-full ${f.videoKind === "live" ? "btn-primary" : ""}`}>● Ao vivo, no banco (sem vídeo)</button>
           <div className="grid grid-cols-4 gap-1">
             {([["youtube", "YouTube"], ["file", "MP4"], ["url", "Link"], ["none", "Sem"]] as const).map(([k, l]) => (
               <button type="button" key={k} onClick={() => setF({ ...f, videoKind: k })} className={`btn px-2 ${f.videoKind === k ? "btn-primary" : ""}`}>{l}</button>
@@ -120,8 +123,9 @@ export default function GamesPage() {
             onChange={(e) => setF({ ...f, url: e.target.value })} />
         )}
         {f.videoKind === "file" && <p className="text-xs text-muted">Vais escolher o ficheiro MP4 no ecrã de registo. O vídeo não sai do teu computador.</p>}
+        {f.videoKind === "live" && <p className="text-xs text-muted">Relógio de jogo, 5 em campo, faltas e descontos no telemóvel. Funciona sem internet. Depois podes juntar o vídeo e completar.</p>}
         {err && <p className="text-sm text-bad">{err}</p>}
-        <button className="btn btn-primary">Criar e abrir registo</button>
+        <button className="btn btn-primary">{f.videoKind === "live" ? "Criar e começar ao vivo" : "Criar e abrir registo"}</button>
       </form>}
     </div>
   );

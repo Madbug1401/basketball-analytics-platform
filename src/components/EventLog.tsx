@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { db } from "@/lib/db";
-import type { EventType, GameEvent, ID, Player } from "@/lib/types";
+import { PLAY_TAGS, TAG_LABEL, type EventType, type GameEvent, type ID, type Player, type PlayTag } from "@/lib/types";
 import { describe, EVENT_LABEL, fmtTs } from "@/lib/stats";
 import type { PlayerHandle } from "./VideoPlayer";
 import { ask } from "./Dialog";
+import { TagPicker, toggleTag } from "./TagPicker";
 
 export const CLIP_BEFORE = 6; // segundos antes do evento
 export const CLIP_AFTER = 2; // segundos depois
@@ -26,9 +27,10 @@ const TYPE_OPTIONS: [TypeFilter, string][] = [
   ["FOUL", "Faltas"],
   ["FOUL_DRAWN", "Faltas sofridas"],
   ["SUB", "Substituições"],
+  ["TIMEOUT", "Descontos de tempo"],
 ];
 
-export interface LogFilter { side: "all" | "us" | "opp"; player: ID | "all"; type: TypeFilter }
+export interface LogFilter { side: "all" | "us" | "opp"; player: ID | "all"; type: TypeFilter; tag: PlayTag | "all" }
 
 export function readFilterFromUrl(): Partial<LogFilter> & { autoplay?: boolean } {
   if (typeof window === "undefined") return {};
@@ -38,12 +40,15 @@ export function readFilterFromUrl(): Partial<LogFilter> & { autoplay?: boolean }
   if (side === "us" || side === "opp") out.side = side;
   if (q.get("jogador")) out.player = q.get("jogador")!;
   if (q.get("tipo")) out.type = q.get("tipo") as TypeFilter;
+  const tag = q.get("contexto");
+  if (tag && PLAY_TAGS.some((t) => t.id === tag)) out.tag = tag as PlayTag;
   if (q.get("play") === "1") out.autoplay = true;
   return out;
 }
 
 function matches(e: GameEvent, f: LogFilter) {
-  if (e.type === "PERIOD_START") return f.type === "all" && f.player === "all";
+  if (e.type === "PERIOD_START" || e.type === "PERIOD_END") return f.type === "all" && f.player === "all" && f.tag === "all";
+  if (f.tag !== "all" && !e.meta?.tags?.includes(f.tag)) return false;
   if (f.side !== "all" && e.side !== f.side) return false;
   if (f.player !== "all" && e.playerId !== f.player && e.meta?.in !== f.player && e.meta?.out !== f.player) return false;
   if (f.type === "all") return true;
@@ -63,13 +68,13 @@ export function EventLog({
   readOnly?: boolean;
 }) {
   const [init] = useState(readFilterFromUrl);
-  const [f, setF] = useState<LogFilter>({ side: init.side ?? "all", player: init.player ?? "all", type: init.type ?? "all" });
+  const [f, setF] = useState<LogFilter>({ side: init.side ?? "all", player: init.player ?? "all", type: init.type ?? "all", tag: init.tag ?? "all" });
   const [editing, setEditing] = useState<ID | null>(null);
   const [clip, setClip] = useState<number | null>(null); // index in playlist while playing
   const autoplayed = useRef(false);
 
   const list = useMemo(() => events.filter((e) => matches(e, f)), [events, f]);
-  const playlist = useMemo(() => list.filter((e) => e.type !== "PERIOD_START"), [list]);
+  const playlist = useMemo(() => list.filter((e) => e.type !== "PERIOD_START" && e.type !== "PERIOD_END"), [list]);
   const shown = [...list].reverse();
 
   const playAt = (i: number) => {
@@ -98,7 +103,7 @@ export function EventLog({
     return () => clearTimeout(t);
   });
 
-  const filtered = f.side !== "all" || f.player !== "all" || f.type !== "all";
+  const filtered = f.side !== "all" || f.player !== "all" || f.type !== "all" || f.tag !== "all";
 
   return (
     <div className="card mt-3">
@@ -117,6 +122,10 @@ export function EventLog({
         </select>
         <select className="input w-auto py-1 text-xs" value={f.type} onChange={(e) => setF({ ...f, type: e.target.value as TypeFilter })} aria-label="Filtrar tipo">
           {TYPE_OPTIONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+        </select>
+        <select className="input w-auto py-1 text-xs" value={f.tag} onChange={(e) => setF({ ...f, tag: e.target.value as LogFilter["tag"] })} aria-label="Filtrar contexto">
+          <option value="all">Todos os contextos</option>
+          {PLAY_TAGS.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
         </select>
         {clip === null ? (
           <button className="btn btn-primary py-1 text-xs" disabled={!playlist.length} onClick={() => playAt(0)} title="Vê todas as jogadas filtradas seguidas">
@@ -145,8 +154,9 @@ export function EventLog({
                 <span className={`w-24 shrink-0 truncate sm:w-36 ${e.side === "opp" ? "text-opp" : ""}`}>
                   {e.type === "SUB" || e.type === "PERIOD_START" ? "" : e.side === "opp" ? "Adversário" : name(e.playerId)}
                 </span>
-                <span className="flex-1 truncate text-muted">
+                <span className="min-w-0 flex-1 truncate text-muted">
                   {describe(e, name)}{e.type === "SHOT" && e.x === undefined ? " · sem local" : ""}
+                  {e.meta?.tags?.map((t) => <span key={t} className="ml-1.5 rounded-full border border-brand/40 px-1.5 text-[10px] text-brand">{TAG_LABEL[t]}</span>)}
                 </span>
                 {!readOnly && <><button onClick={() => setEditing(editing === e.id ? null : e.id)} className={`${editing === e.id ? "visible text-brand" : "invisible pointer-coarse:visible"} -my-1.5 grid h-8 w-7 shrink-0 place-items-center text-muted hover:text-fg group-hover:visible`} title="Editar" aria-label="Editar">✎</button>
                 <button onClick={async () => { if (!matchMedia("(pointer: coarse)").matches || await ask("Apagar este evento?", { confirmText: "Apagar", danger: true })) void db.events.delete(e.id); }} className="invisible -my-1.5 grid h-8 w-7 shrink-0 place-items-center text-muted hover:text-bad group-hover:visible pointer-coarse:visible" title="Apagar" aria-label="Apagar">✕</button></>}
@@ -170,11 +180,11 @@ function EventEditor({ e, players, now, onClose }: { e: GameEvent; players: Play
   const on = "border-brand bg-brand/15 text-brand";
   const off = "border-line text-muted hover:text-fg";
 
-  if (e.type === "PERIOD_START") {
+  if (e.type === "PERIOD_START" || e.type === "PERIOD_END") {
     return (
       <div className="border-b border-line bg-bg/60 px-3 py-2 text-xs text-muted">
         <TimeRow e={e} now={now} upd={upd} />
-        <p className="mt-2">Para mudar o 5 do período, apaga este evento e define-o de novo no painel.</p>
+        {e.type === "PERIOD_START" && <p className="mt-2">Para mudar o 5 do período, apaga este evento e define-o de novo no painel.</p>}
         <button className="btn mt-2 py-1 text-xs" onClick={onClose}>Fechar</button>
       </div>
     );
@@ -182,7 +192,13 @@ function EventEditor({ e, players, now, onClose }: { e: GameEvent; players: Play
 
   return (
     <div className="grid gap-2 border-b border-line bg-bg/60 px-3 py-2 text-xs">
-      {e.type === "SUB" ? (
+      {e.type === "TIMEOUT" ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-muted">Desconto pedido por</span>
+          <button className={`${seg} ${e.side === "us" ? on : off}`} onClick={() => upd({ side: "us" })}>Nós</button>
+          <button className={`${seg} ${e.side === "opp" ? "border-opp bg-opp/15 text-opp" : off}`} onClick={() => upd({ side: "opp" })}>Adversário</button>
+        </div>
+      ) : e.type === "SUB" ? (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted">Entra</span>
           <select className="input w-auto py-1 text-xs" value={e.meta?.in} onChange={(ev) => meta({ in: ev.target.value })}>
@@ -230,6 +246,12 @@ function EventEditor({ e, players, now, onClose }: { e: GameEvent; players: Play
           {e.type === "SHOT" && e.x !== undefined && (
             <button className={`${seg} ${off}`} onClick={() => upd({ x: undefined, y: undefined })}>Limpar local</button>
           )}
+        </div>
+      )}
+      {e.type !== "SUB" && e.type !== "TIMEOUT" && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-muted">Contexto</span>
+          <TagPicker compact value={e.meta?.tags ?? []} onToggle={(t) => meta({ tags: toggleTag(e.meta?.tags, t) })} />
         </div>
       )}
       <TimeRow e={e} now={now} upd={upd} />

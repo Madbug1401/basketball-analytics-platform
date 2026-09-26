@@ -6,6 +6,7 @@ import { useSeason, type SeasonData } from "@/lib/season";
 import { BoxTable, sortRows } from "@/components/BoxScore";
 import { Trend } from "@/components/Trend";
 import { Kpi } from "@/components/Kpi";
+import { ContextTable } from "@/components/ContextTable";
 import { fmtPct, possessions, reb } from "@/lib/stats";
 
 export default function SeasonStats() {
@@ -80,6 +81,8 @@ export default function SeasonStats() {
         <h2 className="mb-3 text-lg font-semibold">Jogadores</h2>
         <BoxTable rows={rows} total={s.team} perGame={mode === "avg"} />
       </section>
+
+      <ContextTable events={s.games.flatMap((g) => g.events)} opponent="Adversários" />
 
       <section className="card overflow-x-auto">
         <div className="border-b border-line px-3 py-2"><h2 className="font-semibold">Assiduidade × produção</h2></div>

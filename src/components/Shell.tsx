@@ -8,6 +8,7 @@ import { AuthProvider, useAccess, useAuth, ROLE_LABEL } from "@/lib/auth";
 import { db, importAll, uid } from "@/lib/db";
 import { syncStore, syncNow } from "@/lib/sync";
 import { AuthScreen, JoinWithCode } from "./AuthScreen";
+import { OfflineBar, ServiceWorker } from "./Offline";
 import { ask, notify, DialogHost } from "@/components/Dialog";
 
 type NavItem = { href: string; label: string; staff?: boolean };
@@ -18,6 +19,7 @@ const NAV: NavItem[] = [
   { href: "/jogos", label: "Jogos" },
   { href: "/adversarios", label: "Adversários" },
   { href: "/estatisticas", label: "Estatísticas" },
+  { href: "/objetivos", label: "Objetivos" },
   { href: "/definicoes", label: "Definições" },
 ];
 
@@ -30,6 +32,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <TeamProvider>
         <Inner>{children}</Inner>
         <DialogHost />
+        <ServiceWorker />
       </TeamProvider>
     </AuthProvider>
   );
@@ -102,10 +105,11 @@ function Inner({ children }: { children: ReactNode }) {
             ))}
           </nav>
           {!team && <span className="flex-1" />}
-          {teamSelect("hidden w-auto max-w-52 lg:block")}
+          {teamSelect("hidden w-auto max-w-64 lg:block")}
           {mode === "cloud" && <SyncBadge />}
           {mode === "cloud" && <UserMenu role={team ? ROLE_LABEL[access.role] : undefined} />}
         </div>
+        <OfflineBar />
       </header>
 
       {menu && (

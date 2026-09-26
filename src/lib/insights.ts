@@ -1,5 +1,6 @@
 import type { Game, GameEvent, ID, Player } from "./types";
-import { eff, pointsOf, reb, sortEvents, walk, type GameStats, type Line } from "./stats";
+import { eff, pointsOf, ppp, reb, sortEvents, tagStats, walk, type GameStats, type Line } from "./stats";
+import { PLAY_TAGS } from "./types";
 import { zoneOf } from "./court";
 
 export interface Insight {
@@ -126,7 +127,24 @@ export function gameInsights(
     if (worst !== best && worst.pf - worst.pa < 0) out.push({ tone: "bad", title: `Quinteto a rever: ${label(worst.ids)}`, text: `${worst.pf - worst.pa} (${worst.pf}–${worst.pa}) em campo.` });
   }
 
-  // 9. data quality
+  // 9. play context (only when the analyst tagged enough plays)
+  for (const side of ["us", "opp"] as const) {
+    const ts = tagStats(events, side);
+    if (ts.tagged < 8) continue;
+    const big = ts.tags.filter((t) => t.plays >= 4);
+    const label = (id: string) => PLAY_TAGS.find((t) => t.id === id)?.label.toLowerCase() ?? id;
+    if (side === "us") {
+      const best = [...big].sort((a, b) => b.pts / b.plays - a.pts / a.plays)[0];
+      const worst = [...big].sort((a, b) => a.pts / a.plays - b.pts / b.plays)[0];
+      if (best && best.pts / best.plays >= 1.1) out.push({ tone: "good", title: `Funcionou: ${label(best.tag)}`, text: `${best.pts} pts em ${Math.round(best.plays)} jogadas (${ppp(best)} por jogada).`, clips: clip({ lado: "us", contexto: best.tag }) });
+      if (worst && worst !== best && worst.pts / worst.plays <= 0.7) out.push({ tone: "bad", title: `Pouco eficaz: ${label(worst.tag)}`, text: `${worst.pts} pts em ${Math.round(worst.plays)} jogadas (${ppp(worst)} por jogada)${worst.tov ? `, ${worst.tov} perdas` : ""}.`, clips: clip({ lado: "us", contexto: worst.tag }) });
+    } else {
+      const hurt = [...big].sort((a, b) => b.pts - a.pts)[0];
+      if (hurt && hurt.pts >= 10) out.push({ tone: "bad", title: `O adversário marcou em ${label(hurt.tag)}`, text: `${hurt.pts} pts sofridos nesse tipo de jogada (${ppp(hurt)} por jogada).`, clips: clip({ lado: "opp", contexto: hurt.tag }) });
+    }
+  }
+
+  // 10. data quality
   const noLoc = events.filter((e) => e.side === "us" && e.type === "SHOT" && e.x === undefined).length;
   let hasLineup = false;
   walk(events, (_e, on) => { if (on.length) hasLineup = true; });

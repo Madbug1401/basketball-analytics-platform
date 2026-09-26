@@ -12,7 +12,14 @@ const COLUMNS: Record<SyncedTable, string[]> = {
   attendance: ["id", "teamId", "practiceId", "playerId", "status", "note"],
   games: ["id", "teamId", "date", "opponent", "home", "competition", "periods", "periodMinutes", "video", "createdAt"],
   events: ["id", "teamId", "gameId", "side", "playerId", "type", "period", "videoTs", "x", "y", "meta", "createdAt"],
+  goals: ["id", "teamId", "playerId", "metric", "target", "title", "dueDate", "active", "createdAt"],
 };
+// tables added after the first release: if the server hasn't been migrated yet, skip them
+// quietly (their changes stay queued) instead of breaking the whole sync
+const OPTIONAL: SyncedTable[] = ["goals"];
+const missingTable = (e: { code?: string; message?: string } | null) =>
+  !!e && (e.code === "PGRST205" || e.code === "42P01" || /could not find the table|does not exist/i.test(e.message ?? ""));
+const unavailable = new Set<SyncedTable>();
 // coach notes live in separate tables that players cannot read
 const PRIVATE: Partial<Record<SyncedTable, { table: string; key: string }>> = {
   players: { table: "players_private", key: "player_id" },
@@ -155,6 +162,7 @@ async function flush() {
   }
 
   const rejected: string[] = [];
+  const skipped = new Set<SyncedTable>();
 
   for (const table of SYNCED_TABLES) {
     const ids = ups.get(table);
@@ -165,6 +173,7 @@ async function flush() {
       const { error } = await client.from(table).upsert(chunk.map((o) => toRow(table, o)), { onConflict: "id" });
       if (error) {
         if (isNetworkError(error)) throw error;
+        if (OPTIONAL.includes(table) && missingTable(error)) { unavailable.add(table); skipped.add(table); break; }
         // permission / validation problems: don't retry forever
         rejected.push(`${table}: ${error.message}`);
         continue;
@@ -185,12 +194,14 @@ async function flush() {
       const { error } = await client.from(table).delete().in("id", ids.slice(i, i + 100));
       if (error) {
         if (isNetworkError(error)) throw error;
+        if (OPTIONAL.includes(table) && missingTable(error)) { unavailable.add(table); skipped.add(table); break; }
         rejected.push(`${table}: ${error.message}`);
       }
     }
   }
 
-  await db.outbox.where("seq").belowOrEqual(maxSeq).delete();
+  // entries of tables the server doesn't have yet stay queued for after the migration
+  await db.outbox.where("seq").belowOrEqual(maxSeq).and((e) => !skipped.has(e.table)).delete();
   if (rejected.length) setStatus({ error: `Algumas alterações foram recusadas pelo servidor (${rejected[0]})` });
 }
 
@@ -247,10 +258,17 @@ async function pull() {
   const knownTeams = serverTeamIds.filter((id) => !newTeams.includes(id));
 
   for (const table of SYNCED_TABLES.filter((t) => t !== "teams")) {
-    const rows = [
-      ...(await fetchAll(table, since[table] ?? null, knownTeams)),
-      ...(await fetchAll(table, null, newTeams)),
-    ];
+    let rows: Record<string, unknown>[];
+    try {
+      rows = [
+        ...(await fetchAll(table, since[table] ?? null, knownTeams)),
+        ...(await fetchAll(table, null, newTeams)),
+      ];
+      unavailable.delete(table);
+    } catch (e) {
+      if (OPTIONAL.includes(table) && missingTable(e as { code?: string; message?: string })) { unavailable.add(table); continue; }
+      throw e;
+    }
     if (rows.length) {
       nextSince[table] = maxTs(rows, since[table]);
       await localOnly([table], async () => {

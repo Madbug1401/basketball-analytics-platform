@@ -20,6 +20,16 @@ const rnd = () => {
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 };
 const chance = (p) => rnd() < p;
+// contexto das jogadas (etiquetas): o analista marca ~55% das jogadas
+const TAGS = [["transicao", 0.22], ["pnr", 0.24], ["iso", 0.16], ["poste", 0.1], ["bloqueio", 0.12], ["zona", 0.1], ["pressao", 0.06]];
+const TAG_BONUS = { transicao: 0.12, pnr: 0.03, iso: -0.07, poste: 0.02, bloqueio: 0.04, zona: -0.05, pressao: -0.08, segunda: 0.06 };
+function playTag(attempt) {
+  if (!chance(0.55)) return null;
+  if (attempt > 0) return "segunda";
+  let x = rnd();
+  for (const [t, w] of TAGS) { if ((x -= w) <= 0) return t; }
+  return "pnr";
+}
 const between = (a, b) => a + rnd() * (b - a);
 const int = (a, b) => Math.floor(between(a, b + 1));
 const pickW = (items, w) => {
@@ -184,7 +194,8 @@ SCHEDULE.forEach(([date, opponent, home, strength], gi) => {
       if (chance(tovRate)) {
         if (us) {
           const p = pickW(onCourt, (p) => sk(p).tov * sk(p).usage);
-          ev({ side: "us", playerId: p.id, type: "TOV", period });
+          const tt = chance(0.5) ? (chance(0.5) ? "pressao" : "transicao") : null;
+          ev({ side: "us", playerId: p.id, type: "TOV", period, ...(tt ? { meta: { tags: [tt] } } : {}) });
           if (chance(0.5)) ev({ side: "opp", type: "STL", period });
         } else {
           ev({ side: "opp", type: "TOV", period });
@@ -229,9 +240,10 @@ SCHEDULE.forEach(([date, opponent, home, strength], gi) => {
         const loc = shotLoc(pts, shooter);
         const paint = pts === 2 && loc.x >= 5.05 && loc.x <= 9.95 && loc.y <= 5.8;
         const zoneAdj = pts === 3 ? 0 : paint ? 0.07 : -0.1; // perto do cesto entra mais
-        const pMake = (us ? (pts === 3 ? s.p3 : s.p2) : (pts === 3 ? 0.28 : 0.44) * strength) + zoneAdj;
+        const tag = playTag(attempt);
+        const pMake = (us ? (pts === 3 ? s.p3 : s.p2) : (pts === 3 ? 0.28 : 0.44) * strength) + zoneAdj + (tag ? TAG_BONUS[tag] ?? 0 : 0);
         const made = chance(pMake);
-        ev({ side: us ? "us" : "opp", playerId: shooter?.id, type: "SHOT", period, meta: { pts, made }, ...loc });
+        ev({ side: us ? "us" : "opp", playerId: shooter?.id, type: "SHOT", period, meta: { pts, made, ...(tag ? { tags: [tag] } : {}) }, ...loc });
 
         // desarme (só nos 2 pontos falhados)
         if (!made && pts === 2 && chance(0.12)) {
@@ -274,11 +286,24 @@ SCHEDULE.forEach(([date, opponent, home, strength], gi) => {
   }
 });
 
+// objetivos de exemplo
+const now0 = Date.parse("2026-10-01T12:00:00Z");
+const g = (i, o) => ({ id: uuid(), teamId, active: true, createdAt: now0 + i, ...o });
+const goals = [
+  g(1, { metric: "tov", target: 15, title: "Menos de 15 perdas por jogo" }),
+  g(2, { metric: "opp_pts", target: 55 }),
+  g(3, { metric: "wins", target: 7, dueDate: "2027-03-31" }),
+  g(4, { playerId: players[0].id, metric: "ast", target: 4 }),
+  g(5, { playerId: players[1].id, metric: "ft_pct", target: 70 }),
+  g(6, { playerId: players[2].id, metric: "pts", target: 12 }),
+  g(7, { playerId: players[3].id, metric: "att_pct", target: 90 }),
+];
+
 const data = {
   app: "basketball-analytics", version: 1, exportedAt: new Date().toISOString(), demo: true,
-  teams: [team], players, practices, attendance, games, events,
+  teams: [team], players, practices, attendance, games, events, goals,
 };
 
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, JSON.stringify(data, null, 1));
-console.log(`✓ ${OUT}: ${players.length} jogadores, ${practices.length} treinos, ${games.length} jogos, ${events.length} eventos`);
+console.log(`✓ ${OUT}: ${players.length} jogadores, ${practices.length} treinos, ${games.length} jogos, ${events.length} eventos, ${goals.length} objetivos`);

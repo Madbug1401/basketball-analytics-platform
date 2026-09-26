@@ -82,7 +82,9 @@ export type EventType =
   | "FOUL"
   | "FOUL_DRAWN"
   | "SUB" // meta.in, meta.out (player ids)
-  | "PERIOD_START"; // meta.lineup: player ids on court
+  | "PERIOD_START" // meta.lineup: player ids on court
+  | "PERIOD_END" // live mode: the period clock reached 0
+  | "TIMEOUT"; // side = who called it
 
 export interface GameEvent {
   id: ID;
@@ -103,7 +105,44 @@ export interface GameEvent {
     out?: ID;
     lineup?: ID[];
     linkedTo?: ID; // e.g. an assist linked to the shot it created
+    tags?: PlayTag[]; // play context (transition, pick & roll…)
   };
+  createdAt: number;
+}
+
+/* ---------- play context ---------- */
+
+export type PlayTag = "transicao" | "pnr" | "iso" | "poste" | "segunda" | "bloqueio" | "zona" | "pressao";
+
+export const PLAY_TAGS: { id: PlayTag; label: string; short: string }[] = [
+  { id: "transicao", label: "Contra-ataque / transição", short: "Transição" },
+  { id: "pnr", label: "Pick & roll", short: "Pick & roll" },
+  { id: "iso", label: "Isolamento / 1x1", short: "1x1" },
+  { id: "poste", label: "Jogo de poste", short: "Poste" },
+  { id: "segunda", label: "2.ª oportunidade (após ressalto of.)", short: "2.ª oport." },
+  { id: "bloqueio", label: "Saída de bloqueio / sem bola", short: "Sem bola" },
+  { id: "zona", label: "Contra defesa à zona", short: "Vs zona" },
+  { id: "pressao", label: "Contra pressão", short: "Vs pressão" },
+];
+export const TAG_LABEL = Object.fromEntries(PLAY_TAGS.map((t) => [t.id, t.short])) as Record<PlayTag, string>;
+
+/* ---------- goals ---------- */
+
+export type GoalMetric =
+  | "pts" | "reb" | "oreb" | "ast" | "stl" | "blk" | "tov" | "eff" | "p3m" // per game
+  | "fg_pct" | "p3_pct" | "ft_pct" // percentages
+  | "att_pct" // practice attendance (players)
+  | "opp_pts" | "wins"; // team only
+
+export interface Goal {
+  id: ID;
+  teamId: ID;
+  playerId?: ID; // undefined = team goal
+  metric: GoalMetric;
+  target: number;
+  title?: string;
+  dueDate?: string; // YYYY-MM-DD
+  active: boolean;
   createdAt: number;
 }
 

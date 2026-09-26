@@ -137,6 +137,21 @@ create table if not exists public.events (
 create index if not exists events_team_updated on public.events(team_id, updated_at);
 create index if not exists events_game on public.events(game_id);
 
+-- objetivos individuais (player_id) ou da equipa (player_id nulo)
+create table if not exists public.goals (
+  id uuid primary key default gen_random_uuid(),
+  team_id uuid not null references public.teams(id) on delete cascade,
+  player_id uuid references public.players(id) on delete cascade,
+  metric text not null,
+  target double precision not null,
+  title text,
+  due_date text,
+  active boolean not null default true,
+  created_at bigint not null default 0,
+  updated_at timestamptz not null default now()
+);
+create index if not exists goals_team on public.goals(team_id, updated_at);
+
 -- convites (código de 6 caracteres)
 create table if not exists public.invites (
   code text primary key,
@@ -216,7 +231,7 @@ end $$;
 do $$
 declare t text;
 begin
-  foreach t in array array['teams','players','players_private','practices','attendance','games','games_private','events'] loop
+  foreach t in array array['teams','players','players_private','practices','attendance','games','games_private','events','goals'] loop
     execute format('drop trigger if exists touch_%1$s on public.%1$s', t);
     execute format('create trigger touch_%1$s before insert or update on public.%1$s for each row execute function public.touch_updated_at()', t);
     execute format('drop trigger if exists tomb_%1$s on public.%1$s', t);
@@ -260,6 +275,7 @@ alter table public.attendance enable row level security;
 alter table public.games enable row level security;
 alter table public.games_private enable row level security;
 alter table public.events enable row level security;
+alter table public.goals enable row level security;
 alter table public.invites enable row level security;
 alter table public.tombstones enable row level security;
 
@@ -308,6 +324,13 @@ create policy attendance_select on public.attendance for select using (
 create policy attendance_write on public.attendance for insert with check (public.is_staff(team_id));
 create policy attendance_update on public.attendance for update using (public.is_staff(team_id));
 create policy attendance_delete on public.attendance for delete using (public.is_staff(team_id));
+
+-- objetivos: staff gere; o jogador vê os da equipa e os seus
+create policy goals_select on public.goals for select using (
+  public.is_staff(team_id) or (public.is_member(team_id) and (player_id is null or player_id = public.my_player_id(team_id))));
+create policy goals_write on public.goals for insert with check (public.is_staff(team_id));
+create policy goals_update on public.goals for update using (public.is_staff(team_id));
+create policy goals_delete on public.goals for delete using (public.is_staff(team_id));
 
 create policy invites_select on public.invites for select using (public.is_staff(team_id));
 create policy invites_delete on public.invites for delete using (public.is_staff(team_id));

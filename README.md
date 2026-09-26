@@ -20,17 +20,22 @@ Precisas do Node 20 ou mais recente.
 
 ## Dados de teste
 
-`dados-teste/abc-sub16-demo.json` tem uma época fictícia do ABC Sub-16: 12 jogadores, cerca de 40 treinos com presenças e 10 jogos com todos os eventos (lançamentos com local, substituições, adversário). No primeiro ecrã, carrega em **importar uma cópia (.json)**; se já tens uma equipa, usa Definições → Importar.
+`dados-teste/abc-sub16-demo.json` tem uma época fictícia do ABC Sub-16: 12 jogadores, cerca de 40 treinos com presenças, 10 jogos com todos os eventos (lançamentos com local, substituições, adversário, contexto das jogadas) e 7 objetivos. No primeiro ecrã, carrega em **importar uma cópia (.json)**; se já tens uma equipa, usa Definições → Importar.
 
 Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/outra.json 42` (o último número é a seed).
 
-## O que já faz (v0.3)
+## O que já faz (v0.4)
 
 | Área | Funcionalidades |
 |---|---|
 | **Plantel** | Jogadores com nº, posição, ano, altura e notas; ativar/desativar; várias equipas |
 | **Treinos** | Criar treino, presenças (presente / atrasado / falta / justificada), intensidade, exercícios, assiduidade da época |
-| **Game Logger** | Vídeo do YouTube, MP4 local, link direto ou sem vídeo (cronómetro) · 5 inicial e substituições · atalhos de teclado · mapa de lançamentos (2/3 pontos detetado pela posição) · adversário · anular · "▶ ver jogada" em cada evento |
+| **Game Logger** | Vídeo do YouTube, MP4 local, link direto ou sem vídeo (cronómetro) · 5 inicial e substituições · atalhos de teclado · mapa de lançamentos (2/3 pontos detetado pela posição) · adversário · anular · "▶ ver jogada" em cada evento · contexto da jogada |
+| **Ao vivo (banco)** | Registo no telemóvel durante o jogo, sem vídeo: relógio de jogo (minutos exatos), 5 em campo com pontos e faltas, aviso na 4.ª e 5.ª falta, bónus, descontos de tempo (FIBA), fim de período e prolongamento, ecrã sempre ligado |
+| **Contexto das jogadas** | Etiquetas opcionais (transição, pick & roll, 1x1, poste, 2.ª oportunidade, sem bola, vs zona, vs pressão) · pontos por jogada em cada contexto, no jogo e na época · filtro e sequência de vídeo por contexto |
+| **Objetivos** | Metas da equipa e de cada jogador (pontos, ressaltos, perdas, %LL, assiduidade, vitórias…) com progresso automático e tendência dos últimos 3 jogos · o jogador vê os seus |
+| **Partilhar** | Imagem do jogo (1080×1350) com resultado, parciais, líderes e box score para WhatsApp/Instagram · resumo em texto |
+| **Offline** | A app abre e funciona sem internet (service worker); tudo fica no telemóvel e sincroniza quando voltar a ligação |
 | **Jogo** | Relatório automático (parciais decisivos, perdas, ressaltos, LL, quintetos, jogadores acima/abaixo da média) com "▶ ver jogadas" · parciais · box score com minutos estimados, +/-, eficiência · mapa de lançamentos · quintetos · imprimir em A4 |
 | **Vídeo** | Editar qualquer evento (✎) · filtrar por jogador/tipo e **ver a sequência** das jogadas (ex.: todas as perdas do #7) · links do relatório abrem a sequência certa |
 | **Adversários** | Registo contra cada equipa, onde lançam (mapa + zonas), médias por período, notas rápidas |

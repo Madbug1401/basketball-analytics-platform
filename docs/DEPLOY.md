@@ -80,3 +80,13 @@ Os dados da versão local ficam no browser, num endereço diferente (localhost).
 ## Como funciona o sync
 
 A app continua a guardar tudo primeiro no dispositivo (funciona sem internet no pavilhão) e envia para o Supabase em segundo plano. O ponto no topo mostra o estado: verde = tudo na cloud, azul = a enviar, laranja = offline (fica guardado e envia quando voltar a ligação).
+
+## Atualizações da base de dados
+
+Quando uma versão nova traz tabelas novas, há um ficheiro em `supabase/migrations/`. Corre-o uma vez no **SQL Editor** (pode correr-se mais do que uma vez sem estragar nada). Enquanto não correres, a app continua a funcionar: as alterações dessas tabelas ficam guardadas no dispositivo e são enviadas depois.
+
+| Ficheiro | O que traz |
+|---|---|
+| `2026-09-26-objetivos.sql` | Tabela `goals` (Objetivos) com permissões: staff gere, o jogador vê os da equipa e os seus |
+
+Uma instalação nova só precisa do `schema.sql` (já inclui tudo).
