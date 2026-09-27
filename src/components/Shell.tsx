@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode, type RefObject } from "react";
 import { TeamProvider, useTeam } from "@/lib/team";
 import { AuthProvider, useAccess, useAuth, ROLE_LABEL } from "@/lib/auth";
-import { db, importAll, uid } from "@/lib/db";
+import { db, importIntoTeam, uid } from "@/lib/db";
 import { syncStore, syncNow } from "@/lib/sync";
 import { AuthScreen, JoinWithCode } from "./AuthScreen";
 import { OfflineBar, ServiceWorker } from "./Offline";
@@ -338,9 +338,10 @@ export function CreateTeam({ onCreated, onCancel }: { onCreated: (id: string) =>
           if (!file) return;
           try {
             const data = JSON.parse(await file.text());
-            data.teams?.forEach((t: { id: string }) => markOwned(t.id));
-            await importAll(data);
-            if (data.teams?.[0]?.id) onCreated(data.teams[0].id);
+            // a new team (own ids) is created from the file, so it never clashes with earlier imports
+            const { teamId } = await importIntoTeam(data, team ?? null);
+            markOwned(teamId);
+            onCreated(teamId);
           } catch (err) { void notify(`Erro ao importar: ${(err as Error).message}`); }
         }} />
       </label>}

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { db, exportAll, importAll } from "@/lib/db";
+import { db, exportAll, importIntoTeam } from "@/lib/db";
 import { useTeam } from "@/lib/team";
 import { ROLE_LABEL, useAccess, useAuth, type Role } from "@/lib/auth";
 import { useTeamMembers } from "@/lib/members";
@@ -14,8 +14,8 @@ import { InviteDialog } from "@/components/InviteDialog";
 import { ask, notify } from "@/components/Dialog";
 
 export default function SettingsPage() {
-  const { team, teams, setTeamId } = useTeam();
-  const { mode, session, markOwned } = useAuth();
+  const { team, teams } = useTeam();
+  const { mode, session } = useAuth();
   const access = useAccess(team?.id);
   const [msg, setMsg] = useState("");
   const file = useRef<HTMLInputElement>(null);
@@ -32,15 +32,22 @@ export default function SettingsPage() {
   };
 
   const doImport = async (f: File) => {
+    if (!team) return;
     try {
       const data = JSON.parse(await f.text());
-      data.teams?.forEach((t: { id: string }) => markOwned(t.id));
-      await importAll(data);
-      const imported = data.teams?.[0];
-      if (imported?.id) {
-        setTeamId(imported.id);
-        setMsg(`Importado: ${imported.name} ${imported.category} · ${imported.season} (${data.games?.length ?? 0} jogos, ${data.events?.length ?? 0} eventos). Esta equipa ficou selecionada.`);
-      } else setMsg("Dados importados com sucesso.");
+      if (data?.app !== "basketball-analytics") throw new Error("Este ficheiro não é uma cópia do Courtside.");
+      const src = data.teams?.[0];
+      const existing = await db.players.where("teamId").equals(team.id).count();
+      const ok = await ask(
+        `Importar ${src ? `“${src.name} ${src.category} ${src.season}”` : "esta cópia"} para a equipa atual (${team.name} ${team.category} · ${team.season})?\n\n` +
+        `${data.players?.length ?? 0} jogadores, ${data.games?.length ?? 0} jogos e ${data.practices?.length ?? 0} treinos serão adicionados` +
+        (existing ? ` aos ${existing} jogadores que já lá estão (nada é apagado).` : "."),
+        { confirmText: "Importar" },
+      );
+      if (!ok) return;
+      setMsg("A importar…");
+      const { summary } = await importIntoTeam(data, team);
+      setMsg(`✓ Importado para ${team.name} ${team.category}: ${summary.players} jogadores, ${summary.games} jogos, ${summary.events} eventos, ${summary.practices} treinos.${mode === "cloud" ? " A enviar para a cloud…" : ""}`);
     } catch (e) {
       setMsg(`Erro: ${(e as Error).message}`);
     }

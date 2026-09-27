@@ -235,3 +235,52 @@ export async function importAll(data: Omit<Export, Optional> & Partial<Pick<Expo
     if (data.measurements?.length) await db.measurements.bulkPut(data.measurements);
   });
 }
+
+/* ---------- import into a team (new ids) ---------- */
+
+const ID_TABLES = ["players", "practices", "games", "events", "goals", "feedback", "drills", "scouting", "notes", "measurements"] as const;
+const DATA_TABLES = ["players", "practices", "attendance", "games", "events", "goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes", "wellness", "measurements"] as const;
+type DataTable = (typeof DATA_TABLES)[number];
+
+export interface ImportSummary { players: number; games: number; events: number; practices: number; total: number }
+
+/**
+ * Imports a backup (.json) INTO a team: every row gets a fresh id and points to that team, so the same
+ * file can be imported many times and never clashes with rows already on the server.
+ * Without a target team, a new team is created from the file's team info.
+ */
+export async function importIntoTeam(data: Record<string, unknown>, target: Team | null): Promise<{ teamId: string; summary: ImportSummary }> {
+  if (data?.app !== "basketball-analytics") throw new Error("Este ficheiro não é uma cópia do Courtside.");
+  const srcTeams = (data.teams as Team[] | undefined) ?? [];
+  const src = srcTeams[0];
+  const teamId = target?.id ?? uid();
+  const rowsOf = (t: DataTable) => ((data[t] as Record<string, unknown>[] | undefined) ?? []).filter((r) => !src || r.teamId === src.id);
+
+  // old id → new id, for every entity referenced by others
+  const map = new Map<string, string>();
+  if (src) map.set(src.id, teamId);
+  for (const t of ID_TABLES) for (const r of rowsOf(t)) map.set(String(r.id), uid());
+  for (const r of rowsOf("measurements")) if (r.sessionId && !map.has(String(r.sessionId))) map.set(String(r.sessionId), uid());
+
+  // replace ids anywhere: plain values, "a:b" composite ids, arrays, nested objects and object keys (rotation)
+  const swap = (s: string) => map.get(s) ?? (s.includes(":") ? s.split(":").map((p) => map.get(p) ?? p).join(":") : s);
+  const remap = (v: unknown): unknown => {
+    if (typeof v === "string") return swap(v);
+    if (Array.isArray(v)) return v.map(remap);
+    if (v && typeof v === "object") return Object.fromEntries(Object.entries(v).map(([k, x]) => [swap(k), remap(x)]));
+    return v;
+  };
+
+  const out = Object.fromEntries(DATA_TABLES.map((t) => [t, rowsOf(t).map((r) => ({ ...(remap(r) as Record<string, unknown>), teamId }))])) as unknown as Record<DataTable, Record<string, unknown>[]>;
+  // agenda rows for games/practices whose id was remapped keep their link (id = game/practice id)
+  const tables = DATA_TABLES.map((t) => db.table(t));
+  await db.transaction("rw", [db.teams, ...tables], async () => {
+    if (!target) {
+      await db.teams.add({ id: teamId, name: src?.name ?? "Equipa", category: src?.category ?? "", gender: src?.gender ?? "M", season: src?.season ?? "", createdAt: Date.now() });
+    }
+    for (const t of DATA_TABLES) if (out[t].length) await db.table(t).bulkAdd(out[t]);
+  });
+  // the roster height follows the latest measured height (already true in the file); nothing else to fix
+  const total = DATA_TABLES.reduce((a, t) => a + out[t].length, 0);
+  return { teamId, summary: { players: out.players.length, games: out.games.length, events: out.events.length, practices: out.practices.length, total } };
+}
