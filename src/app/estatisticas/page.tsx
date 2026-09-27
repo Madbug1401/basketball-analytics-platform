@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTeam } from "@/lib/team";
 import { useSeason, type SeasonData } from "@/lib/season";
 import { BoxTable, sortRows } from "@/components/BoxScore";
@@ -10,6 +10,8 @@ import { ContextTable } from "@/components/ContextTable";
 import { LineupAnalysis } from "@/components/LineupAnalysis";
 import { PossessionTable } from "@/components/PossessionTable";
 import { fmtPct, possessions, reb } from "@/lib/stats";
+import { ShooterTable, ShotQuality } from "@/components/ShotQuality";
+import { zoneModel } from "@/lib/shotQuality";
 
 export default function SeasonStats() {
   const { team } = useTeam();
@@ -87,6 +89,8 @@ export default function SeasonStats() {
       <LineupAnalysis season players={s.players}
         games={s.games.map((g) => ({ game: g.game, events: g.events, min: new Map([...g.stats.players].map(([id, l]) => [id, l.min])) }))} />
 
+      <SeasonShots s={s} />
+
       <div className="grid gap-4 lg:grid-cols-2">
         <PossessionTable games={s.games} opponent="Adversários" />
         <ContextTable events={s.games.flatMap((g) => g.events)} opponent="Adversários" />
@@ -114,5 +118,29 @@ export default function SeasonStats() {
         </table>
       </section>
     </div>
+  );
+}
+
+function SeasonShots({ s }: { s: SeasonData }) {
+  const [side, setSide] = useState<"us" | "opp">("us");
+  const all = useMemo(() => s.games.flatMap((g) => g.events), [s]);
+  const model = useMemo(() => zoneModel(all), [all]);
+  return (
+    <section className="grid gap-4 lg:grid-cols-[420px_1fr]">
+      <div className="card p-3">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <h2 className="font-semibold">Qualidade de lançamento</h2>
+          <select className="input w-auto py-1" value={side} onChange={(e) => setSide(e.target.value as "us" | "opp")} aria-label="Equipa">
+            <option value="us">Nós</option>
+            <option value="opp">Adversários</option>
+          </select>
+        </div>
+        <ShotQuality shots={all.filter((e) => e.type === "SHOT" && e.side === side)} model={model} opp={side === "opp"} />
+      </div>
+      <div className="card h-fit p-3">
+        <h2 className="mb-2 font-semibold">Quem lança bem</h2>
+        <ShooterTable events={all} model={model} players={s.players} />
+      </div>
+    </section>
   );
 }

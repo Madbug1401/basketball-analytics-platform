@@ -10,6 +10,8 @@ import { ACTIONS, timeoutBucket, timeoutsAllowed, type ActionDef } from "@/lib/a
 import { describe, pointsOf, sortEvents, walk } from "@/lib/stats";
 import type { EventType, Game, GameEvent, ID, Player, Side } from "@/lib/types";
 import { LineupPicker } from "@/components/LineupPicker";
+import { Court } from "@/components/Court";
+import { courtTime, liveAlerts } from "@/lib/rotation";
 import { TagPicker, toggleTag } from "@/components/TagPicker";
 import { ask, askText } from "@/components/Dialog";
 
@@ -163,6 +165,15 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
 
   const started = state.period > 0;
   const bench = players.filter((p) => !state.onCourt.includes(p.id));
+
+  /* rotation: minutes on court (game clock) and alerts vs the planned rotation */
+  const rotation = useLiveQuery(() => db.agenda.get(game.id), [game.id])?.rotation;
+  const nowTs = clock ? periodOffset(game, clock.period) + periodLength(game, clock.period) - remaining : undefined;
+  const ct = courtTime(sorted, game, nowTs);
+  const gameSecs = (pid: ID) => (ct.secs.get(pid) ?? []).reduce((a, b) => a + b, 0);
+  const alerts = started && !state.periodEnded
+    ? liveAlerts({ ct, game, period: state.period, remaining, rotation, fouls: state.fouls, bench: bench.map((p) => p.id) }).slice(0, 5)
+    : [];
   const toUsed = state.timeouts.get(timeoutBucket(state.period || 1, game.periods)) ?? { us: 0, opp: 0 };
   const toMax = timeoutsAllowed(state.period || 1, game.periods);
   const finished = state.periodEnded && state.period >= game.periods && state.us !== state.opp;
@@ -390,6 +401,22 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
               {flash && <div className="mt-0.5 text-xs text-muted">✓ {flash}</div>}
             </div>
 
+            {alerts.length > 0 && (
+              <div className="rounded-lg border border-line bg-panel px-3 py-2 text-sm" aria-live="polite">
+                <div className="mb-1 flex items-center justify-between text-xs text-muted">
+                  <span>ROTAÇÃO{rotation ? "" : " · sem plano (define-o na página do jogo)"}</span>
+                </div>
+                <ul className="grid gap-1">
+                  {alerts.map((a, i) => (
+                    <li key={i} className="flex items-baseline gap-2">
+                      <span className={`h-2 w-2 shrink-0 rounded-full ${a.tone === "bad" ? "bg-bad" : a.tone === "warn" ? "bg-brand" : "bg-opp"}`} aria-hidden />
+                      <span><b>{name(a.playerId)}</b> <span className="text-muted">{a.text}</span></span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {/* on court */}
             <div>
               <div className="mb-1 flex items-center justify-between text-xs text-muted">
@@ -408,7 +435,7 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
                       className={`relative min-h-[4.5rem] rounded-xl border px-1 py-2 text-center ${out ? "border-bad bg-bad/15" : sel ? "border-brand bg-brand/15" : "border-line bg-panel active:bg-panel-2"}`}>
                       <div className="font-mono text-2xl font-bold leading-none">{p?.number ?? "–"}</div>
                       <div className="mt-1 truncate text-xs text-muted">{p?.name.split(" ")[0] ?? ""}</div>
-                      <div className="mt-0.5 text-[11px] text-muted">{pid ? `${state.pts.get(pid) ?? 0} pts` : ""}</div>
+                      <div className="mt-0.5 text-[11px] text-muted">{pid ? `${state.pts.get(pid) ?? 0} pts · ${Math.floor(gameSecs(pid) / 60)}'` : ""}</div>
                       {f > 0 && <div className={`absolute right-1.5 top-1 text-[10px] tracking-tighter ${f >= 4 ? "text-bad" : "text-muted"}`} aria-label={`${f} faltas`}>{"●".repeat(Math.min(f, 5))}</div>}
                     </button>
                   );
@@ -440,6 +467,15 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
                 </div>
                 <TagPicker compact value={tagLast.meta?.tags ?? []}
                   onToggle={(t) => db.events.update(tagLast.id, { meta: { ...(tagLast.meta ?? {}), tags: toggleTag(tagLast.meta?.tags, t) } })} />
+                {tagLast.type === "SHOT" && (
+                  <div className="mt-2">
+                    <div className="mb-1 text-xs text-muted">{tagLast.x === undefined ? "Onde foi o lançamento? Toca no campo (opcional)" : "Local marcado ✓ — toca para corrigir"}</div>
+                    <div className="mx-auto max-w-[260px]">
+                      <Court onPick={(x, y) => db.events.update(tagLast.id, { x, y })}
+                        shots={tagLast.x !== undefined ? [{ id: tagLast.id, x: tagLast.x, y: tagLast.y!, made: !!tagLast.meta?.made, side: tagLast.side }] : []} />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

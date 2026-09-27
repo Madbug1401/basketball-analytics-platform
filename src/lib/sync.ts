@@ -13,17 +13,18 @@ const COLUMNS: Record<SyncedTable, string[]> = {
   games: ["id", "teamId", "date", "opponent", "home", "competition", "periods", "periodMinutes", "video", "createdAt"],
   events: ["id", "teamId", "gameId", "side", "playerId", "type", "period", "videoTs", "x", "y", "meta", "createdAt"],
   goals: ["id", "teamId", "playerId", "metric", "target", "title", "dueDate", "active", "createdAt"],
-  agenda: ["id", "teamId", "kind", "time", "meetTime", "location", "callup", "published", "plan", "note"],
+  agenda: ["id", "teamId", "kind", "time", "meetTime", "location", "callup", "published", "plan", "note", "rotation"],
   rsvps: ["id", "teamId", "refId", "playerId", "status", "note", "answeredAt"],
-  feedback: ["id", "teamId", "playerId", "gameId", "clipStart", "clipEnd", "eventIds", "text", "author", "createdAt"],
+  feedback: ["id", "teamId", "playerId", "gameId", "clipStart", "clipEnd", "eventIds", "text", "author", "report", "createdAt"],
   seen: ["id", "teamId", "playerId", "seenAt"],
   drills: ["id", "teamId", "name", "focus", "minutes", "description", "createdAt"],
   scouting: ["id", "teamId", "name", "notes", "keyPlayers", "editedAt"],
   notes: ["id", "teamId", "gameId", "videoTs", "period", "text", "author", "createdAt"],
+  wellness: ["id", "teamId", "playerId", "kind", "refId", "date", "rpe", "minutes", "status", "note", "answeredAt"],
 };
 // tables added after the first release: if the server hasn't been migrated yet, skip them
 // quietly (their changes stay queued) instead of breaking the whole sync
-const OPTIONAL: SyncedTable[] = ["goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes"];
+const OPTIONAL: SyncedTable[] = ["goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes", "wellness"];
 const missingTable = (e: { code?: string; message?: string } | null) =>
   !!e && (e.code === "PGRST205" || e.code === "42P01" || /could not find the table|does not exist/i.test(e.message ?? ""));
 const unavailable = new Set<SyncedTable>();
@@ -107,6 +108,7 @@ export async function syncNow() {
     await pull();
     await refreshPending();
     setStatus({ state: "idle", lastSync: Date.now() });
+    void import("./push").then((m) => m.flushPush()); // queued notifications
   } catch (e) {
     await refreshPending();
     setStatus(isNetworkError(e) ? { state: "offline" } : { state: "error", error: (e as Error).message ?? String(e) });
@@ -134,6 +136,7 @@ export async function startSync(sb: SupabaseClient, uid: string) {
     window.addEventListener("focus", onWake);
   }
   await syncNow();
+  void import("./push").then((m) => m.refreshPushSubscription());
 }
 
 const onWake = () => scheduleSync(200);
@@ -177,7 +180,15 @@ async function flush() {
     const objs = (await db.table(table).bulkGet(ids)).filter(Boolean) as Record<string, unknown>[];
     for (let i = 0; i < objs.length; i += 500) {
       const chunk = objs.slice(i, i + 500);
-      const { error } = await client.from(table).upsert(chunk.map((o) => toRow(table, o)), { onConflict: "id" });
+      let rows = chunk.map((o) => toRow(table, o));
+      let { error } = await client.from(table).upsert(rows, { onConflict: "id" });
+      // server not migrated yet for a new column (e.g. agenda.rotation): send the row without it
+      for (let tries = 0; error && tries < 3; tries++) {
+        const col = (error.code === "PGRST204" || /column/i.test(error.message ?? "")) && error.message?.match(/'([a-z_]+)' column/)?.[1];
+        if (!col || !(col in rows[0])) break;
+        rows = rows.map((r) => Object.fromEntries(Object.entries(r).filter(([k]) => k !== col)));
+        ({ error } = await client.from(table).upsert(rows, { onConflict: "id" }));
+      }
       if (error) {
         if (isNetworkError(error)) throw error;
         if (OPTIONAL.includes(table) && missingTable(error)) { unavailable.add(table); skipped.add(table); break; }

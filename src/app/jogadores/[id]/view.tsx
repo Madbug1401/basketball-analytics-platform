@@ -5,9 +5,9 @@ import { useRouteId } from "@/lib/route";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { useSeason } from "@/lib/season";
-import { eff, fmtMin, fmtPct, reb, shotZones } from "@/lib/stats";
-import { ZONES } from "@/lib/court";
-import { Court } from "@/components/Court";
+import { eff, fmtMin, fmtPct, reb } from "@/lib/stats";
+import { ShotQuality } from "@/components/ShotQuality";
+import { zoneModel } from "@/lib/shotQuality";
 import { Trend } from "@/components/Trend";
 import { Kpi } from "@/components/Kpi";
 import { GoalCard } from "@/components/Goals";
@@ -29,7 +29,6 @@ export function PlayerPage() {
   const pg = (v: number) => (gp ? (v / gp).toFixed(1) : "–");
   const log = s.games.map(({ game, stats }) => ({ game, l: stats.players.get(id) })).filter((r) => r.l?.gp);
   const shots = s.games.flatMap((g) => g.events).filter((e) => e.type === "SHOT" && e.playerId === id);
-  const zones = shotZones(shots);
   const att = s.attendancePct.get(id);
 
   return (
@@ -82,15 +81,7 @@ export function PlayerPage() {
         </div>
         <div className="card p-3">
           <h2 className="mb-2 font-semibold">Lançamentos na época</h2>
-          <Court shots={shots.filter((e) => e.x !== undefined).map((e) => ({ id: e.id, x: e.x!, y: e.y!, made: !!e.meta?.made }))} />
-          <table className="tbl mt-2">
-            <tbody>
-              {ZONES.map((z) => {
-                const a = zones.find((x) => x.zone === z);
-                return <tr key={z}><td>{z}</td><td>{a ? `${a.m}/${a.a}` : "0/0"}</td><td>{a ? fmtPct(a.m, a.a) : "–"}</td></tr>;
-              })}
-            </tbody>
-          </table>
+          <ShotQuality shots={shots} model={zoneModel(s.games.flatMap((g) => g.events))} />
         </div>
       </div>
 

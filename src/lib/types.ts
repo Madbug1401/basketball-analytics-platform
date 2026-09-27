@@ -160,7 +160,11 @@ export interface Agenda {
   published?: boolean; // call-up visible to players
   plan?: PlanItem[]; // practice plan
   note?: string; // message to the players
+  rotation?: Rotation; // games: planned minutes per player and period
 }
+
+/** Planned minutes per player, one number per regulation period. */
+export type Rotation = Record<ID, number[]>;
 
 export type RsvpStatus = "yes" | "maybe" | "no";
 
@@ -189,7 +193,45 @@ export interface Feedback {
   eventIds?: ID[];
   text: string;
   author?: string;
+  report?: PlayerReport; // post-game individual report
   createdAt: number;
+}
+
+export interface ReportClip { start: number; end: number; label: string }
+/** Snapshot of one player's game, sent as feedback (so it stays as it was when sent). */
+export interface PlayerReport {
+  gameId: ID;
+  opponent: string;
+  home: boolean;
+  date: string;
+  score: [number, number]; // us, them
+  line: { min: number; pts: number; reb: number; ast: number; stl: number; blk: number; tov: number; pf: number; fgm: number; fga: number; p3m: number; p3a: number; ftm: number; fta: number; pm: number; eff: number };
+  avg?: { pts: number; reb: number; ast: number; tov: number; eff: number; games: number }; // season average before this game
+  good?: ReportClip;
+  improve?: ReportClip;
+  goal?: { title: string; value: string; progress: number }; // progress 0..1
+  trend?: number[]; // efficiency in the last games (this one last)
+}
+
+/* ---------- training load & availability ---------- */
+
+export type Availability = "ok" | "limited" | "out";
+export const AVAILABILITY_LABEL: Record<Availability, string> = { ok: "Disponível", limited: "Condicionado", out: "Indisponível" };
+
+/** Player self-report. kind "session": effort (RPE) after a practice/game, id = `${refId}:${playerId}`.
+    kind "status": current availability, id = `status:${playerId}`. Players write their own; staff read all. */
+export interface Wellness {
+  id: ID;
+  teamId: ID;
+  playerId: ID;
+  kind: "session" | "status";
+  refId?: ID;
+  date: string; // YYYY-MM-DD
+  rpe?: number; // 1..10
+  minutes?: number;
+  status?: Availability;
+  note?: string;
+  answeredAt: number;
 }
 
 /** "Seen" receipt a player writes for a feedback item (id = feedback id). */

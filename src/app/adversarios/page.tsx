@@ -12,9 +12,9 @@ import { ImageShareDialog } from "@/components/ShareDialog";
 import type { Game, Scouting, Team } from "@/lib/types";
 import { useTeam } from "@/lib/team";
 import { useSeason, type SeasonData } from "@/lib/season";
-import { addLines, emptyLine, fmtPct, possessions, reb, shotZones } from "@/lib/stats";
-import { ZONES } from "@/lib/court";
-import { Court } from "@/components/Court";
+import { addLines, emptyLine, fmtPct, possessions, reb } from "@/lib/stats";
+import { ShotQuality } from "@/components/ShotQuality";
+import { zoneModel, type ZoneModel } from "@/lib/shotQuality";
 import { Kpi } from "@/components/Kpi";
 
 export default function Page() {
@@ -81,20 +81,19 @@ function OpponentsPage() {
         <div className="grid h-fit min-w-0 gap-4">
           <ScoutPanel key={current.name} name={current.name} team={team} season={s} games={extra.games}
             notes={extra.scouting.find((x) => x.name.trim().toLowerCase() === current.name.toLowerCase())} />
-          {current.games.length > 0 && <OpponentDetail o={current} />}
+          {current.games.length > 0 && <OpponentDetail o={current} model={zoneModel(s.games.flatMap((g) => g.events))} />}
         </div>
       )}
     </div>
   );
 }
 
-function OpponentDetail({ o }: { o: { name: string; games: SeasonData["games"]; w: number; l: number; pf: number; pa: number } }) {
+function OpponentDetail({ o, model }: { o: { name: string; games: SeasonData["games"]; w: number; l: number; pf: number; pa: number }; model: ZoneModel }) {
   const their = o.games.reduce((acc, g) => addLines(acc, { ...g.stats.opp }), emptyLine());
   const ours = o.games.reduce((acc, g) => addLines(acc, { ...g.stats.us }), emptyLine());
   const n = o.games.length;
   const avg = (v: number) => (v / n).toFixed(1);
   const shots = o.games.flatMap((g) => g.events).filter((e) => e.side === "opp" && e.type === "SHOT");
-  const zones = shotZones(shots);
   const byPeriod = [0, 1, 2, 3].map((i) => ({
     us: o.games.reduce((a, g) => a + (g.stats.byPeriod[i]?.us ?? 0), 0) / n,
     opp: o.games.reduce((a, g) => a + (g.stats.byPeriod[i]?.opp ?? 0), 0) / n,
@@ -118,17 +117,7 @@ function OpponentDetail({ o }: { o: { name: string; games: SeasonData["games"]; 
       <div className="grid gap-4 lg:grid-cols-[380px_1fr]">
         <div className="card p-3">
           <h3 className="mb-2 font-semibold">Onde lançam</h3>
-          <Court shots={shots.filter((e) => e.x !== undefined).map((e) => ({ id: e.id, x: e.x!, y: e.y!, made: !!e.meta?.made }))} />
-          <table className="tbl mt-2">
-            <thead><tr><th>Zona</th><th>% lanç.</th><th>C/T</th><th>%</th></tr></thead>
-            <tbody>
-              {ZONES.map((z) => {
-                const a = zones.find((x) => x.zone === z);
-                const share = a && shots.length ? Math.round((a.a / shots.filter((e) => e.x !== undefined).length) * 100) : 0;
-                return <tr key={z}><td>{z}</td><td className="text-muted">{share}%</td><td>{a ? `${a.m}/${a.a}` : "0/0"}</td><td>{a ? fmtPct(a.m, a.a) : "–"}</td></tr>;
-              })}
-            </tbody>
-          </table>
+          <ShotQuality shots={shots} model={model} opp />
         </div>
         <div className="grid h-fit gap-4">
           <div className="card overflow-x-auto">

@@ -34,7 +34,7 @@
 - [x] Planeador de treinos e biblioteca de exercícios
 - [x] Relatório de scouting pré-jogo
 - [x] Quintetos avançados (por 100 posses, com/sem, duplas/trios) e gestão de minutos
-- [ ] Notificações no telemóvel (push) para convocatórias e mensagens
+- [x] Notificações no telemóvel (push) para convocatórias e mensagens (v0.7)
 
 ## v0.6 — Basketball Intelligence (base)
 - [x] Motor de posses (derivado dos eventos) e métricas por posse
@@ -42,8 +42,16 @@
 - [x] Game plan com verificação automática
 - [x] Notas do treinador ligadas ao vídeo
 - [x] Timeline visual do jogo
-- [ ] Qualidade de lançamento (opcional, como etiqueta)
-- [ ] Planeador de rotações · assistente de IA sobre os dados
+- [x] Qualidade de lançamento (v0.7)
+- [x] Planeador de rotações (v0.7)
+- [ ] Assistente de IA sobre os dados
+
+## v0.7 — Treinar e comunicar melhor
+- [x] Qualidade de lançamento: zonas, pontos por lançamento vs esperado, seleção e acerto por jogador, mapa de zonas; local opcional no modo ao vivo
+- [x] Notificações push: convocatória publicada, mensagens/relatórios, game plan, "não posso ir" e indisponibilidade (para a equipa técnica)
+- [x] Planeador de rotações: minutos por período, tempo igual ou pela época, alertas no modo ao vivo, planeado vs real
+- [x] Relatório individual pós-jogo (números vs média, 2 jogadas, objetivo) enviado a todos de uma vez
+- [x] Carga de treino (esforço 1–10 × minutos, rácio 7 dias / 4 semanas) e disponibilidade na convocatória
 
 ## Fase 3: vídeo
 - [x] Clips/playlist: "todos os turnovers do #7" → sequência de jogadas (v0.2)

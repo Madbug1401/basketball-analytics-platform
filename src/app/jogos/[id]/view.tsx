@@ -6,10 +6,10 @@ import { useRouteId } from "@/lib/route";
 import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, deleteGame } from "@/lib/db";
-import { fmtPct, fmtTs, gameStats, possessions, reb, shotZones, type Line } from "@/lib/stats";
-import { Court } from "@/components/Court";
+import { fmtPct, fmtTs, gameStats, possessions, reb, type Line } from "@/lib/stats";
 import { BoxTable, sortRows } from "@/components/BoxScore";
-import { ZONES } from "@/lib/court";
+import { ShotQuality } from "@/components/ShotQuality";
+import { zoneModel } from "@/lib/shotQuality";
 import { gameInsights, type Insight } from "@/lib/insights";
 import { useSeason } from "@/lib/season";
 import { useAccess } from "@/lib/auth";
@@ -20,6 +20,8 @@ import { LineupAnalysis } from "@/components/LineupAnalysis";
 import { PossessionTable } from "@/components/PossessionTable";
 import { ReviewList } from "@/components/ReviewList";
 import { GamePlan } from "@/components/GamePlan";
+import { RotationPlanner } from "@/components/RotationPlanner";
+import { PlayerReports } from "@/components/PlayerReport";
 import { GameTimeline } from "@/components/GameTimeline";
 import { possessions as countPossessions } from "@/lib/possessions";
 import { reviewItems } from "@/lib/review";
@@ -43,6 +45,7 @@ export function GamePage() {
 
   const stats = useMemo(() => (data?.game ? gameStats(data.events!, data.game.periods, data.game.periodMinutes) : null), [data]);
   const [sharing, setSharing] = useState(false);
+  const model = useMemo(() => zoneModel([...(season?.games.flatMap((g) => (g.game.id === id ? [] : g.events)) ?? []), ...(data?.events ?? [])]), [season, data, id]);
   const notes = useLiveQuery(() => db.notes.where("gameId").equals(id).sortBy("videoTs"), [id]);
   const review = useMemo(() => (data?.game && data.events?.length ? reviewItems(countPossessions(data.events), data.events, data.players ?? [], data.game.periods) : []), [data]);
   const shareData = useMemo(() => {
@@ -59,7 +62,6 @@ export function GamePage() {
   const insights = events.length ? gameInsights(game, stats, events, players, seasonAvg) : [];
 
   const shotEvents = events.filter((e) => e.type === "SHOT" && (shotFilter === "opp" ? e.side === "opp" : shotFilter === "us" ? e.side === "us" : e.playerId === shotFilter));
-  const zones = shotZones(shotEvents);
 
 
   return (
@@ -93,6 +95,7 @@ export function GamePage() {
       </div>
 
       {events.length === 0 && <GamePlan game={game} events={events} canEdit={access.canEdit} />}
+      {events.length === 0 && <RotationPlanner game={game} events={events} canEdit={access.canEdit} />}
 
       {events.length === 0 ? (
         <div className="card p-10 text-center text-muted">
@@ -142,6 +145,8 @@ export function GamePage() {
           )}
 
           <GamePlan game={game} events={events} canEdit={access.canEdit} />
+          <RotationPlanner game={game} events={events} canEdit={access.canEdit} />
+          {access.canEdit && <PlayerReports game={game} events={events} players={players} />}
 
           {insights.length > 0 && <Report insights={insights} gameId={id} />}
 
@@ -158,31 +163,15 @@ export function GamePage() {
           <section className="grid gap-4 lg:grid-cols-[420px_1fr]">
             <div className="card p-3">
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                <h2 className="font-semibold">Mapa de lançamentos</h2>
-                <select className="input w-full py-1 sm:w-auto" value={shotFilter} onChange={(e) => setShotFilter(e.target.value)}>
+                <h2 className="font-semibold">Lançamentos e qualidade</h2>
+                <select className="input w-full py-1 sm:w-auto" value={shotFilter} onChange={(e) => setShotFilter(e.target.value)} aria-label="De quem">
                   <option value="us">Equipa</option>
                   {rows.map(({ p }) => <option key={p.id} value={p.id}>#{p.number} {p.name}</option>)}
                   <option value="opp">Adversário</option>
                 </select>
               </div>
-              <Court shots={shotEvents.filter((e) => e.x !== undefined).map((e) => ({ id: e.id, x: e.x!, y: e.y!, made: !!e.meta?.made, side: shotFilter === "opp" ? undefined : e.side }))} />
-              <table className="tbl mt-2">
-                <thead><tr><th>Zona</th><th>C/T</th><th>%</th></tr></thead>
-                <tbody>
-                  {ZONES.map((z) => {
-                    const a = zones.find((x) => x.zone === z);
-                    return <tr key={z}><td>{z}</td><td>{a ? `${a.m}/${a.a}` : "0/0"}</td><td>{a ? fmtPct(a.m, a.a) : "–"}</td></tr>;
-                  })}
-                </tbody>
-              </table>
-              <div className="mt-1 flex items-center justify-between text-[11px] text-muted">
-                <span>{shotEvents.filter((e) => e.x === undefined).length} lançamentos sem local marcado.</span>
-                {shotEvents.length > 0 && (
-                  <Link className="tap text-brand print:hidden" href={`/jogos/${id}/logger?${new URLSearchParams({ tipo: "SHOT", play: "1", ...(shotFilter === "us" || shotFilter === "opp" ? { lado: shotFilter } : { jogador: shotFilter }) })}`}>
-                    ▶ Ver estes lançamentos
-                  </Link>
-                )}
-              </div>
+              <ShotQuality shots={shotEvents} model={model} opp={shotFilter === "opp"}
+                clipsHref={`/jogos/${id}/logger?${new URLSearchParams({ tipo: "SHOT", play: "1", ...(shotFilter === "us" || shotFilter === "opp" ? { lado: shotFilter } : { jogador: shotFilter }) })}`} />
             </div>
 
             <LineupAnalysis games={[{ game, events }]} players={players} />

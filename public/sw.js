@@ -7,7 +7,7 @@ const CACHE = `courtside-${VERSION}`;
 
 // every page of the app; dynamic pages are served from one shell ("_") — they read the id from the URL
 const ROUTES = [
-  "/", "/agenda", "/equipa", "/treinos", "/treinos/exercicios", "/jogos", "/adversarios", "/estatisticas", "/objetivos", "/definicoes",
+  "/", "/agenda", "/equipa", "/treinos", "/treinos/exercicios", "/jogos", "/adversarios", "/estatisticas", "/objetivos", "/carga", "/definicoes",
   "/conta", "/convite", "/admin",
   "/jogos/_", "/jogos/_/logger", "/jogos/_/ao-vivo", "/treinos/_", "/jogadores/_",
 ];
@@ -110,4 +110,33 @@ self.addEventListener("fetch", (event) => {
 
 self.addEventListener("message", (event) => {
   if (event.data === "skip-waiting") self.skipWaiting();
+});
+
+/* ---------- push notifications ---------- */
+
+self.addEventListener("push", (event) => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch { d = { body: event.data ? event.data.text() : "" }; }
+  event.waitUntil(self.registration.showNotification(d.title || "Courtside", {
+    body: d.body || "",
+    icon: "/icon-192.png",
+    badge: "/icon-192.png",
+    tag: d.tag,
+    data: { url: d.url || "/" },
+  }));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = new URL((event.notification.data && event.notification.data.url) || "/", self.location.origin).href;
+  event.waitUntil((async () => {
+    const wins = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    for (const w of wins) {
+      if (new URL(w.url).origin !== self.location.origin) continue;
+      await w.focus();
+      if ("navigate" in w) { try { await w.navigate(url); } catch {} }
+      return;
+    }
+    await self.clients.openWindow(url);
+  })());
 });

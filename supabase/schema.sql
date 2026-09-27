@@ -164,6 +164,7 @@ create table if not exists public.agenda (
   published boolean,
   plan jsonb,
   note text,
+  rotation jsonb,
   updated_at timestamptz not null default now()
 );
 create index if not exists agenda_team on public.agenda(team_id, updated_at);
@@ -192,6 +193,7 @@ create table if not exists public.feedback (
   event_ids jsonb,
   text text not null default '',
   author text,
+  report jsonb,
   created_at bigint not null default 0,
   updated_at timestamptz not null default now()
 );
@@ -245,6 +247,33 @@ create table if not exists public.notes (
   updated_at timestamptz not null default now()
 );
 create index if not exists notes_team on public.notes(team_id, updated_at);
+
+-- carga de treino (esforço 1–10) e disponibilidade, respondidas pelo jogador
+create table if not exists public.wellness (
+  id text primary key,
+  team_id uuid not null references public.teams(id) on delete cascade,
+  player_id uuid not null references public.players(id) on delete cascade,
+  kind text not null check (kind in ('session','status')),
+  ref_id text,
+  date text not null,
+  rpe smallint check (rpe between 1 and 10),
+  minutes smallint,
+  status text check (status in ('ok','limited','out')),
+  note text,
+  answered_at bigint not null default 0,
+  updated_at timestamptz not null default now()
+);
+create index if not exists wellness_team on public.wellness(team_id, updated_at);
+
+-- notificações push: uma subscrição por dispositivo
+create table if not exists public.push_subs (
+  endpoint text primary key,
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  p256dh text not null,
+  auth text not null,
+  ua text,
+  created_at timestamptz not null default now()
+);
 
 -- convites (código de 6 caracteres)
 create table if not exists public.invites (
@@ -325,7 +354,7 @@ end $$;
 do $$
 declare t text;
 begin
-  foreach t in array array['teams','players','players_private','practices','attendance','games','games_private','events','goals','agenda','rsvps','feedback','seen','drills','scouting','notes'] loop
+  foreach t in array array['teams','players','players_private','practices','attendance','games','games_private','events','goals','agenda','rsvps','feedback','seen','drills','scouting','notes','wellness'] loop
     execute format('drop trigger if exists touch_%1$s on public.%1$s', t);
     execute format('create trigger touch_%1$s before insert or update on public.%1$s for each row execute function public.touch_updated_at()', t);
     execute format('drop trigger if exists tomb_%1$s on public.%1$s', t);
@@ -377,6 +406,8 @@ alter table public.seen enable row level security;
 alter table public.drills enable row level security;
 alter table public.scouting enable row level security;
 alter table public.notes enable row level security;
+alter table public.wellness enable row level security;
+alter table public.push_subs enable row level security;
 alter table public.invites enable row level security;
 alter table public.tombstones enable row level security;
 
@@ -449,7 +480,7 @@ end $$;
 do $$
 declare t text;
 begin
-  foreach t in array array['rsvps','seen'] loop
+  foreach t in array array['rsvps','seen','wellness'] loop
     execute format('create policy %1$s_select on public.%1$s for select using (public.is_staff(team_id) or player_id = public.my_player_id(team_id))', t);
     execute format('create policy %1$s_write on public.%1$s for insert with check (public.is_staff(team_id) or player_id = public.my_player_id(team_id))', t);
     execute format('create policy %1$s_update on public.%1$s for update using (public.is_staff(team_id) or player_id = public.my_player_id(team_id)) with check (public.is_staff(team_id) or player_id = public.my_player_id(team_id))', t);
@@ -467,6 +498,9 @@ create policy feedback_delete on public.feedback for delete using (public.is_sta
 -- notas de vídeo: só staff
 create policy notes_all on public.notes for all using (public.is_staff(team_id)) with check (public.is_staff(team_id));
 
+-- subscrições push: cada utilizador gere as suas
+create policy push_subs_own on public.push_subs for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
 create policy invites_select on public.invites for select using (public.is_staff(team_id));
 create policy invites_delete on public.invites for delete using (public.is_staff(team_id));
 
@@ -474,6 +508,30 @@ create policy tombstones_select on public.tombstones for select using (
   table_name = 'teams' or public.is_member(team_id));
 
 -- ---------- RPCs ----------
+-- notificações: staff → jogadores escolhidos; qualquer membro → equipa técnica
+create or replace function public.push_targets(p_team uuid, p_players uuid[], p_staff boolean)
+returns table (endpoint text, p256dh text, auth text)
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_member(p_team) then raise exception 'forbidden'; end if;
+  if coalesce(array_length(p_players, 1), 0) > 0 and not public.is_staff(p_team) then raise exception 'forbidden'; end if;
+  return query
+    select distinct s.endpoint, s.p256dh, s.auth
+    from public.push_subs s
+    join public.team_members m on m.user_id = s.user_id and m.team_id = p_team
+    where s.user_id <> auth.uid()
+      and (m.player_id = any(coalesce(p_players, '{}'::uuid[]))
+           or (p_staff and m.role in ('owner','coach','analyst')));
+end $$;
+
+create or replace function public.push_drop(p_endpoints text[])
+returns void language sql security definer set search_path = public as $$
+  delete from public.push_subs s
+  where s.endpoint = any(p_endpoints)
+    and exists (select 1 from public.team_members a join public.team_members b on a.team_id = b.team_id
+                where a.user_id = auth.uid() and b.user_id = s.user_id);
+$$;
+
 create or replace function public.create_invite(p_team uuid, p_role text, p_player uuid default null)
 returns text language plpgsql security definer set search_path = public as $$
 declare c text;

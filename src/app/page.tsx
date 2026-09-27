@@ -12,6 +12,8 @@ import { GoalCard } from "@/components/Goals";
 import { AgendaCard } from "@/components/AgendaCard";
 import { isUpcoming, useAgenda } from "@/lib/agenda";
 import { useUnseenFeedback } from "@/components/Feedback";
+import { PushPrompt } from "@/components/PushSettings";
+import { WellnessCheck } from "@/components/Wellness";
 
 export default function Dashboard() {
   const { team } = useTeam();
@@ -69,6 +71,10 @@ export default function Dashboard() {
           </Link>
         );
       })()}
+
+      <PushPrompt />
+
+      {access.isPlayer && access.playerId && <WellnessCheck teamId={team.id} playerId={access.playerId} />}
 
       {access.isPlayer && unseen > 0 && (
         <Link href={`/jogadores/${access.playerId}#feedback`} className="card flex items-center gap-3 border-brand bg-brand/10 p-4 hover:bg-brand/15">

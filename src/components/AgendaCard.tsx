@@ -7,6 +7,9 @@ import { callupText, dayLabel, expected, rsvpCounts, type AgendaItem } from "@/l
 import { readPlan } from "@/lib/gameplan";
 import { RSVP_LABEL, type Agenda, type ID, type Player, type RsvpStatus } from "@/lib/types";
 import { askText } from "./Dialog";
+import { notify } from "@/lib/push";
+import { useLiveQuery } from "dexie-react-hooks";
+import { AVAILABILITY_LABEL } from "@/lib/types";
 
 const RS_STYLE: Record<RsvpStatus, string> = {
   yes: "border-good bg-good/15 text-good",
@@ -22,7 +25,12 @@ export async function answer(it: AgendaItem, teamId: ID, playerId: ID, status: R
     if (v === null) return; // cancelled
     note = v.trim() || undefined;
   } else if (status !== "no") note = undefined;
+  const prev = it.rsvps.get(playerId)?.status;
   await db.rsvps.put({ id: `${it.id}:${playerId}`, teamId, refId: it.id, playerId, status, note, answeredAt: Date.now() });
+  if (status === "no" && prev !== "no") {
+    const p = await db.players.get(playerId);
+    void notify({ teamId, staff: true, title: `${p ? `#${p.number} ${p.name.split(" ")[0]}` : "Um jogador"} não pode ir`, body: `${it.title} · ${dayLabel(it.date)}${note ? ` — ${note}` : ""}`, url: "/agenda", tag: `rsvp-${it.id}-${playerId}` });
+  }
 }
 
 function saveInfo(it: AgendaItem, teamId: ID, patch: Partial<Agenda>) {
@@ -108,6 +116,7 @@ export function AgendaCard({ it, players, teamId, teamName, canEdit, myPlayerId,
             <button className="btn px-2.5 py-1 text-xs" onClick={share}>WhatsApp</button>
             {it.kind === "game" && it.game && <Link className="btn px-2.5 py-1 text-xs" href={`/adversarios?nome=${encodeURIComponent(it.game.opponent)}`}>Scouting</Link>}
             {it.kind === "game" && <Link className="btn px-2.5 py-1 text-xs" href={`/jogos/${it.id}#plano`}>Game plan</Link>}
+            {it.kind === "game" && <Link className="btn px-2.5 py-1 text-xs" href={`/jogos/${it.id}#rotacao`}>Rotação</Link>}
           </div>
           {open === "details" && <DetailsEditor it={it} teamId={teamId} />}
           {open === "callup" && <CallupEditor it={it} players={players} teamId={teamId} />}
@@ -137,7 +146,17 @@ function DetailsEditor({ it, teamId }: { it: AgendaItem; teamId: ID }) {
 function CallupEditor({ it, players, teamId }: { it: AgendaItem; players: Player[]; teamId: ID }) {
   const [sel, setSel] = useState<ID[]>(it.info?.callup ?? []);
   const toggle = (id: ID) => setSel(sel.includes(id) ? sel.filter((x) => x !== id) : [...sel, id]);
-  const save = (published: boolean) => saveInfo(it, teamId, { callup: sel, published });
+  const status = useLiveQuery(() => db.wellness.where("teamId").equals(teamId).filter((w) => w.kind === "status").toArray(), [teamId]);
+  const avail = new Map((status ?? []).filter((w) => w.status && w.status !== "ok").map((w) => [w.playerId, w]));
+  const save = async (published: boolean) => {
+    const wasPublished = !!it.info?.published;
+    await saveInfo(it, teamId, { callup: sel, published });
+    if (published) {
+      const before = new Set(wasPublished ? it.info?.callup ?? [] : []);
+      const fresh = sel.filter((id) => !before.has(id));
+      void notify({ teamId, players: fresh, title: `Convocado: ${it.title}`, body: `${dayLabel(it.date)}${it.info?.meetTime ? ` · concentração ${it.info.meetTime}` : it.time ? ` · ${it.time}` : ""}. Responde na app se vais.`, url: "/agenda", tag: `callup-${it.id}` });
+    }
+  };
   return (
     <div className="border-t border-line bg-bg/40 px-3 py-3 sm:px-4">
       <div className="mb-2 flex items-center justify-between text-xs text-muted">
@@ -155,6 +174,7 @@ function CallupEditor({ it, players, teamId }: { it: AgendaItem; players: Player
             <button key={p.id} onClick={() => toggle(p.id)} aria-pressed={on}
               className={`flex min-h-10 items-center gap-1.5 truncate rounded-lg border px-2 text-left text-sm ${on ? "border-brand bg-brand/15" : "border-line text-muted"}`}>
               <b className="font-mono">#{p.number}</b> <span className="truncate">{p.name.split(" ")[0]}</span>
+              {avail.get(p.id) && <span title={`${AVAILABILITY_LABEL[avail.get(p.id)!.status!]}${avail.get(p.id)!.note ? ` — ${avail.get(p.id)!.note}` : ""}`} className={`text-xs ${avail.get(p.id)!.status === "out" ? "text-bad" : "text-brand"}`}>{avail.get(p.id)!.status === "out" ? "⛔" : "⚠"}</span>}
               {r && <span className={`ml-auto text-xs ${r.status === "yes" ? "text-good" : r.status === "no" ? "text-bad" : "text-brand"}`}>{RS_ICON[r.status]}</span>}
             </button>
           );
@@ -164,7 +184,7 @@ function CallupEditor({ it, players, teamId }: { it: AgendaItem; players: Player
         <button className="btn btn-primary" onClick={() => save(true)} disabled={!sel.length}>Publicar convocatória</button>
         <button className="btn" onClick={() => save(false)}>Guardar rascunho</button>
       </div>
-      <p className="mt-2 text-[11px] text-muted">Depois de publicar, os jogadores veem se estão convocados. Usa o botão WhatsApp para avisar o grupo.</p>
+      <p className="mt-2 text-[11px] text-muted">Depois de publicar, os convocados recebem uma notificação (se a ativaram) e veem-no na app. ⚠ condicionado · ⛔ indisponível. Usa o botão WhatsApp para avisar o grupo.</p>
     </div>
   );
 }

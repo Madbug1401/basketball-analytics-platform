@@ -10,6 +10,8 @@ import {
   type GamePlanItem, type PlanArea, type PlanMetric,
 } from "@/lib/gameplan";
 import type { Agenda, Game, GameEvent } from "@/lib/types";
+import { notify } from "@/lib/push";
+import { cloudConfigured } from "@/lib/supabase";
 
 const ICON = { ok: "✅", partial: "⚠️", fail: "❌", pending: "•" } as const;
 const TONE = { ok: "text-good", partial: "text-brand", fail: "text-bad", pending: "text-muted" } as const;
@@ -20,6 +22,7 @@ export function GamePlan({ game, events, canEdit }: { game: Game; events: GameEv
   const allGames = useLiveQuery(() => db.games.where("teamId").equals(game.teamId).toArray(), [game.teamId]);
   const season = useSeason(game.teamId);
   const [adding, setAdding] = useState(false);
+  const [warned, setWarned] = useState(false);
   const [f, setF] = useState<{ area: PlanArea; text: string; metric: PlanMetric | ""; value: string }>({ area: "defesa", text: "", metric: "", value: "" });
   if (info === undefined) return null;
 
@@ -52,6 +55,11 @@ export function GamePlan({ game, events, canEdit }: { game: Game; events: GameEv
     .filter((m) => !items.some((i) => i.check?.metric === m)).slice(0, 5);
   const verdicts = items.map((i) => verdict(i, events));
   const done = verdicts.filter((v) => v.status === "ok").length;
+  const warnPlayers = async () => {
+    const ids = info?.published && info.callup?.length ? info.callup : (await db.players.where("teamId").equals(game.teamId).filter((p) => p.active).primaryKeys()) as string[];
+    await notify({ teamId: game.teamId, players: ids, title: `Game plan: ${game.home ? "vs" : "@"} ${game.opponent}`, body: `${items.length} objetivos para o jogo. Vê o plano na app.`, url: `/jogos/${game.id}#plano`, tag: `plan-${game.id}` });
+    setWarned(true);
+  };
   const share = () => {
     const lines = [`🏀 *Game plan — ${game.home ? "vs" : "@"} ${game.opponent}*`];
     (["defesa", "ataque", "geral"] as PlanArea[]).forEach((a) => {
@@ -71,6 +79,7 @@ export function GamePlan({ game, events, canEdit }: { game: Game; events: GameEv
           </p>
         </div>
         <div className="flex gap-1.5">
+          {items.length > 0 && canEdit && !played && cloudConfigured && <button className="btn px-2.5 py-1 text-xs" onClick={warnPlayers} disabled={warned}>{warned ? "Avisados ✓" : "Avisar jogadores"}</button>}
           {items.length > 0 && <button className="btn px-2.5 py-1 text-xs" onClick={share}>WhatsApp</button>}
           {canEdit && <button className={`btn px-2.5 py-1 text-xs ${adding ? "btn-primary" : ""}`} onClick={() => setAdding(!adding)}>{adding ? "Fechar" : "+ Objetivo"}</button>}
         </div>

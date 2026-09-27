@@ -17,6 +17,7 @@ const NAV: NavItem[] = [
   { href: "/agenda", label: "Agenda" },
   { href: "/equipa", label: "Plantel" },
   { href: "/treinos", label: "Treinos", staff: true },
+  { href: "/carga", label: "Carga", staff: true },
   { href: "/jogos", label: "Jogos" },
   { href: "/adversarios", label: "Adversários" },
   { href: "/estatisticas", label: "Estatísticas" },

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { cloudConfigured, supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
+import { PushSettings } from "@/components/PushSettings";
 
 export default function AccountPage() {
   const { session, profile, refresh } = useAuth();
@@ -43,6 +44,7 @@ export default function AccountPage() {
           </div>
         </div>
       </div>
+      <PushSettings />
       <form onSubmit={savePw} className="card grid gap-3 p-4">
         <label className="label">Nova password</label>
         <input className="input" type="password" minLength={6} required value={pw} onChange={(e) => setPw(e.target.value)} autoComplete="new-password" />

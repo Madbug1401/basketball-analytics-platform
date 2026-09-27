@@ -369,9 +369,40 @@ nextAgenda.plan = [
   gp("ataque", "Atacar a zona 2-3 com o poste alto"),
 ];
 
+// ---------- rotação planeada do próximo jogo (tempo igual pelos convocados) ----------
+{
+  const called = nextAgenda.callup;
+  const rot = {};
+  called.forEach((pid) => { rot[pid] = [0, 0, 0, 0]; });
+  for (let q = 0; q < 4; q++) {
+    let left = 50, k = q * 3;
+    const base = Math.floor(50 / called.length);
+    called.forEach((pid) => { rot[pid][q] = base; left -= base; });
+    while (left > 0) { const pid = called[k++ % called.length]; if (rot[pid][q] < 10) { rot[pid][q]++; left--; } }
+  }
+  nextAgenda.rotation = rot;
+}
+
+// ---------- carga (esforço 1–10 depois dos treinos) e disponibilidade ----------
+const wellness = [];
+const pastPractices = practices.filter((p) => p.date <= TODAY && p.date >= addDays(TODAY, -35));
+for (const pr of pastPractices) {
+  for (const pl of players) {
+    const att = attendance.find((a) => a.practiceId === pr.id && a.playerId === pl.id);
+    if (!att || (att.status !== "present" && att.status !== "late")) continue;
+    if (!chance(0.92)) continue; // quase todos respondem
+    // o 3.º jogador teve uma semana muito mais pesada (treinos extra na seleção)
+    const heavy = pl === players[2] && pr.date >= addDays(TODAY, -6);
+    const rpe = Math.max(1, Math.min(10, (pr.intensity ?? 3) + 2 + int(0, 1) + (heavy ? 3 : 0)));
+    wellness.push({ id: `${pr.id}:${pl.id}`, teamId, playerId: pl.id, kind: "session", refId: pr.id, date: pr.date, rpe, minutes: (pr.durationMin ?? 90) + (heavy ? 60 : 0), answeredAt: Date.parse(pr.date + "T21:00:00Z") });
+  }
+}
+wellness.push({ id: `status:${players[4].id}`, teamId, playerId: players[4].id, kind: "status", date: addDays(TODAY, -1), status: "limited", note: "Dor no tornozelo, treino sem saltos", answeredAt: Date.parse(TODAY + "T08:00:00Z") });
+wellness.push({ id: `status:${players[9].id}`, teamId, playerId: players[9].id, kind: "status", date: addDays(TODAY, -2), status: "out", note: "Doente (gripe)", answeredAt: Date.parse(TODAY + "T08:00:00Z") });
+
 const data = {
   app: "basketball-analytics", version: 1, exportedAt: new Date().toISOString(), demo: true,
-  teams: [team], players, practices, attendance, games, events, goals, agenda, rsvps, drills, scouting, feedback, notes,
+  teams: [team], players, practices, attendance, games, events, goals, agenda, rsvps, drills, scouting, feedback, notes, wellness,
 };
 
 mkdirSync(dirname(OUT), { recursive: true });

@@ -2,6 +2,9 @@
 
 import { useRef } from "react";
 import { COURT_H, COURT_W, CORNER_X, CORNER_Y, RIM, THREE_R } from "@/lib/court";
+import { zoneGrid, type QZone } from "@/lib/shotQuality";
+
+const GRID = zoneGrid(0.5);
 
 export interface ShotMark {
   id: string;
@@ -18,9 +21,12 @@ export function Court({
   shots = [],
   onPick,
   pending,
+  heat,
   className = "",
 }: {
   shots?: ShotMark[];
+  /** colour per zone (zone heat map drawn under the lines) */
+  heat?: Partial<Record<QZone, string>>;
   onPick?: (x: number, y: number) => void;
   pending?: { x: number; y: number } | null;
   className?: string;
@@ -51,9 +57,14 @@ export function Court({
       aria-label="Campo"
     >
       <rect x={0} y={0} width={COURT_W * S} height={COURT_H * S} rx={4} fill="#1b2230" stroke="#3a4760" strokeWidth={2} />
+      {heat && (
+        <g aria-hidden>
+          {GRID.map((c, i) => heat[c.zone] && <rect key={i} x={c.x * S} y={c.y * S} width={0.5 * S + 0.5} height={0.5 * S + 0.5} fill={heat[c.zone]} />)}
+        </g>
+      )}
       <g fill="none" stroke="#4b5a78" strokeWidth={1.5}>
         {/* paint */}
-        <rect x={(RIM.x - 2.45) * S} y={0} width={4.9 * S} height={5.8 * S} fill="#222b3c" />
+        <rect x={(RIM.x - 2.45) * S} y={0} width={4.9 * S} height={5.8 * S} fill={heat ? "none" : "#222b3c"} />
         <circle cx={RIM.x * S} cy={5.8 * S} r={1.8 * S} />
         {/* three point line */}
         <path d={`M ${arcStartX} 0 L ${arcStartX} ${cy} A ${THREE_R * S} ${THREE_R * S} 0 0 0 ${arcEndX} ${cy} L ${arcEndX} 0`} />

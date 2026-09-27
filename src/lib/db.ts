@@ -1,13 +1,13 @@
 import Dexie, { type EntityTable, type Transaction } from "dexie";
-import type { Agenda, Attendance, Drill, Feedback, Game, GameEvent, Goal, Player, Practice, Rsvp, Scouting, Seen, Team, VideoNote } from "./types";
+import type { Agenda, Attendance, Drill, Feedback, Game, GameEvent, Goal, Player, Practice, Rsvp, Scouting, Seen, Team, VideoNote, Wellness } from "./types";
 import { cloudConfigured } from "./supabase";
 
 // Local-first storage (IndexedDB). In cloud mode every local write is also queued
 // in `outbox` and pushed to Supabase by src/lib/sync.ts.
 
-export type SyncedTable = "teams" | "players" | "practices" | "attendance" | "games" | "events" | "goals" | "agenda" | "rsvps" | "feedback" | "seen" | "drills" | "scouting" | "notes";
+export type SyncedTable = "teams" | "players" | "practices" | "attendance" | "games" | "events" | "goals" | "agenda" | "rsvps" | "feedback" | "seen" | "drills" | "scouting" | "notes" | "wellness";
 // order matters for uploads (foreign keys): parents first
-export const SYNCED_TABLES: SyncedTable[] = ["teams", "players", "practices", "games", "attendance", "events", "goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes"];
+export const SYNCED_TABLES: SyncedTable[] = ["teams", "players", "practices", "games", "attendance", "events", "goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes", "wellness"];
 
 export interface OutboxEntry {
   seq?: number;
@@ -32,6 +32,8 @@ export const db = new Dexie("basketball-analytics") as Dexie & {
   drills: EntityTable<Drill, "id">;
   scouting: EntityTable<Scouting, "id">;
   notes: EntityTable<VideoNote, "id">;
+  wellness: EntityTable<Wellness, "id">;
+  pushQueue: EntityTable<PushJob, "seq">;
   videoHandles: EntityTable<{ gameId: string; handle: FileSystemFileHandle }, "gameId">;
   outbox: EntityTable<OutboxEntry, "seq">;
   meta: EntityTable<{ key: string; value: unknown }, "key">;
@@ -64,6 +66,23 @@ db.version(4).stores({
 db.version(5).stores({
   notes: "id, teamId, gameId",
 });
+db.version(6).stores({
+  wellness: "id, teamId, playerId, date",
+  pushQueue: "++seq",
+});
+
+/** A notification waiting to be sent (kept on this device until online; see src/lib/push.ts). */
+export interface PushJob {
+  seq?: number;
+  teamId: string;
+  players?: string[]; // notify these players
+  staff?: boolean; // notify the staff
+  title: string;
+  body: string;
+  url: string;
+  tag?: string;
+  createdAt: number;
+}
 
 /* ---------- change capture ---------- */
 
@@ -135,15 +154,16 @@ export async function deletePractice(practiceId: string) {
   await db.practices.delete(practiceId);
   await db.agenda.delete(practiceId);
   await db.rsvps.where("refId").equals(practiceId).delete();
+  await db.wellness.filter((w) => w.refId === practiceId).delete();
 }
 
 /** Removes every local row of a team without queueing anything (used after a server-side delete). */
 export async function purgeTeamLocal(teamId: string) {
   const gameIds = await db.games.where("teamId").equals(teamId).primaryKeys();
-  await localOnly(["teams", "players", "practices", "attendance", "games", "events", "goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes", "videoHandles", "outbox"], async () => {
+  await localOnly(["teams", "players", "practices", "attendance", "games", "events", "goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes", "wellness", "videoHandles", "outbox"], async () => {
     await db.events.where("teamId").equals(teamId).delete();
     await db.goals.where("teamId").equals(teamId).delete();
-    for (const t of [db.agenda, db.rsvps, db.feedback, db.seen, db.drills, db.scouting, db.notes]) await t.where("teamId").equals(teamId).delete();
+    for (const t of [db.agenda, db.rsvps, db.feedback, db.seen, db.drills, db.scouting, db.notes, db.wellness]) await t.where("teamId").equals(teamId).delete();
     await db.attendance.where("teamId").equals(teamId).delete();
     await db.games.where("teamId").equals(teamId).delete();
     await db.practices.where("teamId").equals(teamId).delete();
@@ -155,14 +175,14 @@ export async function purgeTeamLocal(teamId: string) {
 }
 
 export async function clearAllLocal() {
-  await localOnly(["teams", "players", "practices", "attendance", "games", "events", "goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes", "videoHandles", "outbox", "meta"], async () => {
-    await Promise.all([db.teams, db.players, db.practices, db.attendance, db.games, db.events, db.goals, db.agenda, db.rsvps, db.feedback, db.seen, db.drills, db.scouting, db.notes, db.videoHandles, db.outbox, db.meta].map((t) => t.clear()));
+  await localOnly(["teams", "players", "practices", "attendance", "games", "events", "goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes", "wellness", "pushQueue", "videoHandles", "outbox", "meta"], async () => {
+    await Promise.all([db.teams, db.players, db.practices, db.attendance, db.games, db.events, db.goals, db.agenda, db.rsvps, db.feedback, db.seen, db.drills, db.scouting, db.notes, db.wellness, db.pushQueue, db.videoHandles, db.outbox, db.meta].map((t) => t.clear()));
   });
 }
 
 export async function exportAll(teamId?: string) {
   const byTeam = <T extends { teamId: string }>(rows: T[]) => (teamId ? rows.filter((r) => r.teamId === teamId) : rows);
-  const [teams, players, practices, attendance, games, events, goals, agenda, rsvps, feedback, seen, drills, scouting, notes] = await Promise.all([
+  const [teams, players, practices, attendance, games, events, goals, agenda, rsvps, feedback, seen, drills, scouting, notes, wellness] = await Promise.all([
     db.teams.toArray(),
     db.players.toArray(),
     db.practices.toArray(),
@@ -177,20 +197,21 @@ export async function exportAll(teamId?: string) {
     db.drills.toArray(),
     db.scouting.toArray(),
     db.notes.toArray(),
+    db.wellness.toArray(),
   ]);
   return {
     app: "basketball-analytics", version: 1, exportedAt: new Date().toISOString(),
     teams: teamId ? teams.filter((t) => t.id === teamId) : teams,
     players: byTeam(players), practices: byTeam(practices), attendance: byTeam(attendance), games: byTeam(games), events: byTeam(events), goals: byTeam(goals),
-    agenda: byTeam(agenda), rsvps: byTeam(rsvps), feedback: byTeam(feedback), seen: byTeam(seen), drills: byTeam(drills), scouting: byTeam(scouting), notes: byTeam(notes),
+    agenda: byTeam(agenda), rsvps: byTeam(rsvps), feedback: byTeam(feedback), seen: byTeam(seen), drills: byTeam(drills), scouting: byTeam(scouting), notes: byTeam(notes), wellness: byTeam(wellness),
   };
 }
 
 type Export = Awaited<ReturnType<typeof exportAll>>;
-type Optional = "goals" | "agenda" | "rsvps" | "feedback" | "seen" | "drills" | "scouting" | "notes";
+type Optional = "goals" | "agenda" | "rsvps" | "feedback" | "seen" | "drills" | "scouting" | "notes" | "wellness";
 export async function importAll(data: Omit<Export, Optional> & Partial<Pick<Export, Optional>>) {
   if (data?.app !== "basketball-analytics") throw new Error("Ficheiro inválido");
-  await db.transaction("rw", [db.teams, db.players, db.practices, db.attendance, db.games, db.events, db.goals, db.agenda, db.rsvps, db.feedback, db.seen, db.drills, db.scouting, db.notes], async () => {
+  await db.transaction("rw", [db.teams, db.players, db.practices, db.attendance, db.games, db.events, db.goals, db.agenda, db.rsvps, db.feedback, db.seen, db.drills, db.scouting, db.notes, db.wellness], async () => {
     await db.teams.bulkPut(data.teams);
     await db.players.bulkPut(data.players);
     await db.practices.bulkPut(data.practices);
@@ -205,5 +226,6 @@ export async function importAll(data: Omit<Export, Optional> & Partial<Pick<Expo
     if (data.drills?.length) await db.drills.bulkPut(data.drills);
     if (data.scouting?.length) await db.scouting.bulkPut(data.scouting);
     if (data.notes?.length) await db.notes.bulkPut(data.notes);
+    if (data.wellness?.length) await db.wellness.bulkPut(data.wellness);
   });
 }

@@ -8,6 +8,8 @@ import { fmtTs } from "@/lib/stats";
 import type { Feedback, Game, ID, Player } from "@/lib/types";
 import { youtubeId } from "./VideoPlayer";
 import { ask } from "./Dialog";
+import { notify } from "@/lib/push";
+import { ReportCard } from "./PlayerReport";
 
 /** Plays [start, end] of a game's video when the player can reach it (YouTube or a link). */
 export function ClipPlayer({ game, start, end }: { game?: Game; start?: number; end?: number }) {
@@ -61,6 +63,7 @@ export function FeedbackComposer({ teamId, players, initial, onClose }: {
       ...(initial.eventIds ? { eventIds: initial.eventIds } : {}),
     };
     await db.feedback.add(f);
+    void notify({ teamId, players: [playerId], title: "Mensagem do treinador", body: f.text ? f.text.slice(0, 140) : "Tens uma jogada para ver.", url: `/jogadores/${playerId}#feedback`, tag: `fb-${f.id}` });
     onClose();
   };
 
@@ -143,8 +146,8 @@ export function FeedbackList({ player, isMe, canEdit }: { player: Player; isMe: 
                 )}
                 {isMe && !seen && <span className="rounded-full bg-brand px-2 py-0.5 text-[10px] font-semibold text-black">NOVO</span>}
               </div>
-              {f.text && <p className="mt-1.5 whitespace-pre-line text-sm">{f.text}</p>}
-              {f.clipStart !== undefined && g && (
+              {f.report ? <div className="mt-1.5"><ReportCard r={f.report} game={g} text={f.text} /></div> : f.text && <p className="mt-1.5 whitespace-pre-line text-sm">{f.text}</p>}
+              {!f.report && f.clipStart !== undefined && g && (
                 openClip === f.id
                   ? <div className="mt-2"><ClipPlayer game={g} start={f.clipStart} end={f.clipEnd} /></div>
                   : <button className="btn mt-2 py-1 text-xs" onClick={() => setOpenClip(f.id)}>▶ Ver a jogada ({fmtTs(f.clipStart)})</button>
