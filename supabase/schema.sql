@@ -49,6 +49,7 @@ create table if not exists public.players (
   birth_year smallint,
   height_cm smallint,
   active boolean not null default true,
+  prev_id uuid,
   created_at bigint not null default 0,
   updated_at timestamptz not null default now()
 );
@@ -265,6 +266,26 @@ create table if not exists public.wellness (
 );
 create index if not exists wellness_team on public.wellness(team_id, updated_at);
 
+-- perfil físico: medições e testes (histórico, nunca se sobrescreve)
+create table if not exists public.measurements (
+  id uuid primary key default gen_random_uuid(),
+  team_id uuid not null references public.teams(id) on delete cascade,
+  player_id uuid not null references public.players(id) on delete cascade,
+  type text not null check (type in ('altura','peso','envergadura','alcance','cmj','salto_balanco','lane','sprint')),
+  value double precision not null,
+  date text not null,
+  session_id text,
+  attempts jsonb,
+  base double precision,
+  evaluator text,
+  protocol_ok boolean,
+  notes text,
+  from_team text,
+  created_at bigint not null default 0,
+  updated_at timestamptz not null default now()
+);
+create index if not exists measurements_team on public.measurements(team_id, updated_at);
+
 -- notificações push: uma subscrição por dispositivo
 create table if not exists public.push_subs (
   endpoint text primary key,
@@ -354,7 +375,7 @@ end $$;
 do $$
 declare t text;
 begin
-  foreach t in array array['teams','players','players_private','practices','attendance','games','games_private','events','goals','agenda','rsvps','feedback','seen','drills','scouting','notes','wellness'] loop
+  foreach t in array array['teams','players','players_private','practices','attendance','games','games_private','events','goals','agenda','rsvps','feedback','seen','drills','scouting','notes','wellness','measurements'] loop
     execute format('drop trigger if exists touch_%1$s on public.%1$s', t);
     execute format('create trigger touch_%1$s before insert or update on public.%1$s for each row execute function public.touch_updated_at()', t);
     execute format('drop trigger if exists tomb_%1$s on public.%1$s', t);
@@ -408,6 +429,7 @@ alter table public.scouting enable row level security;
 alter table public.notes enable row level security;
 alter table public.wellness enable row level security;
 alter table public.push_subs enable row level security;
+alter table public.measurements enable row level security;
 alter table public.invites enable row level security;
 alter table public.tombstones enable row level security;
 
@@ -497,6 +519,13 @@ create policy feedback_delete on public.feedback for delete using (public.is_sta
 
 -- notas de vídeo: só staff
 create policy notes_all on public.notes for all using (public.is_staff(team_id)) with check (public.is_staff(team_id));
+
+-- perfil físico: staff regista e vê tudo; o jogador vê as suas medições, exceto o peso
+create policy measurements_select on public.measurements for select using (
+  public.is_staff(team_id) or (player_id = public.my_player_id(team_id) and type <> 'peso'));
+create policy measurements_write on public.measurements for insert with check (public.is_staff(team_id));
+create policy measurements_update on public.measurements for update using (public.is_staff(team_id));
+create policy measurements_delete on public.measurements for delete using (public.is_staff(team_id));
 
 -- subscrições push: cada utilizador gere as suas
 create policy push_subs_own on public.push_subs for all using (user_id = auth.uid()) with check (user_id = auth.uid());

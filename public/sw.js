@@ -7,7 +7,7 @@ const CACHE = `courtside-${VERSION}`;
 
 // every page of the app; dynamic pages are served from one shell ("_") — they read the id from the URL
 const ROUTES = [
-  "/", "/agenda", "/equipa", "/treinos", "/treinos/exercicios", "/jogos", "/adversarios", "/estatisticas", "/objetivos", "/carga", "/definicoes",
+  "/", "/agenda", "/equipa", "/treinos", "/treinos/exercicios", "/jogos", "/adversarios", "/estatisticas", "/objetivos", "/carga", "/fisico", "/definicoes",
   "/conta", "/convite", "/admin",
   "/jogos/_", "/jogos/_/logger", "/jogos/_/ao-vivo", "/treinos/_", "/jogadores/_",
 ];

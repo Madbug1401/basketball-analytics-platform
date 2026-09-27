@@ -13,6 +13,7 @@ import { Kpi } from "@/components/Kpi";
 import { GoalCard } from "@/components/Goals";
 import { FeedbackComposer, FeedbackList } from "@/components/Feedback";
 import { useAccess } from "@/lib/auth";
+import { PhysicalProfile } from "@/components/Physical";
 import { useState } from "react";
 
 export function PlayerPage() {
@@ -65,6 +66,8 @@ export function PlayerPage() {
           </div>
         </section>
       )}
+
+      {(access.canEdit || access.playerId === player.id) && <PhysicalProfile player={player} isStaff={access.canEdit} />}
 
       <div className="grid gap-4 lg:grid-cols-[1fr_380px]">
         <div className="card p-4">

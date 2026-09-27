@@ -1,7 +1,7 @@
 {
  "app": "basketball-analytics",
  "version": 1,
- "exportedAt": "2026-09-27T09:35:25.638Z",
+ "exportedAt": "2026-09-27T10:45:56.119Z",
  "demo": true,
  "teams": [
   {
@@ -32,7 +32,7 @@
    "number": 7,
    "position": "SG",
    "birthYear": 2010,
-   "heightCm": 178,
+   "heightCm": 179,
    "active": true,
    "createdAt": 1782381600001
   },
@@ -43,7 +43,7 @@
    "number": 8,
    "position": "SF",
    "birthYear": 2010,
-   "heightCm": 183,
+   "heightCm": 184,
    "active": true,
    "createdAt": 1782381600002
   },
@@ -54,7 +54,7 @@
    "number": 10,
    "position": "PF",
    "birthYear": 2010,
-   "heightCm": 189,
+   "heightCm": 191,
    "active": true,
    "createdAt": 1782381600003
   },
@@ -65,7 +65,7 @@
    "number": 12,
    "position": "C",
    "birthYear": 2011,
-   "heightCm": 194,
+   "heightCm": 195,
    "active": true,
    "createdAt": 1782381600004
   },
@@ -76,7 +76,7 @@
    "number": 5,
    "position": "PG",
    "birthYear": 2011,
-   "heightCm": 168,
+   "heightCm": 169,
    "active": true,
    "createdAt": 1782381600005
   },
@@ -99,7 +99,7 @@
    "number": 11,
    "position": "SF",
    "birthYear": 2011,
-   "heightCm": 181,
+   "heightCm": 182,
    "active": true,
    "createdAt": 1782381600007
   },
@@ -110,7 +110,7 @@
    "number": 14,
    "position": "PF",
    "birthYear": 2011,
-   "heightCm": 187,
+   "heightCm": 188,
    "active": true,
    "createdAt": 1782381600008
   },
@@ -132,7 +132,7 @@
    "number": 6,
    "position": "SG",
    "birthYear": 2011,
-   "heightCm": 173,
+   "heightCm": 174,
    "active": true,
    "createdAt": 1782381600010
   },
@@ -143,7 +143,7 @@
    "number": 13,
    "position": "SF",
    "birthYear": 2011,
-   "heightCm": 179,
+   "heightCm": 180,
    "active": true,
    "createdAt": 1782381600011
   }
@@ -55181,6 +55181,3981 @@
    "status": "out",
    "note": "Doente (gripe)",
    "answeredAt": 1790496000000
+  }
+ ],
+ "measurements": [
+  {
+   "id": "f31c3a54-714a-4bed-a9b7-b6d27ed3b63b",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "altura",
+   "value": 172,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400000
+  },
+  {
+   "id": "e267ef07-5e7f-48dd-a372-613e40ca2b60",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "peso",
+   "value": 64,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400001
+  },
+  {
+   "id": "c1d7bb1c-90d0-4c73-ac9c-c1532119ac37",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "envergadura",
+   "value": 174,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400002
+  },
+  {
+   "id": "aef797a0-ad5d-4be1-afe4-f1c6726ef549",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "alcance",
+   "value": 225,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400003
+  },
+  {
+   "id": "75e00005-3407-464c-a6e6-bbe70252f5ab",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "cmj",
+   "value": 34,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    259,
+    259,
+    256
+   ],
+   "base": 225,
+   "protocolOk": true,
+   "createdAt": 1785092400004
+  },
+  {
+   "id": "eea23b1f-a7dc-408c-a34c-629c47c97274",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "salto_balanco",
+   "value": 41,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    266,
+    265,
+    264
+   ],
+   "base": 225,
+   "protocolOk": true,
+   "createdAt": 1785092400005
+  },
+  {
+   "id": "1547f69d-7a4e-439c-ae5e-3ed066458f25",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "lane",
+   "value": 12.6,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    12.6,
+    12.72,
+    12.84
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400006
+  },
+  {
+   "id": "78127fb2-bea7-4c8d-a91c-582e535bd8f5",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "sprint",
+   "value": 3.75,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    3.75,
+    3.8,
+    3.85
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400007
+  },
+  {
+   "id": "ee2e1747-7db4-40e2-a97b-8eebcc437324",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "altura",
+   "value": 172.2,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600008
+  },
+  {
+   "id": "7e52e7b1-00c4-47ef-a823-8de624c2bbdf",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "peso",
+   "value": 64.6,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600009
+  },
+  {
+   "id": "a0ac1c74-e17f-4509-a7ca-597765712aa8",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "alcance",
+   "value": 225,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600010
+  },
+  {
+   "id": "690aa152-23e9-405e-a996-d764ed2314bc",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "cmj",
+   "value": 36,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    261,
+    260,
+    258
+   ],
+   "base": 225,
+   "protocolOk": true,
+   "createdAt": 1787943600011
+  },
+  {
+   "id": "25ee3bdb-b829-4386-a3ff-1c31b249a37a",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "salto_balanco",
+   "value": 43,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    268,
+    267,
+    266
+   ],
+   "base": 225,
+   "protocolOk": true,
+   "createdAt": 1787943600012
+  },
+  {
+   "id": "1c718192-eec9-4268-a144-0a2b42a5fe29",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "lane",
+   "value": 12.4,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    12.4,
+    12.52,
+    12.64
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600013
+  },
+  {
+   "id": "ec74119a-33ca-4cdc-a188-5c598535276a",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "sprint",
+   "value": 3.71,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    3.71,
+    3.76,
+    3.81
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600014
+  },
+  {
+   "id": "b4c977f1-7b74-4649-ae6c-fec3f0f982ae",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "altura",
+   "value": 172.4,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400015
+  },
+  {
+   "id": "6d76c039-3960-4f5d-a591-bce76127b172",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "peso",
+   "value": 65,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400016
+  },
+  {
+   "id": "4f1a7e67-5d09-4275-a49b-93bd80bf9947",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "envergadura",
+   "value": 174.4,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400017
+  },
+  {
+   "id": "04af8138-aa73-42ca-ae70-f8cbaae6515e",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "alcance",
+   "value": 226,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400018
+  },
+  {
+   "id": "bc87e0e5-c129-4eca-a8ec-1e87eedeb994",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "cmj",
+   "value": 37,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    263,
+    263,
+    260
+   ],
+   "base": 226,
+   "protocolOk": true,
+   "createdAt": 1790276400019
+  },
+  {
+   "id": "02552aff-3707-4408-a46a-f73cbb2e0e2f",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "salto_balanco",
+   "value": 44,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    270,
+    269,
+    268
+   ],
+   "base": 226,
+   "protocolOk": true,
+   "createdAt": 1790276400020
+  },
+  {
+   "id": "0a24eacf-28e9-4622-aa67-ac450c4377d3",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "lane",
+   "value": 12.25,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    12.25,
+    12.37,
+    12.49
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400021
+  },
+  {
+   "id": "79f8d110-4003-4244-af07-c2b3e83b2922",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "4e105cb6-faa5-4f2f-a472-f9dc978cc9af",
+   "type": "sprint",
+   "value": 3.67,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    3.67,
+    3.72,
+    3.77
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400022
+  },
+  {
+   "id": "afa5beb1-c487-44c6-a157-f810a9b158a3",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "altura",
+   "value": 178,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400023
+  },
+  {
+   "id": "ba5c5aff-9dc0-479f-ad06-8dc7d00de00a",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "peso",
+   "value": 73,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400024
+  },
+  {
+   "id": "a22eaad0-eb7f-4bcf-ab2d-ebbdde94aeb1",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "envergadura",
+   "value": 181,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400025
+  },
+  {
+   "id": "b084ff2f-94eb-4daf-a819-44610037aaf0",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "alcance",
+   "value": 233,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400026
+  },
+  {
+   "id": "fd589c3c-269a-4d10-ab78-48d42b5a26a7",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "cmj",
+   "value": 38,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    271,
+    271,
+    268
+   ],
+   "base": 233,
+   "protocolOk": true,
+   "createdAt": 1785092400027
+  },
+  {
+   "id": "553f7bf2-4819-4c87-a89a-fb79367c50f2",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "salto_balanco",
+   "value": 45,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    278,
+    277,
+    276
+   ],
+   "base": 233,
+   "protocolOk": true,
+   "createdAt": 1785092400028
+  },
+  {
+   "id": "1bf98278-3ee3-444b-a2bf-5a0fbdb5ebd3",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "lane",
+   "value": 12.35,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    12.35,
+    12.47,
+    12.59
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400029
+  },
+  {
+   "id": "de273477-77c6-4af5-aab3-d578ff3007a3",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "sprint",
+   "value": 3.68,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    3.68,
+    3.73,
+    3.78
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400030
+  },
+  {
+   "id": "6b478c9c-0903-421f-abd2-1153b6865b2b",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "altura",
+   "value": 178.4,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600031
+  },
+  {
+   "id": "34aeef79-8028-4937-aa2b-e63c248b4e66",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "peso",
+   "value": 73.6,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600032
+  },
+  {
+   "id": "2dc4df8c-9ac0-453a-a672-481bdcd35d42",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "alcance",
+   "value": 233,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600033
+  },
+  {
+   "id": "8ebed07e-2850-438b-ad7b-6ebaecaa6b0a",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "cmj",
+   "value": 40,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    273,
+    272,
+    270
+   ],
+   "base": 233,
+   "protocolOk": true,
+   "createdAt": 1787943600034
+  },
+  {
+   "id": "4e557d17-ece9-4f77-a0f4-a7c1f878edf0",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "salto_balanco",
+   "value": 47,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    280,
+    279,
+    278
+   ],
+   "base": 233,
+   "protocolOk": true,
+   "createdAt": 1787943600035
+  },
+  {
+   "id": "02441406-7f46-4d70-a2f3-613c3d06e7bb",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "lane",
+   "value": 12.15,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    12.15,
+    12.27,
+    12.39
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600036
+  },
+  {
+   "id": "7e43d22c-40e6-41ab-a9df-5e246d34e421",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "sprint",
+   "value": 3.64,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    3.64,
+    3.69,
+    3.74
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600037
+  },
+  {
+   "id": "93314af7-d67b-40fe-a4d5-5cefa1bbc64d",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "altura",
+   "value": 178.6,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400038
+  },
+  {
+   "id": "ab73d42f-e8ee-4d89-a99c-b588e705d89f",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "peso",
+   "value": 74,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400039
+  },
+  {
+   "id": "3110161d-7844-4fca-abb2-df9c78e04a27",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "envergadura",
+   "value": 181.6,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400040
+  },
+  {
+   "id": "1fb1bbed-519f-45fb-aab4-b910ce44bf52",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "alcance",
+   "value": 234,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400041
+  },
+  {
+   "id": "d91aff81-1dc9-4722-ac76-d1d55eef2c03",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "cmj",
+   "value": 41,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    275,
+    275,
+    272
+   ],
+   "base": 234,
+   "protocolOk": true,
+   "createdAt": 1790276400042
+  },
+  {
+   "id": "e0c0dae4-1b22-4828-a0c0-b8c7462342ae",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "salto_balanco",
+   "value": 48,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    282,
+    281,
+    280
+   ],
+   "base": 234,
+   "protocolOk": true,
+   "createdAt": 1790276400043
+  },
+  {
+   "id": "d591d00b-5f96-4983-a8ce-6535d83d142c",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "lane",
+   "value": 12,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    12,
+    12.12,
+    12.24
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400044
+  },
+  {
+   "id": "f049065b-ab0c-499d-af57-cbc06dc2086f",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "5021fe22-794f-40f9-a398-0edfc0fe7703",
+   "type": "sprint",
+   "value": 3.6,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    3.6,
+    3.65,
+    3.7
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400045
+  },
+  {
+   "id": "87f82819-5820-43e9-a58f-1ede5b9e6c50",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "altura",
+   "value": 183,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400046
+  },
+  {
+   "id": "c98de619-207b-4568-ab65-9a4725cccfde",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "peso",
+   "value": 81,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400047
+  },
+  {
+   "id": "e667ede6-60bd-454f-aa49-04ec61ade49c",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "envergadura",
+   "value": 187,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400048
+  },
+  {
+   "id": "69f2357d-9e3b-43ca-a0fa-a0c15c7a0b10",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "alcance",
+   "value": 240,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400049
+  },
+  {
+   "id": "83a2ff7e-bf76-42fb-a3fb-a00e4e36cd90",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "cmj",
+   "value": 40,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    280,
+    280,
+    277
+   ],
+   "base": 240,
+   "protocolOk": true,
+   "createdAt": 1785092400050
+  },
+  {
+   "id": "41853d29-fa42-4734-ab6d-346971caf285",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "salto_balanco",
+   "value": 47,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    287,
+    286,
+    285
+   ],
+   "base": 240,
+   "protocolOk": true,
+   "createdAt": 1785092400051
+  },
+  {
+   "id": "5429deb1-2b34-4d67-aa13-ca2c07fb50ac",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "lane",
+   "value": 12.1,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    12.1,
+    12.22,
+    12.34
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400052
+  },
+  {
+   "id": "ae697156-072b-4022-a1e0-c3cf4065fd01",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "sprint",
+   "value": 3.61,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    3.61,
+    3.66,
+    3.71
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400053
+  },
+  {
+   "id": "9f3162ef-67d8-4319-a75a-6e2781ce0089",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "altura",
+   "value": 183.5,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600054
+  },
+  {
+   "id": "8f3cb208-3fe0-461d-a3c4-367155e70f6e",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "peso",
+   "value": 81.6,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600055
+  },
+  {
+   "id": "a48992a8-e68b-4342-abbd-cc77a59ab5be",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "alcance",
+   "value": 241,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600056
+  },
+  {
+   "id": "4d499bc3-e1b7-45f8-a741-ccbf1d30d2b9",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "cmj",
+   "value": 42,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    283,
+    282,
+    280
+   ],
+   "base": 241,
+   "protocolOk": true,
+   "createdAt": 1787943600057
+  },
+  {
+   "id": "125d0585-e0b1-47b6-ab69-dd9d3e4b2318",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "salto_balanco",
+   "value": 49,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    290,
+    289,
+    288
+   ],
+   "base": 241,
+   "protocolOk": true,
+   "createdAt": 1787943600058
+  },
+  {
+   "id": "caae8972-da56-4899-a277-508c2b2375cf",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "lane",
+   "value": 11.9,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    11.9,
+    12.02,
+    12.14
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600059
+  },
+  {
+   "id": "bac47df0-633a-47b1-a1b8-19d272b4c1ed",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "sprint",
+   "value": 3.57,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    3.57,
+    3.62,
+    3.67
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600060
+  },
+  {
+   "id": "c8c65e5e-2b20-48d5-aef0-42099766c6f5",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "altura",
+   "value": 183.9,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400061
+  },
+  {
+   "id": "41ab7af5-3e74-4001-ad26-38a505383579",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "peso",
+   "value": 82,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400062
+  },
+  {
+   "id": "8445b7c6-a6c3-4b27-a0b7-e1e9917d67fd",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "envergadura",
+   "value": 187.9,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400063
+  },
+  {
+   "id": "6c948cb6-38ab-4990-aadb-6b048d96967f",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "alcance",
+   "value": 241,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400064
+  },
+  {
+   "id": "c7e7c4ff-1d78-4861-abaf-4d25d9f0cb79",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "cmj",
+   "value": 43,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    284,
+    284,
+    281
+   ],
+   "base": 241,
+   "protocolOk": true,
+   "createdAt": 1790276400065
+  },
+  {
+   "id": "46c14a84-bb62-43ff-a473-34e17b4b637b",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "salto_balanco",
+   "value": 50,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    291,
+    290,
+    289
+   ],
+   "base": 241,
+   "protocolOk": true,
+   "createdAt": 1790276400066
+  },
+  {
+   "id": "a540002d-fc5e-4838-a6e6-057524c11299",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "lane",
+   "value": 11.75,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    11.75,
+    11.87,
+    11.99
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400067
+  },
+  {
+   "id": "eadb56a3-4dc1-4420-a166-ee0cba45136a",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "de8317fd-35bd-49e0-a2a9-3352e5065eda",
+   "type": "sprint",
+   "value": 3.53,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    3.53,
+    3.58,
+    3.63
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400068
+  },
+  {
+   "id": "951022df-f6ea-42b0-a3ef-0b97c21dfe9e",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "altura",
+   "value": 189,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400069
+  },
+  {
+   "id": "df9f38e5-a679-4177-a482-dbdbe38ad7c3",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "peso",
+   "value": 90,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400070
+  },
+  {
+   "id": "7a974238-e2fa-4e33-afef-6a79d6ebf85a",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "envergadura",
+   "value": 194,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400071
+  },
+  {
+   "id": "06436624-ecbb-48d2-a3f6-97f36ac684a3",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "alcance",
+   "value": 248,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400072
+  },
+  {
+   "id": "71e4973b-9f92-486a-ac37-d374add6ec03",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "cmj",
+   "value": 41,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    289,
+    289,
+    286
+   ],
+   "base": 248,
+   "protocolOk": true,
+   "createdAt": 1785092400073
+  },
+  {
+   "id": "68f425ba-296f-4735-a568-9ba9ca392f7b",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "salto_balanco",
+   "value": 48,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    296,
+    295,
+    294
+   ],
+   "base": 248,
+   "protocolOk": true,
+   "createdAt": 1785092400074
+  },
+  {
+   "id": "d2725ed6-3297-49a3-a958-125b39e458af",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "lane",
+   "value": 11.85,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    11.85,
+    11.97,
+    12.09
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400075
+  },
+  {
+   "id": "4a4eff4f-d2d2-423f-a159-d8036bb910bb",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "sprint",
+   "value": 3.54,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    3.54,
+    3.59,
+    3.64
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400076
+  },
+  {
+   "id": "d02bd38a-22f4-4226-a2f3-13b3257fa11b",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "altura",
+   "value": 189.9,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600077
+  },
+  {
+   "id": "d780f535-fa16-4d0a-aa3f-965f6dded95c",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "peso",
+   "value": 91.3,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600078
+  },
+  {
+   "id": "cb1c070a-abb3-4350-afd2-209107788f99",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "alcance",
+   "value": 249,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600079
+  },
+  {
+   "id": "7fe7e943-9553-47a1-a70e-07aea11ba3e9",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "cmj",
+   "value": 43,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    292,
+    291,
+    289
+   ],
+   "base": 249,
+   "protocolOk": true,
+   "createdAt": 1787943600080
+  },
+  {
+   "id": "66fe8102-5268-4c26-afcf-038fba5c98a9",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "salto_balanco",
+   "value": 50,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    299,
+    298,
+    297
+   ],
+   "base": 249,
+   "protocolOk": true,
+   "createdAt": 1787943600081
+  },
+  {
+   "id": "bd19b3ee-3763-400c-a7ea-78cfb6249ec5",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "lane",
+   "value": 11.65,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    11.65,
+    11.77,
+    11.89
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600082
+  },
+  {
+   "id": "89804551-0440-4e58-a39e-33d7795cf21b",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "sprint",
+   "value": 3.5,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    3.5,
+    3.55,
+    3.6
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600083
+  },
+  {
+   "id": "84a90ba8-8449-48ee-a762-dd6bcf0e3487",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "altura",
+   "value": 190.7,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400084
+  },
+  {
+   "id": "158dc23d-9e17-4b59-a9b5-45faff872e8d",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "peso",
+   "value": 92.4,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400085
+  },
+  {
+   "id": "28f31d4a-8280-484b-ae17-002b1443bb4c",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "envergadura",
+   "value": 195.7,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400086
+  },
+  {
+   "id": "bcbfa6c2-e089-4df9-a972-a01a0080a025",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "alcance",
+   "value": 250,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400087
+  },
+  {
+   "id": "f58bad4e-4092-4cad-a194-43f5bfe7b43c",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "cmj",
+   "value": 44,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    294,
+    294,
+    291
+   ],
+   "base": 250,
+   "protocolOk": true,
+   "createdAt": 1790276400088
+  },
+  {
+   "id": "3dad6d3b-9757-40bd-a64b-a7f292304aea",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "salto_balanco",
+   "value": 51,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    301,
+    300,
+    299
+   ],
+   "base": 250,
+   "protocolOk": true,
+   "createdAt": 1790276400089
+  },
+  {
+   "id": "2eb85f0f-5d59-444e-aa5d-a83c333cef31",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "lane",
+   "value": 11.75,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    11.75,
+    11.87,
+    11.99
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400090
+  },
+  {
+   "id": "eeeb865c-79bb-4a44-afe2-30957af6f8ac",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "b537301f-2df1-425e-a409-9f589ae86ab2",
+   "type": "sprint",
+   "value": 3.46,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    3.46,
+    3.51,
+    3.56
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400091
+  },
+  {
+   "id": "2461f8a5-f6f4-484e-a47b-4240491c1434",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "altura",
+   "value": 194,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400092
+  },
+  {
+   "id": "e8f6d00f-0151-4973-a8d3-644db1eb086a",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "peso",
+   "value": 86,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400093
+  },
+  {
+   "id": "020403b2-b1c5-4c18-aa3b-05def46d5a3a",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "envergadura",
+   "value": 200,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400094
+  },
+  {
+   "id": "7e95794b-ba7b-481f-a55d-25d4e074b38c",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "alcance",
+   "value": 254,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400095
+  },
+  {
+   "id": "89ba23be-de3e-43c1-a25b-11af325b4d97",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "cmj",
+   "value": 46,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    300,
+    300,
+    297
+   ],
+   "base": 254,
+   "protocolOk": true,
+   "createdAt": 1785092400096
+  },
+  {
+   "id": "ab516047-8604-4696-af93-d33e31d33442",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "salto_balanco",
+   "value": 53,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    307,
+    306,
+    305
+   ],
+   "base": 254,
+   "protocolOk": true,
+   "createdAt": 1785092400097
+  },
+  {
+   "id": "f75fa224-4b00-4ced-a294-ac7c89a5acaf",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "lane",
+   "value": 11.6,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    11.6,
+    11.72,
+    11.84
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400098
+  },
+  {
+   "id": "81511051-cef2-4d75-af65-665c4df21f9a",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "sprint",
+   "value": 3.75,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    3.75,
+    3.8,
+    3.85
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400099
+  },
+  {
+   "id": "2cf3a41d-7b02-44cd-a8f0-f86dbfc73f8a",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "altura",
+   "value": 194.4,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600100
+  },
+  {
+   "id": "707d3fcb-0122-4df4-a9ab-b127d1bfd47f",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "peso",
+   "value": 86.6,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600101
+  },
+  {
+   "id": "d03d992d-570a-42a3-aac7-cf2b8f1310d3",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "alcance",
+   "value": 254,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600102
+  },
+  {
+   "id": "dba0abc9-60a2-49f0-afa6-3b713a689b86",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "cmj",
+   "value": 48,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    302,
+    301,
+    299
+   ],
+   "base": 254,
+   "protocolOk": true,
+   "createdAt": 1787943600103
+  },
+  {
+   "id": "dc62fda0-2821-4de2-a17a-18ade986ca92",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "salto_balanco",
+   "value": 55,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    309,
+    308,
+    307
+   ],
+   "base": 254,
+   "protocolOk": true,
+   "createdAt": 1787943600104
+  },
+  {
+   "id": "f88f2c28-225d-4f5a-ad29-5b50b90388e4",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "lane",
+   "value": 11.4,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    11.4,
+    11.52,
+    11.64
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600105
+  },
+  {
+   "id": "ff197cfe-ed25-402f-a036-752c74177765",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "sprint",
+   "value": 3.71,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    3.71,
+    3.76,
+    3.81
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600106
+  },
+  {
+   "id": "0b600c54-0238-4cff-ac3a-3a708813d51f",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "altura",
+   "value": 194.6,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400107
+  },
+  {
+   "id": "bb0d8259-c17c-4340-a8f7-0d50c03ab317",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "peso",
+   "value": 87,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400108
+  },
+  {
+   "id": "56aae3de-49de-4bff-ae77-eb0d9740ac51",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "envergadura",
+   "value": 200.6,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400109
+  },
+  {
+   "id": "ec3c6217-b8a3-4165-a8bd-2ec4f6818a4d",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "alcance",
+   "value": 255,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400110
+  },
+  {
+   "id": "6286280c-2047-481c-af69-de135a548b7e",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "cmj",
+   "value": 49,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    304,
+    304,
+    301
+   ],
+   "base": 255,
+   "protocolOk": true,
+   "createdAt": 1790276400111
+  },
+  {
+   "id": "d7523837-c26e-4ec0-adba-68982cd36429",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "salto_balanco",
+   "value": 56,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    311,
+    310,
+    309
+   ],
+   "base": 255,
+   "protocolOk": true,
+   "createdAt": 1790276400112
+  },
+  {
+   "id": "c1f6db07-b790-4769-ade8-81aa8a0dd987",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "lane",
+   "value": 11.25,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    11.25,
+    11.37,
+    11.49
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400113
+  },
+  {
+   "id": "359da907-6187-47e2-adcb-f262baffba3e",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "56612517-7234-4b51-adee-b246f84f768c",
+   "type": "sprint",
+   "value": 3.67,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    3.67,
+    3.72,
+    3.77
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400114
+  },
+  {
+   "id": "a2e93211-d4f4-4941-a607-786340346680",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "altura",
+   "value": 168,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400115
+  },
+  {
+   "id": "9ad765b1-efeb-42b4-a639-d03e956b4dd0",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "peso",
+   "value": 63,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400116
+  },
+  {
+   "id": "5f3f915d-5fc2-401b-abea-af1b08f8625a",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "envergadura",
+   "value": 170,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400117
+  },
+  {
+   "id": "d2843f29-8e0c-4927-a4d7-e65f4cc2bdee",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "alcance",
+   "value": 220,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400118
+  },
+  {
+   "id": "85dc3246-743e-4545-a240-2c9c5929605c",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "cmj",
+   "value": 50,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    270,
+    270,
+    267
+   ],
+   "base": 220,
+   "protocolOk": true,
+   "createdAt": 1785092400119
+  },
+  {
+   "id": "8581b3ef-6518-4cbc-a3d0-5d4e934084fa",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "salto_balanco",
+   "value": 57,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    277,
+    276,
+    275
+   ],
+   "base": 220,
+   "protocolOk": true,
+   "createdAt": 1785092400120
+  },
+  {
+   "id": "97a467ae-8f07-4c57-a066-f63dad41154e",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "lane",
+   "value": 12.6,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    12.6,
+    12.72,
+    12.84
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400121
+  },
+  {
+   "id": "2405a809-6edf-43b5-addb-3d8c796ea0a2",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "sprint",
+   "value": 3.68,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    3.68,
+    3.73,
+    3.78
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400122
+  },
+  {
+   "id": "7d5db33e-06ca-44d5-a4eb-04d4356238fb",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "altura",
+   "value": 168.5,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600123
+  },
+  {
+   "id": "570087be-9bda-49a6-a928-182905002293",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "peso",
+   "value": 63.6,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600124
+  },
+  {
+   "id": "41dd99ec-f462-42b1-a2aa-96491cf96603",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "alcance",
+   "value": 221,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600125
+  },
+  {
+   "id": "038088dd-4088-4ea1-ac97-972fae7463c4",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "cmj",
+   "value": 52,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    273,
+    272,
+    270
+   ],
+   "base": 221,
+   "protocolOk": false,
+   "notes": "sem aquecimento padrão",
+   "createdAt": 1787943600126
+  },
+  {
+   "id": "3f0b82b0-3389-4dec-a425-ca65ed72f719",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "salto_balanco",
+   "value": 59,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    280,
+    279,
+    278
+   ],
+   "base": 221,
+   "protocolOk": false,
+   "createdAt": 1787943600127
+  },
+  {
+   "id": "13521b0b-0fab-4e3d-a335-14c45f72bf4f",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "lane",
+   "value": 12.4,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    12.4,
+    12.52,
+    12.64
+   ],
+   "protocolOk": false,
+   "createdAt": 1787943600128
+  },
+  {
+   "id": "50ea92c3-2c35-47a7-a183-ed53e13bf03b",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "sprint",
+   "value": 3.64,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    3.64,
+    3.69,
+    3.74
+   ],
+   "protocolOk": false,
+   "createdAt": 1787943600129
+  },
+  {
+   "id": "70cd6294-72dc-4dc1-ab48-a1feff86939e",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "altura",
+   "value": 168.9,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400130
+  },
+  {
+   "id": "5864578f-947b-438b-a03c-bb2d1932c67f",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "peso",
+   "value": 64,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400131
+  },
+  {
+   "id": "bf7de00f-0467-49dd-a439-980b12670b13",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "envergadura",
+   "value": 170.9,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400132
+  },
+  {
+   "id": "0c5bd1ac-15b0-4a0e-a6ee-c31ad2874cea",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "alcance",
+   "value": 221,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400133
+  },
+  {
+   "id": "6c1b0a50-4f5e-4dd1-a405-0c5292e583ee",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "cmj",
+   "value": 53,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    274,
+    274,
+    271
+   ],
+   "base": 221,
+   "protocolOk": true,
+   "createdAt": 1790276400134
+  },
+  {
+   "id": "395f92de-cfd9-4c78-a061-0e26354562ba",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "salto_balanco",
+   "value": 60,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    281,
+    280,
+    279
+   ],
+   "base": 221,
+   "protocolOk": true,
+   "createdAt": 1790276400135
+  },
+  {
+   "id": "dfcf2c5a-4bc7-4811-ac17-5edaf33f12c9",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "lane",
+   "value": 12.25,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    12.25,
+    12.37,
+    12.49
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400136
+  },
+  {
+   "id": "d58d5f72-77dd-49ff-a041-4cd1fddf17bc",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "c3f21512-040a-4090-a165-788d672bcca5",
+   "type": "sprint",
+   "value": 3.6,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    3.6,
+    3.65,
+    3.7
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400137
+  },
+  {
+   "id": "b643d482-f0e2-44ed-ad3c-7e7c573ccbb8",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "altura",
+   "value": 176,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400138
+  },
+  {
+   "id": "988fddcb-b796-4fdf-ad5c-cf3a9c17eca8",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "peso",
+   "value": 74,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400139
+  },
+  {
+   "id": "4f3e5e6f-25d6-49e9-a887-530214499281",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "envergadura",
+   "value": 179,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400140
+  },
+  {
+   "id": "eb0cc3bd-68fe-40ca-a86f-26b28fd94978",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "alcance",
+   "value": 231,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400141
+  },
+  {
+   "id": "e1e94a0a-28fc-485e-a9a8-17b427fb730a",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "cmj",
+   "value": 34,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    265,
+    265,
+    262
+   ],
+   "base": 231,
+   "protocolOk": true,
+   "createdAt": 1785092400142
+  },
+  {
+   "id": "0f6ddec4-3ddc-4b41-ad61-bd4ac1c33210",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "salto_balanco",
+   "value": 41,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    272,
+    271,
+    270
+   ],
+   "base": 231,
+   "protocolOk": true,
+   "createdAt": 1785092400143
+  },
+  {
+   "id": "8f73bd73-9557-49d7-a29b-df8f15a00507",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "lane",
+   "value": 12.35,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    12.35,
+    12.47,
+    12.59
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400144
+  },
+  {
+   "id": "df3b0db8-ec7a-49d9-a1e7-aaf884ae7670",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "sprint",
+   "value": 3.61,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    3.61,
+    3.66,
+    3.71
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400145
+  },
+  {
+   "id": "db8480a3-c05d-457a-a76b-4eb89679987e",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "altura",
+   "value": 176.2,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600146
+  },
+  {
+   "id": "ce344ade-3046-489f-a0b1-8b9db85025e7",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "peso",
+   "value": 74.6,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600147
+  },
+  {
+   "id": "262f4702-c747-401f-a18d-7a488c34a9c1",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "alcance",
+   "value": 231,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600148
+  },
+  {
+   "id": "3dd7afc0-6dd6-4408-a215-70f4dbc1e6fd",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "cmj",
+   "value": 36,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    267,
+    266,
+    264
+   ],
+   "base": 231,
+   "protocolOk": true,
+   "createdAt": 1787943600149
+  },
+  {
+   "id": "fd079851-d428-446c-ad3b-39cd4d48a12d",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "salto_balanco",
+   "value": 43,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    274,
+    273,
+    272
+   ],
+   "base": 231,
+   "protocolOk": true,
+   "createdAt": 1787943600150
+  },
+  {
+   "id": "94b87286-00ed-4c7b-a1b1-c038bef87776",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "lane",
+   "value": 12.15,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    12.15,
+    12.27,
+    12.39
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600151
+  },
+  {
+   "id": "eae479c4-864e-4cb6-ad80-8d3e24ad05ff",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "sprint",
+   "value": 3.57,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    3.57,
+    3.62,
+    3.67
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600152
+  },
+  {
+   "id": "b359eeea-2ae9-4130-aee8-74af593f1d16",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "altura",
+   "value": 176.4,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400153
+  },
+  {
+   "id": "62cd55bb-f2fd-4a00-a1d3-6ac97e60a5f8",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "peso",
+   "value": 75,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400154
+  },
+  {
+   "id": "16cc4617-ec77-4a8b-ab10-49b4b1afa825",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "envergadura",
+   "value": 179.4,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400155
+  },
+  {
+   "id": "21187cfd-fedf-4414-abab-d6e29844d1fe",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "alcance",
+   "value": 232,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400156
+  },
+  {
+   "id": "4e856ce3-66d0-40c3-a1dd-49f90478051d",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "cmj",
+   "value": 37,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    269,
+    269,
+    266
+   ],
+   "base": 232,
+   "protocolOk": true,
+   "createdAt": 1790276400157
+  },
+  {
+   "id": "811053a0-9fa3-45d9-ad6a-67ffb110ab0c",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "salto_balanco",
+   "value": 44,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    276,
+    275,
+    274
+   ],
+   "base": 232,
+   "protocolOk": true,
+   "createdAt": 1790276400158
+  },
+  {
+   "id": "25894943-5ebd-44f6-a950-60f327355074",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "lane",
+   "value": 12,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    12,
+    12.12,
+    12.24
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400159
+  },
+  {
+   "id": "4b3118ee-d32b-4f22-adde-3e05ba5fc1d9",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "bb2bb81f-8889-4f66-ae0f-825e9defe45b",
+   "type": "sprint",
+   "value": 3.53,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    3.53,
+    3.58,
+    3.63
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400160
+  },
+  {
+   "id": "ea35fff1-90a6-4cc6-a80d-91723a054928",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "altura",
+   "value": 181,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400161
+  },
+  {
+   "id": "68845cf0-018f-494e-afbd-7443e3d45abb",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "peso",
+   "value": 82,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400162
+  },
+  {
+   "id": "fa59130a-b3c9-4dec-aaa7-78d5071441ae",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "envergadura",
+   "value": 179,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400163
+  },
+  {
+   "id": "2b5c6c5c-0666-40c5-aeed-bb7b5c45bb15",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "alcance",
+   "value": 237,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400164
+  },
+  {
+   "id": "3faa77b0-14d9-469b-a7e1-e52b089eaf62",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "cmj",
+   "value": 38,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    275,
+    275,
+    272
+   ],
+   "base": 237,
+   "protocolOk": true,
+   "createdAt": 1785092400165
+  },
+  {
+   "id": "2fd59093-99b6-4da6-a9fd-49555200bd4d",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "salto_balanco",
+   "value": 45,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    282,
+    281,
+    280
+   ],
+   "base": 237,
+   "protocolOk": true,
+   "createdAt": 1785092400166
+  },
+  {
+   "id": "987f9e6e-3481-4b79-a757-f18ad9711e43",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "lane",
+   "value": 12.1,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    12.1,
+    12.22,
+    12.34
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400167
+  },
+  {
+   "id": "b5e5edb2-3bec-47b4-ab4b-f65705f5ea8d",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "sprint",
+   "value": 3.54,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    3.54,
+    3.59,
+    3.64
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400168
+  },
+  {
+   "id": "1da142bb-5365-4549-acf9-59eb4becd0b1",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "altura",
+   "value": 181.4,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600169
+  },
+  {
+   "id": "39f80372-1b6f-41d8-a6a0-6306702be8be",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "peso",
+   "value": 82.6,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600170
+  },
+  {
+   "id": "d519d981-6f3b-4739-af79-928a79bebade",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "alcance",
+   "value": 237,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600171
+  },
+  {
+   "id": "9b899756-9e64-449e-af11-369d4ab926ce",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "cmj",
+   "value": 40,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    277,
+    276,
+    274
+   ],
+   "base": 237,
+   "protocolOk": true,
+   "createdAt": 1787943600172
+  },
+  {
+   "id": "c221f6de-4304-4d0a-a895-3c5d3fc720a5",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "salto_balanco",
+   "value": 47,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    284,
+    283,
+    282
+   ],
+   "base": 237,
+   "protocolOk": true,
+   "createdAt": 1787943600173
+  },
+  {
+   "id": "19cf10ed-5a11-4090-a934-d5ddbb012e04",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "lane",
+   "value": 11.9,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    11.9,
+    12.02,
+    12.14
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600174
+  },
+  {
+   "id": "bc3b9e66-7b42-49c2-acd4-cd94a357abaa",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "sprint",
+   "value": 3.5,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    3.5,
+    3.55,
+    3.6
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600175
+  },
+  {
+   "id": "7ff754a6-0721-494f-a822-479b0e0283cb",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "altura",
+   "value": 181.6,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400176
+  },
+  {
+   "id": "3463e3db-807e-4023-a59c-cdc3410db0a8",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "peso",
+   "value": 83,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400177
+  },
+  {
+   "id": "c2c75cbc-c1fd-4744-a7e0-b9b31ab8cafd",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "envergadura",
+   "value": 179.6,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400178
+  },
+  {
+   "id": "c5d29a1b-7230-47ea-a2f2-ba90e75312b8",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "alcance",
+   "value": 238,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400179
+  },
+  {
+   "id": "7ffb3927-0f0f-47b1-ad7c-43942e1565d1",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "cmj",
+   "value": 41,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    279,
+    279,
+    276
+   ],
+   "base": 238,
+   "protocolOk": true,
+   "createdAt": 1790276400180
+  },
+  {
+   "id": "d9894e9e-73d5-4426-a335-9796e3f2868b",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "salto_balanco",
+   "value": 48,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    286,
+    285,
+    284
+   ],
+   "base": 238,
+   "protocolOk": true,
+   "createdAt": 1790276400181
+  },
+  {
+   "id": "fb756a1b-882e-4322-a780-f839fd98960c",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "lane",
+   "value": 11.75,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    11.75,
+    11.87,
+    11.99
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400182
+  },
+  {
+   "id": "fe169e2a-1ba7-4da8-accd-a48d48362cf8",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "25a6d52a-dc38-482c-aa8f-56fee8dff028",
+   "type": "sprint",
+   "value": 3.46,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    3.46,
+    3.51,
+    3.56
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400183
+  },
+  {
+   "id": "ed48ce79-6718-44b7-a4ad-7a919dee88f8",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "altura",
+   "value": 187,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400184
+  },
+  {
+   "id": "60251a06-5027-437d-a970-25683d2adb97",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "peso",
+   "value": 79,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400185
+  },
+  {
+   "id": "3ebac271-20bf-4209-a225-2a1ed789330f",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "envergadura",
+   "value": 192,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400186
+  },
+  {
+   "id": "3e2d8b3a-646d-4577-a634-46a79ca3b1ae",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "alcance",
+   "value": 245,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400187
+  },
+  {
+   "id": "ec0ca21c-19a4-4631-a1b2-a9d0bcce0066",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "cmj",
+   "value": 40,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    285,
+    285,
+    282
+   ],
+   "base": 245,
+   "protocolOk": true,
+   "createdAt": 1785092400188
+  },
+  {
+   "id": "1f87c971-b04d-4d2a-a0d1-a11382cf071b",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "salto_balanco",
+   "value": 47,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    292,
+    291,
+    290
+   ],
+   "base": 245,
+   "protocolOk": true,
+   "createdAt": 1785092400189
+  },
+  {
+   "id": "a69adb67-8932-4196-a88f-9e83842203ad",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "lane",
+   "value": 11.85,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    11.85,
+    11.97,
+    12.09
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400190
+  },
+  {
+   "id": "1cf603ee-0d27-4385-a417-aa8831192010",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "sprint",
+   "value": 3.75,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    3.75,
+    3.8,
+    3.85
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400191
+  },
+  {
+   "id": "6d890dfd-1a80-4aa7-a3b6-faa0f24617f3",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "altura",
+   "value": 187.5,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600192
+  },
+  {
+   "id": "581bdd98-940d-4f03-a598-f553e03f42c3",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "peso",
+   "value": 79.6,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600193
+  },
+  {
+   "id": "4ce62183-692f-4dfd-a856-bca856dc6071",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "alcance",
+   "value": 246,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600194
+  },
+  {
+   "id": "a9065ba2-8250-4300-aa72-a6765d386467",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "cmj",
+   "value": 42,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    288,
+    287,
+    285
+   ],
+   "base": 246,
+   "protocolOk": true,
+   "createdAt": 1787943600195
+  },
+  {
+   "id": "8d52519e-9fd4-41de-a6e6-69250d6dd634",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "salto_balanco",
+   "value": 49,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    295,
+    294,
+    293
+   ],
+   "base": 246,
+   "protocolOk": true,
+   "createdAt": 1787943600196
+  },
+  {
+   "id": "3da2bf72-0407-4b75-afae-af444235082f",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "lane",
+   "value": 11.65,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    11.65,
+    11.77,
+    11.89
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600197
+  },
+  {
+   "id": "b428a740-e63d-4aba-ae78-99b3c7b41c96",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "sprint",
+   "value": 3.71,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    3.71,
+    3.76,
+    3.81
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600198
+  },
+  {
+   "id": "cce18efb-32a7-403a-a4d5-3de3121e542a",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "altura",
+   "value": 187.9,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400199
+  },
+  {
+   "id": "aeb83adf-cd6b-4629-a079-b8bd2949a29e",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "peso",
+   "value": 80,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400200
+  },
+  {
+   "id": "25bf0af8-4703-49e6-af79-98266c856fc7",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "envergadura",
+   "value": 192.9,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400201
+  },
+  {
+   "id": "7ca9afe9-874b-4863-a6f2-b3e5e9820eeb",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "alcance",
+   "value": 246,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400202
+  },
+  {
+   "id": "56511db6-d906-4643-ae95-b3e55dd6b60c",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "cmj",
+   "value": 43,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    289,
+    289,
+    286
+   ],
+   "base": 246,
+   "protocolOk": true,
+   "createdAt": 1790276400203
+  },
+  {
+   "id": "7549b0bc-c478-4b13-a0e9-f28ec377728c",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "salto_balanco",
+   "value": 50,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    296,
+    295,
+    294
+   ],
+   "base": 246,
+   "protocolOk": true,
+   "createdAt": 1790276400204
+  },
+  {
+   "id": "446586f5-cbb9-417c-aad9-321644662211",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "lane",
+   "value": 11.5,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    11.5,
+    11.62,
+    11.74
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400205
+  },
+  {
+   "id": "1c50e167-2ab5-4dd9-a882-a84042835e12",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "316181d9-6922-48ed-a6e4-5673a5118844",
+   "type": "sprint",
+   "value": 3.67,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    3.67,
+    3.72,
+    3.77
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400206
+  },
+  {
+   "id": "26ff99b5-a67e-47ac-a5b6-970371fe60b4",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "altura",
+   "value": 191,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400207
+  },
+  {
+   "id": "9d7d3a36-b7cb-41c0-ae76-c5fc1c4a56f1",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "peso",
+   "value": 86,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400208
+  },
+  {
+   "id": "f9295730-053a-49b1-ac01-5aa218bff8c7",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "envergadura",
+   "value": 197,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400209
+  },
+  {
+   "id": "46e8a355-72cf-48e1-a334-ed8105d70077",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "alcance",
+   "value": 250,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400210
+  },
+  {
+   "id": "95cf27e8-e47b-489f-a6df-ddca1ef178f7",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "cmj",
+   "value": 44,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    294,
+    294,
+    291
+   ],
+   "base": 250,
+   "protocolOk": true,
+   "createdAt": 1785092400211
+  },
+  {
+   "id": "83da6def-97bd-4cce-a726-40454fcbf392",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "salto_balanco",
+   "value": 51,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    301,
+    300,
+    299
+   ],
+   "base": 250,
+   "protocolOk": true,
+   "createdAt": 1785092400212
+  },
+  {
+   "id": "127d8482-a3f6-4b0a-af2e-1f1c35bb55d0",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "lane",
+   "value": 11.6,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    11.6,
+    11.72,
+    11.84
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400213
+  },
+  {
+   "id": "20db89d9-a284-4a6f-a4ca-acda8e2c30b6",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "sprint",
+   "value": 3.68,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    3.68,
+    3.73,
+    3.78
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400214
+  },
+  {
+   "id": "16cfe424-aef1-4f0b-a369-afd68f337a5a",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "altura",
+   "value": 191.2,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600215
+  },
+  {
+   "id": "ec93fba9-635e-4ca6-adc8-f6113a642b61",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "peso",
+   "value": 86.6,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600216
+  },
+  {
+   "id": "0306680b-5f65-414a-a058-d6a0f3ba501b",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "alcance",
+   "value": 250,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600217
+  },
+  {
+   "id": "1ed07b94-06e6-4216-a522-d444f54a47aa",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "cmj",
+   "value": 46,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    296,
+    295,
+    293
+   ],
+   "base": 250,
+   "protocolOk": true,
+   "createdAt": 1787943600218
+  },
+  {
+   "id": "4dd06c3b-f391-45a0-ae6e-70c94dd5fee4",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "salto_balanco",
+   "value": 53,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    303,
+    302,
+    301
+   ],
+   "base": 250,
+   "protocolOk": true,
+   "createdAt": 1787943600219
+  },
+  {
+   "id": "6949ed9a-7610-4f91-ab7e-1496160d9843",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "lane",
+   "value": 11.4,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    11.4,
+    11.52,
+    11.64
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600220
+  },
+  {
+   "id": "e9b9eb5a-5086-41d5-a96e-d9fb60f47f31",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "sprint",
+   "value": 3.64,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    3.64,
+    3.69,
+    3.74
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600221
+  },
+  {
+   "id": "6b5e76e0-b8c1-42e0-a854-717e71d200d5",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "altura",
+   "value": 191.4,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400222
+  },
+  {
+   "id": "f9e3fcb7-bb7f-4b91-a200-ffaa62211e79",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "peso",
+   "value": 87,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400223
+  },
+  {
+   "id": "e9c4f268-937a-435b-a156-cb7d0af33a03",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "envergadura",
+   "value": 197.4,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400224
+  },
+  {
+   "id": "12a42ff9-63d1-4b62-a8fa-3d65911b9a80",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "alcance",
+   "value": 251,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400225
+  },
+  {
+   "id": "e0767a10-9159-4045-a037-37c4cb6f6496",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "cmj",
+   "value": 47,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    298,
+    298,
+    295
+   ],
+   "base": 251,
+   "protocolOk": true,
+   "createdAt": 1790276400226
+  },
+  {
+   "id": "78175fcd-cc11-4baa-accd-730667fc3777",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "salto_balanco",
+   "value": 54,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    305,
+    304,
+    303
+   ],
+   "base": 251,
+   "protocolOk": true,
+   "createdAt": 1790276400227
+  },
+  {
+   "id": "a3a5de64-7579-4cc9-a524-a848315f7221",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "lane",
+   "value": 11.25,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    11.25,
+    11.37,
+    11.49
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400228
+  },
+  {
+   "id": "ce006268-c18d-4fb4-af66-ef3fc214ac07",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "fac09a21-7eb7-4cbe-adb2-332ae49860e6",
+   "type": "sprint",
+   "value": 3.6,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    3.6,
+    3.65,
+    3.7
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400229
+  },
+  {
+   "id": "90b6039e-60a3-4a05-a497-3cae3b3dc0d8",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "altura",
+   "value": 173,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400230
+  },
+  {
+   "id": "50857ef5-e54d-4ce9-a591-45b902bc1645",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "peso",
+   "value": 71,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400231
+  },
+  {
+   "id": "3526b3c0-f4e1-45c9-ac0c-004ac91a62c6",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "envergadura",
+   "value": 175,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400232
+  },
+  {
+   "id": "1da74819-f9e1-4d62-a981-d473f4065826",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "alcance",
+   "value": 227,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400233
+  },
+  {
+   "id": "df952900-41a3-4108-a798-53ab31c1f60d",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "cmj",
+   "value": 46,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    273,
+    273,
+    270
+   ],
+   "base": 227,
+   "protocolOk": true,
+   "createdAt": 1785092400234
+  },
+  {
+   "id": "492a5cb8-354c-4ac9-a752-cd7ac1f27a58",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "salto_balanco",
+   "value": 53,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    280,
+    279,
+    278
+   ],
+   "base": 227,
+   "protocolOk": true,
+   "createdAt": 1785092400235
+  },
+  {
+   "id": "4f3c1dbb-14be-4f35-ab34-ce3c6c7f2f29",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "lane",
+   "value": 12.6,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    12.6,
+    12.72,
+    12.84
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400236
+  },
+  {
+   "id": "17bad615-0b15-4916-af7e-a1f0e536eacf",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "sprint",
+   "value": 3.61,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    3.61,
+    3.66,
+    3.71
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400237
+  },
+  {
+   "id": "9619dc84-51b1-432e-a0af-df76f70098ea",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "altura",
+   "value": 173.4,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600238
+  },
+  {
+   "id": "3068db29-51da-4596-a88a-9384b1687a24",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "peso",
+   "value": 71.6,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600239
+  },
+  {
+   "id": "63a3438c-dcf7-423f-a845-31af41549f7a",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "alcance",
+   "value": 227,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600240
+  },
+  {
+   "id": "8330c6b8-b348-4ae7-ac8a-4aac5c1258ae",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "cmj",
+   "value": 48,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    275,
+    274,
+    272
+   ],
+   "base": 227,
+   "protocolOk": true,
+   "createdAt": 1787943600241
+  },
+  {
+   "id": "253aa12f-b533-461a-a8e7-5245ab5e7446",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "salto_balanco",
+   "value": 55,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    282,
+    281,
+    280
+   ],
+   "base": 227,
+   "protocolOk": true,
+   "createdAt": 1787943600242
+  },
+  {
+   "id": "aeb9d85b-cd4b-48fb-ab0a-2dea07dd0261",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "lane",
+   "value": 12.4,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    12.4,
+    12.52,
+    12.64
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600243
+  },
+  {
+   "id": "3eb5e849-df71-40d9-a7da-7e7975f49e71",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "sprint",
+   "value": 3.57,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    3.57,
+    3.62,
+    3.67
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600244
+  },
+  {
+   "id": "c43e184d-f5cc-4fc5-ac82-c38117c74fc5",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "altura",
+   "value": 173.6,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400245
+  },
+  {
+   "id": "8348255d-0d91-44f6-ac7c-f033fc15a17d",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "peso",
+   "value": 72,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400246
+  },
+  {
+   "id": "4acddf9b-7f40-4b2c-a2e5-729139c395f5",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "envergadura",
+   "value": 175.6,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400247
+  },
+  {
+   "id": "7f63dbcb-9f6c-4958-a945-c30177acbd12",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "alcance",
+   "value": 228,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400248
+  },
+  {
+   "id": "4b88b955-52b7-422c-acb7-18f609268a3e",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "cmj",
+   "value": 49,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    277,
+    277,
+    274
+   ],
+   "base": 228,
+   "protocolOk": true,
+   "createdAt": 1790276400249
+  },
+  {
+   "id": "be7550ac-3ad3-4406-a0d6-69624af5af2a",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "salto_balanco",
+   "value": 56,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    284,
+    283,
+    282
+   ],
+   "base": 228,
+   "protocolOk": true,
+   "createdAt": 1790276400250
+  },
+  {
+   "id": "ebda7299-af9e-42d6-aa5f-7d6a4e9d8f06",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "lane",
+   "value": 12.25,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    12.25,
+    12.37,
+    12.49
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400251
+  },
+  {
+   "id": "c570a554-b9c2-420c-afe4-20113a2a3100",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "666386a2-6df6-4fe5-a706-bcb5f555297d",
+   "type": "sprint",
+   "value": 3.53,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    3.53,
+    3.58,
+    3.63
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400252
+  },
+  {
+   "id": "86652b84-4167-4f58-a64e-d92375ecbb1c",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "altura",
+   "value": 179,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400253
+  },
+  {
+   "id": "68bdb1e9-8d22-4663-a437-98acb788cbcd",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "peso",
+   "value": 80,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400254
+  },
+  {
+   "id": "fe000edd-60c6-4769-a507-9595cace924a",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "envergadura",
+   "value": 182,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400255
+  },
+  {
+   "id": "91438769-67a3-45ee-ab53-00e9a509b243",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "alcance",
+   "value": 234,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "createdAt": 1785092400256
+  },
+  {
+   "id": "686b7c1c-9265-4fc3-a40d-f3b9eb89db91",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "cmj",
+   "value": 50,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    284,
+    284,
+    281
+   ],
+   "base": 234,
+   "protocolOk": true,
+   "createdAt": 1785092400257
+  },
+  {
+   "id": "43e0fee1-9581-4bc6-af2c-5117ada77b6f",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "salto_balanco",
+   "value": 57,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    291,
+    290,
+    289
+   ],
+   "base": 234,
+   "protocolOk": true,
+   "createdAt": 1785092400258
+  },
+  {
+   "id": "ba0e64ae-b2cd-4d28-a653-c8dbaded8f85",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "lane",
+   "value": 12.35,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    12.35,
+    12.47,
+    12.59
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400259
+  },
+  {
+   "id": "bd1a6016-f033-440f-aa36-5a83c3e80296",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "sprint",
+   "value": 3.54,
+   "date": "2026-07-26",
+   "sessionId": "fa8c9607-93d7-46c3-a397-7359231daef5",
+   "evaluator": "Nico",
+   "attempts": [
+    3.54,
+    3.59,
+    3.64
+   ],
+   "protocolOk": true,
+   "createdAt": 1785092400260
+  },
+  {
+   "id": "1dc43942-06f6-45bb-a1a6-cd3eefcdb8da",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "altura",
+   "value": 179.5,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600261
+  },
+  {
+   "id": "4dc0bfd0-32f7-434b-a1bd-2bcfb18c6245",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "peso",
+   "value": 80.6,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600262
+  },
+  {
+   "id": "e3de90b1-7f7a-4bf3-afce-16e8ca059b88",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "alcance",
+   "value": 235,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "createdAt": 1787943600263
+  },
+  {
+   "id": "1eedc25f-41d7-41f3-ad21-9b98bff93a99",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "cmj",
+   "value": 52,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    287,
+    286,
+    284
+   ],
+   "base": 235,
+   "protocolOk": true,
+   "createdAt": 1787943600264
+  },
+  {
+   "id": "7c3bb220-84f1-457b-a520-afa94440e136",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "salto_balanco",
+   "value": 59,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    294,
+    293,
+    292
+   ],
+   "base": 235,
+   "protocolOk": true,
+   "createdAt": 1787943600265
+  },
+  {
+   "id": "3e3e28a0-3f0d-42c4-ac7b-8e277f355cfe",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "lane",
+   "value": 12.15,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    12.15,
+    12.27,
+    12.39
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600266
+  },
+  {
+   "id": "df27900e-2cc0-4b36-a646-fdbfeffdd731",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "sprint",
+   "value": 3.5,
+   "date": "2026-08-28",
+   "sessionId": "115acb14-3436-4768-a4d6-b0617e974b79",
+   "evaluator": "Nico",
+   "attempts": [
+    3.5,
+    3.55,
+    3.6
+   ],
+   "protocolOk": true,
+   "createdAt": 1787943600267
+  },
+  {
+   "id": "13011bb8-59e1-4cfb-aced-30f8fc77fa38",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "altura",
+   "value": 179.9,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400268
+  },
+  {
+   "id": "b615ae74-44a1-4419-a1a6-115112c7cc63",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "peso",
+   "value": 81,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400269
+  },
+  {
+   "id": "179a66f5-fa4e-4791-aee1-df186926c440",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "envergadura",
+   "value": 182.9,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400270
+  },
+  {
+   "id": "89be9b82-3e4b-4b1d-ada6-0d3459b1f36e",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "alcance",
+   "value": 235,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "createdAt": 1790276400271
+  },
+  {
+   "id": "4b540891-386c-4d1a-aa17-7ece03ba478d",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "cmj",
+   "value": 53,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    288,
+    288,
+    285
+   ],
+   "base": 235,
+   "protocolOk": true,
+   "createdAt": 1790276400272
+  },
+  {
+   "id": "d7d36ce3-a5bc-4cbe-aa47-05cf16ac598f",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "salto_balanco",
+   "value": 60,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    295,
+    294,
+    293
+   ],
+   "base": 235,
+   "protocolOk": true,
+   "createdAt": 1790276400273
+  },
+  {
+   "id": "558b29ea-8619-4c98-a1f1-f424492a92f7",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "lane",
+   "value": 12,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    12,
+    12.12,
+    12.24
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400274
+  },
+  {
+   "id": "f17ed76d-df96-4ec3-af36-59fec2ccd44d",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "playerId": "cb406658-c174-4450-a31b-d1ff1602bbb1",
+   "type": "sprint",
+   "value": 3.46,
+   "date": "2026-09-24",
+   "sessionId": "631e8674-b20e-4231-a757-6c69817c8cec",
+   "evaluator": "Nico",
+   "attempts": [
+    3.46,
+    3.51,
+    3.56
+   ],
+   "protocolOk": true,
+   "createdAt": 1790276400275
   }
  ]
 }

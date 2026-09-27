@@ -53,6 +53,14 @@
 - [x] Relatório individual pós-jogo (números vs média, 2 jogadas, objetivo) enviado a todos de uma vez
 - [x] Carga de treino (esforço 1–10 × minutos, rácio 7 dias / 4 semanas) e disponibilidade na convocatória
 
+## v0.8 — Perfil físico (proposta do Meny)
+- [x] Medições com data (nunca se sobrescreve): antropometria + 4 testes de campo
+- [x] Protocolo: 3 tentativas registadas, melhor automática, checklist (avaliador, aquecimento); fora do protocolo não conta como ponto de partida
+- [x] Velocidade de crescimento (cm/ano) e alerta de pico de crescimento; envergadura − altura
+- [x] Peso só visível para a equipa técnica
+- [x] Subir de escalão: novo atleta ligado ao anterior, histórico físico copiado
+- [ ] Comparação com valores de referência por idade · relatório físico em PDF
+
 ## Fase 3: vídeo
 - [x] Clips/playlist: "todos os turnovers do #7" → sequência de jogadas (v0.2)
 - [x] Marcadores e notas no vídeo (v0.6)

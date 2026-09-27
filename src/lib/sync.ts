@@ -7,7 +7,7 @@ import { db, localOnly, purgeTeamLocal, setEnqueueListener, SYNCED_TABLES, type 
 
 const COLUMNS: Record<SyncedTable, string[]> = {
   teams: ["id", "name", "category", "gender", "season", "createdAt"],
-  players: ["id", "teamId", "name", "number", "position", "birthYear", "heightCm", "active", "createdAt"],
+  players: ["id", "teamId", "name", "number", "position", "birthYear", "heightCm", "active", "prevId", "createdAt"],
   practices: ["id", "teamId", "date", "title", "durationMin", "intensity", "notes", "createdAt"],
   attendance: ["id", "teamId", "practiceId", "playerId", "status", "note"],
   games: ["id", "teamId", "date", "opponent", "home", "competition", "periods", "periodMinutes", "video", "createdAt"],
@@ -21,10 +21,11 @@ const COLUMNS: Record<SyncedTable, string[]> = {
   scouting: ["id", "teamId", "name", "notes", "keyPlayers", "editedAt"],
   notes: ["id", "teamId", "gameId", "videoTs", "period", "text", "author", "createdAt"],
   wellness: ["id", "teamId", "playerId", "kind", "refId", "date", "rpe", "minutes", "status", "note", "answeredAt"],
+  measurements: ["id", "teamId", "playerId", "type", "value", "date", "sessionId", "attempts", "base", "evaluator", "protocolOk", "notes", "fromTeam", "createdAt"],
 };
 // tables added after the first release: if the server hasn't been migrated yet, skip them
 // quietly (their changes stay queued) instead of breaking the whole sync
-const OPTIONAL: SyncedTable[] = ["goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes", "wellness"];
+const OPTIONAL: SyncedTable[] = ["goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes", "wellness", "measurements"];
 const missingTable = (e: { code?: string; message?: string } | null) =>
   !!e && (e.code === "PGRST205" || e.code === "42P01" || /could not find the table|does not exist/i.test(e.message ?? ""));
 const unavailable = new Set<SyncedTable>();

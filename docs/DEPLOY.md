@@ -90,6 +90,7 @@ Quando uma versão nova traz tabelas novas, há um ficheiro em `supabase/migrati
 | `2026-09-26-objetivos.sql` | Tabela `goals` (Objetivos) com permissões: staff gere, o jogador vê os da equipa e os seus |
 | `2026-09-27-v05.sql` | Agenda/convocatórias (`agenda`, `rsvps`), feedback (`feedback`, `seen`), exercícios (`drills`) e scouting (`scouting`). O jogador só escreve as suas respostas e o "visto" |
 | `2026-09-27-v06-notas.sql` | Notas de vídeo do treinador (`notes`), só visíveis para a equipa técnica |
+| `2026-09-28-v08-fisico.sql` | Perfil físico (`measurements`: staff regista; o jogador vê as suas, exceto o peso) e ligação ao escalão anterior (`players.prev_id`) |
 | `2026-09-27-v07.sql` | Rotação planeada (`agenda.rotation`), relatório individual (`feedback.report`), carga e disponibilidade (`wellness`, o jogador escreve as suas) e notificações push (`push_subs`, `push_targets`, `push_drop`) |
 
 Uma instalação nova só precisa do `schema.sql` (já inclui tudo).

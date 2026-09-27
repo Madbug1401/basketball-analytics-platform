@@ -3,18 +3,19 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, uid } from "@/lib/db";
+import { db, today, uid } from "@/lib/db";
+import { movePlayer, teamLabel } from "@/lib/physical";
 import { useTeam } from "@/lib/team";
 import { useAccess, useAuth } from "@/lib/auth";
 import { useTeamMembers } from "@/lib/members";
 import { InviteDialog } from "@/components/InviteDialog";
-import { POSITIONS, type Player, type Position } from "@/lib/types";
+import { POSITIONS, type Player, type Position, type Team } from "@/lib/types";
 
 type Draft = { name: string; number: string; position: Position; birthYear: string; heightCm: string; notes: string };
 const blank: Draft = { name: "", number: "", position: "", birthYear: "", heightCm: "", notes: "" };
 
 export default function RosterPage() {
-  const { team } = useTeam();
+  const { team, teams, setTeamId } = useTeam();
   const access = useAccess(team?.id);
   const { mode } = useAuth();
   const { members, reload } = useTeamMembers(mode === "cloud" && access.canEdit ? team?.id : undefined);
@@ -26,6 +27,10 @@ export default function RosterPage() {
   const [draft, setDraft] = useState<Draft>(blank);
   const [editing, setEditing] = useState<string | null>(null);
   const [showInactive, setShowInactive] = useState(false);
+  const [moving, setMoving] = useState<Player | null>(null);
+  const { memberships, profile } = useAuth();
+  // teams this user can add players to (staff there)
+  const otherTeams = teams.filter((t) => t.id !== team?.id && (mode === "local" || profile?.isAdmin || memberships.some((m) => m.teamId === t.id && m.role !== "player")));
 
   if (!team || !players) return null;
 
@@ -41,8 +46,14 @@ export default function RosterPage() {
       heightCm: draft.heightCm ? Number(draft.heightCm) : undefined,
       notes: draft.notes || undefined,
     };
+    let pid = editing;
+    const before = editing ? players.find((p) => p.id === editing)?.heightCm : undefined;
     if (editing) await db.players.update(editing, data);
-    else await db.players.add({ id: uid(), teamId: team.id, active: true, createdAt: Date.now(), ...data });
+    else { pid = uid(); await db.players.add({ id: pid, teamId: team.id, active: true, createdAt: Date.now(), ...data }); }
+    // a new height is kept as a dated measurement (history for the physical profile)
+    if (pid && data.heightCm && data.heightCm !== before) {
+      await db.measurements.add({ id: uid(), teamId: team.id, playerId: pid, type: "altura", value: data.heightCm, date: today(), notes: "editado no plantel", createdAt: Date.now() });
+    }
     setDraft(blank);
     setEditing(null);
   };
@@ -101,6 +112,7 @@ export default function RosterPage() {
                         <button className="btn btn-ghost py-1" onClick={() => db.players.update(p.id, { active: !p.active })}>
                           {p.active ? "Desativar" : "Ativar"}
                         </button>
+                        {otherTeams.length > 0 && <button className="btn btn-ghost py-1" onClick={() => setMoving(p)}>Subir de escalão</button>}
                       </>
                     )}
                     {access.isPlayer && access.playerId === p.id && <span className="text-xs text-brand">és tu</span>}
@@ -160,6 +172,64 @@ export default function RosterPage() {
         <InviteDialog teamId={team.id} teamName={`${team.name} ${team.category}`} role="player" playerId={inviting.id}
           who={inviting.name.split(" ")[0]} onClose={() => { setInviting(null); void reload(); }} />
       )}
+      {moving && team && <MoveDialog player={moving} from={team} teams={otherTeams} onClose={() => setMoving(null)} onOpen={(id) => setTeamId(id)} />}
+    </div>
+  );
+}
+
+/** Move a player to another team (e.g. Sub-16 → Sub-18): the physical history goes with them. */
+function MoveDialog({ player, from, teams, onClose, onOpen }: { player: Player; from: Team; teams: Team[]; onClose: () => void; onOpen: (teamId: string) => void }) {
+  const [to, setTo] = useState(teams[0]?.id ?? "");
+  const [number, setNumber] = useState(String(player.number));
+  const [deactivate, setDeactivate] = useState(true);
+  const [done, setDone] = useState<{ copied: number; team: Team } | null>(null);
+  const target = teams.find((t) => t.id === to);
+  const clash = useLiveQuery(async () => (to ? (await db.players.where("teamId").equals(to).filter((p) => p.active && String(p.number) === number).count()) > 0 : false), [to, number]);
+  const already = useLiveQuery(async () => (to ? (await db.players.where("teamId").equals(to).filter((p) => p.prevId === player.id).count()) > 0 : false), [to, player.id]);
+  const go = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!target) return;
+    const r = await movePlayer(player, from, target, { number: Number(number) || player.number, deactivate });
+    setDone({ copied: r.copied, team: target });
+  };
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/60 p-4" onClick={onClose} role="dialog" aria-modal="true" aria-label="Subir de escalão">
+      <form className="card grid w-full max-w-md gap-3 p-5" onClick={(e) => e.stopPropagation()} onSubmit={go}>
+        <h2 className="font-semibold">Subir {player.name.split(" ")[0]} de escalão</h2>
+        {done ? (
+          <>
+            <p className="text-sm">✓ {player.name} está agora em <b>{teamLabel(done.team)}</b>{done.copied ? `, com ${done.copied} medições do perfil físico.` : "."} As estatísticas desta equipa continuam aqui e ligadas ao novo perfil.</p>
+            <div className="flex gap-2">
+              <button type="button" className="btn btn-primary flex-1" onClick={() => { onOpen(done.team.id); onClose(); }}>Abrir {done.team.category}</button>
+              <button type="button" className="btn" onClick={onClose}>Fechar</button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div>
+              <label className="label" htmlFor="mv-team">Para a equipa</label>
+              <select id="mv-team" className="input" value={to} onChange={(e) => setTo(e.target.value)}>
+                {teams.map((t) => <option key={t.id} value={t.id}>{teamLabel(t)}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="label" htmlFor="mv-num">Número na nova equipa</label>
+              <input id="mv-num" className="input w-24" inputMode="numeric" value={number} onChange={(e) => setNumber(e.target.value.replace(/\D/g, ""))} />
+              {clash && <p className="mt-1 text-xs text-bad">Esse número já está ocupado nessa equipa.</p>}
+            </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" className="h-4 w-4 accent-[var(--color-brand)]" checked={deactivate} onChange={(e) => setDeactivate(e.target.checked)} />
+              Desativar nesta equipa ({from.category})
+            </label>
+            {already && <p className="text-xs text-brand">Este atleta já foi passado para essa equipa.</p>}
+            <p className="text-[11px] text-muted">Cria o atleta na outra equipa, ligado a este perfil, e copia o histórico físico (marcado com o escalão de origem).</p>
+            <div className="flex gap-2">
+              <button className="btn btn-primary flex-1" disabled={!target || !!clash || !!already}>Passar para {target?.category ?? "…"}</button>
+              <button type="button" className="btn" onClick={onClose}>Cancelar</button>
+            </div>
+          </>
+        )}
+      </form>
     </div>
   );
 }

@@ -24,6 +24,7 @@ export interface Player {
   heightCm?: number;
   active: boolean;
   notes?: string;
+  prevId?: ID; // same athlete in the team they came from (moved up an age group)
   createdAt: number;
 }
 
@@ -211,6 +212,28 @@ export interface PlayerReport {
   improve?: ReportClip;
   goal?: { title: string; value: string; progress: number }; // progress 0..1
   trend?: number[]; // efficiency in the last games (this one last)
+}
+
+/* ---------- physical profile ---------- */
+
+export type MeasureType = "altura" | "peso" | "envergadura" | "alcance" | "cmj" | "salto_balanco" | "lane" | "sprint";
+
+/** One measurement of one athlete on one day. Kept as history (never overwritten). */
+export interface Measurement {
+  id: ID;
+  teamId: ID;
+  playerId: ID;
+  type: MeasureType;
+  value: number; // result (best attempt; jumps: mark − standing reach)
+  date: string; // YYYY-MM-DD
+  sessionId?: ID; // measurements taken together
+  attempts?: number[]; // raw attempts (jumps: marks reached, cm)
+  base?: number; // jumps: standing reach used (cm)
+  evaluator?: string;
+  protocolOk?: boolean; // same evaluator, standard warm-up, 3 attempts
+  notes?: string;
+  fromTeam?: string; // copied from a previous team (e.g. "Sub-14 2025/26")
+  createdAt: number;
 }
 
 /* ---------- training load & availability ---------- */

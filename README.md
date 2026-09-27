@@ -24,7 +24,7 @@ Precisas do Node 20 ou mais recente.
 
 Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/outra.json 42 2026-10-15` (seed e "hoje").
 
-## O que já faz (v0.7)
+## O que já faz (v0.8)
 
 | Área | Funcionalidades |
 |---|---|
@@ -49,6 +49,7 @@ Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/out
 | **Notificações** | Push no telemóvel: convocatória publicada, mensagens e relatórios do treinador, game plan · para a equipa técnica: "não posso ir" e jogador indisponível · funcionam também quando o treinador está offline (enviam quando voltar a rede) |
 | **Rotações** | Minutos planeados por jogador e período (tempo igual ou pela época) · no modo ao vivo: minutos em campo, avisos de "passou do previsto", muito tempo seguido, faltas cedo e quem ainda tem minutos por jogar · planeado vs real no fim |
 | **Relatório individual** | Depois do jogo, um relatório por jogador (números com ▲▼ vs a sua média, jogada para repetir e para melhorar em vídeo, objetivo, tendência) enviado a todos de uma vez |
+| **Perfil físico** | Histórico datado de altura, peso (só staff), envergadura, alcance, salto parado, salto com balanço, lane agility e sprint ¾ · sessão de testes por estação com 3 tentativas (conta a melhor; o salto é calculado a partir do alcance) · checklist de protocolo (fora do protocolo fica marcado) · evolução, velocidade de crescimento (pico de crescimento) e envergadura − altura · "Subir de escalão" leva o histórico físico para a nova equipa |
 | **Carga** | Cada jogador diz o esforço (1–10) depois do treino/jogo e se está disponível/condicionado/indisponível · carga dos últimos 7 dias vs média de 4 semanas com alertas · disponibilidade na convocatória · o treinador pode registar por quem não tem telemóvel |
 | **Offline** | A app abre e funciona sem internet (service worker); tudo fica no telemóvel e sincroniza quando voltar a ligação |
 | **Jogo** | Relatório automático (parciais decisivos, perdas, ressaltos, LL, quintetos, jogadores acima/abaixo da média) com "▶ ver jogadas" · parciais · box score com minutos estimados, +/-, eficiência · mapa de lançamentos · quintetos · imprimir em A4 |

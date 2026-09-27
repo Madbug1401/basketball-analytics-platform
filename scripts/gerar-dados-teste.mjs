@@ -400,9 +400,49 @@ for (const pr of pastPractices) {
 wellness.push({ id: `status:${players[4].id}`, teamId, playerId: players[4].id, kind: "status", date: addDays(TODAY, -1), status: "limited", note: "Dor no tornozelo, treino sem saltos", answeredAt: Date.parse(TODAY + "T08:00:00Z") });
 wellness.push({ id: `status:${players[9].id}`, teamId, playerId: players[9].id, kind: "status", date: addDays(TODAY, -2), status: "out", note: "Doente (gripe)", answeredAt: Date.parse(TODAY + "T08:00:00Z") });
 
+// ---------- perfil físico: 3 sessões de testes (início, meio, agora) e altura mensal ----------
+const measurements = [];
+const mSession = (date, evaluator, protocolOk = true) => ({ sessionId: uuid(), date, evaluator, protocolOk });
+const S = [mSession(addDays(TODAY, -63), "Nico"), mSession(addDays(TODAY, -30), "Nico"), mSession(addDays(TODAY, -3), "Nico")];
+const round1 = (v) => Math.round(v * 10) / 10;
+const round2 = (v) => Math.round(v * 100) / 100;
+const addM = (pl, type, value, s, extra = {}) =>
+  measurements.push({ id: uuid(), teamId, playerId: pl.id, type, value, date: s.date, sessionId: s.sessionId, evaluator: s.evaluator, ...extra, createdAt: Date.parse(s.date + "T19:00:00Z") + measurements.length });
+players.forEach((pl, i) => {
+  const h0 = pl.heightCm ?? 178;
+  const spurt = i === 3; // o 4.º jogador está no pico de crescimento
+  const grow = spurt ? 0.85 : 0.2 + (i % 3) * 0.12; // cm por mês (pico ≈ 10 cm/ano)
+  const wing = h0 + 2 + (i % 5) - (i === 7 ? 6 : 0);
+  const reach0 = Math.round(h0 * 1.31);
+  const w0 = Math.round(h0 - 108 + (i % 4) * 3);
+  const cmj0 = 34 + (i % 6) * 3 + (spurt ? -2 : 0);
+  const lane0 = 12.6 - (i % 5) * 0.25;
+  const spr0 = 3.75 - (i % 4) * 0.07;
+  S.forEach((s, k) => {
+    const months = (k === 0 ? 0 : k === 1 ? 1.1 : 2) ;
+    const h = round1(h0 + grow * months);
+    addM(pl, "altura", h, s);
+    addM(pl, "peso", round1(w0 + months * (spurt ? 1.2 : 0.5)), s);
+    if (k !== 1) addM(pl, "envergadura", round1(wing + grow * months), s);
+    const reach = Math.round(reach0 + grow * months * 1.3);
+    addM(pl, "alcance", reach, s);
+    const off = k === 1 && i === 5; // sessão do meio sem aquecimento para um atleta
+    const gain = [0, 1.5, 3][k] + (spurt ? -1 : 0) + (i % 2);
+    const jumps = [0, 1, 2].map((a) => reach + Math.round(cmj0 + gain - a * 1.5 + (a === 1 ? 1 : 0)));
+    addM(pl, "cmj", Math.max(...jumps) - reach, s, { attempts: jumps, base: reach, protocolOk: !off, notes: off ? "sem aquecimento padrão" : undefined });
+    const run = [0, 1, 2].map((a) => reach + Math.round(cmj0 + 7 + gain - a));
+    addM(pl, "salto_balanco", Math.max(...run) - reach, s, { attempts: run, base: reach, protocolOk: !off });
+    const lanes = [0, 1, 2].map((a) => round2(lane0 - [0, 0.2, 0.35][k] + a * 0.12 + (spurt && k === 2 ? 0.25 : 0)));
+    addM(pl, "lane", Math.min(...lanes), s, { attempts: lanes, protocolOk: !off });
+    const sprints = [0, 1, 2].map((a) => round2(spr0 - [0, 0.04, 0.08][k] + a * 0.05));
+    addM(pl, "sprint", Math.min(...sprints), s, { attempts: sprints, protocolOk: !off });
+  });
+  pl.heightCm = Math.round(h0 + grow * 2);
+});
+
 const data = {
   app: "basketball-analytics", version: 1, exportedAt: new Date().toISOString(), demo: true,
-  teams: [team], players, practices, attendance, games, events, goals, agenda, rsvps, drills, scouting, feedback, notes, wellness,
+  teams: [team], players, practices, attendance, games, events, goals, agenda, rsvps, drills, scouting, feedback, notes, wellness, measurements,
 };
 
 mkdirSync(dirname(OUT), { recursive: true });
