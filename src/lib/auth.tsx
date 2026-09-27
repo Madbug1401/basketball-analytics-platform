@@ -103,6 +103,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return data as string;
   }, [load]);
 
+  // keep the offline copy current (new team created, invite claimed, role changed…)
+  useEffect(() => {
+    if (session && profile?.id === session.user.id) cacheAccess(session.user.id, profile, memberships);
+  }, [session, profile, memberships]);
+
   // memberships change when teams are created (server trigger) or invites are claimed
   useEffect(() => {
     if (!supabase) return;
@@ -173,7 +178,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profile,
     memberships,
     refresh: async () => { if (supabase) { const { data } = await supabase.auth.getSession(); await load(data.session); } },
-    signOut: async () => { if (supabase) await supabase.auth.signOut(); },
+    signOut: async () => {
+      if (!supabase) return;
+      await import("./push").then((m) => m.forgetPushDevice()).catch(() => {});
+      await supabase.auth.signOut();
+    },
     claimInvite,
     markOwned: (teamId) => setMemberships((prev) => (prev.some((p) => p.teamId === teamId) ? prev : [...prev, { teamId, role: "owner" }])),
   };

@@ -90,8 +90,9 @@ Quando uma versão nova traz tabelas novas, há um ficheiro em `supabase/migrati
 | `2026-09-26-objetivos.sql` | Tabela `goals` (Objetivos) com permissões: staff gere, o jogador vê os da equipa e os seus |
 | `2026-09-27-v05.sql` | Agenda/convocatórias (`agenda`, `rsvps`), feedback (`feedback`, `seen`), exercícios (`drills`) e scouting (`scouting`). O jogador só escreve as suas respostas e o "visto" |
 | `2026-09-27-v06-notas.sql` | Notas de vídeo do treinador (`notes`), só visíveis para a equipa técnica |
-| `2026-09-28-v08-fisico.sql` | Perfil físico (`measurements`: staff regista; o jogador vê as suas, exceto o peso) e ligação ao escalão anterior (`players.prev_id`) |
 | `2026-09-27-v07.sql` | Rotação planeada (`agenda.rotation`), relatório individual (`feedback.report`), carga e disponibilidade (`wellness`, o jogador escreve as suas) e notificações push (`push_subs`, `push_targets`, `push_drop`) |
+| `2026-09-28-v08-fisico.sql` | Perfil físico (`measurements`: staff regista; o jogador vê as suas, exceto o peso) e ligação ao escalão anterior (`players.prev_id`) |
+| `2026-09-28-v09-apagados.sql` | O que foi apagado não volta: um dispositivo que ainda não sabia do apagão não consegue recriar um jogo, treino, atleta ou evento (`skip_deleted`) |
 
 Uma instalação nova só precisa do `schema.sql` (já inclui tudo).
 
@@ -102,4 +103,4 @@ As notificações são enviadas pela rota `/api/push` (Vercel), com a sessão de
 1. Vercel → projeto → **Settings → Environment Variables** → adicionar `VAPID_PRIVATE_KEY` (Production) com o valor da chave privada.
 2. **Deployments → Redeploy** do último deploy.
 
-Sem esta variável a app funciona igual, só não envia notificações. Para gerar um par novo: `npx web-push generate-vapid-keys` (e trocar também a pública em `pushKey.ts` ou em `NEXT_PUBLIC_VAPID_PUBLIC_KEY`). No iPhone, as notificações só funcionam com a app adicionada ao ecrã principal (iOS 16.4+).
+Estado em produção: **configurado** (27 set 2026). Sem esta variável a app funciona igual, só não envia notificações. Para gerar um par novo: `npx web-push generate-vapid-keys` e pôr as duas na Vercel (`VAPID_PRIVATE_KEY` e `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, do mesmo par), depois Redeploy. Os telemóveis que já tinham notificações ativas voltam a subscrever sozinhos com a chave nova da próxima vez que abrirem a app. No iPhone, as notificações só funcionam com a app adicionada ao ecrã principal (iOS 16.4+).

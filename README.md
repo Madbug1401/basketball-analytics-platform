@@ -24,14 +24,14 @@ Precisas do Node 20 ou mais recente.
 
 Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/outra.json 42 2026-10-15` (seed e "hoje").
 
-## O que já faz (v0.8)
+## O que já faz (v0.9)
 
 | Área | Funcionalidades |
 |---|---|
 | **Plantel** | Jogadores com nº, posição, ano, altura e notas; ativar/desativar; várias equipas |
 | **Treinos** | Criar treino, presenças (presente / atrasado / falta / justificada), intensidade, exercícios, assiduidade da época |
 | **Game Logger** | Vídeo do YouTube, MP4 local, link direto ou sem vídeo (cronómetro) · 5 inicial e substituições · atalhos de teclado · mapa de lançamentos (2/3 pontos detetado pela posição) · adversário · anular · "▶ ver jogada" em cada evento · contexto da jogada |
-| **Ao vivo (banco)** | Registo no telemóvel durante o jogo, sem vídeo: relógio de jogo (minutos exatos), 5 em campo com pontos e faltas, aviso na 4.ª e 5.ª falta, bónus, descontos de tempo (FIBA), fim de período e prolongamento, ecrã sempre ligado |
+| **Ao vivo (banco)** | Registo no telemóvel durante o jogo, sem vídeo: relógio de jogo (minutos exatos), 5 em campo com pontos e faltas, aviso na 4.ª e 5.ª falta, bónus (no prolongamento as faltas de equipa continuam as do 4.º período, regra FIBA), descontos de tempo (FIBA), fim de período e prolongamento, anular (também o "terminar período", que devolve o relógio), ecrã sempre ligado |
 | **Contexto das jogadas** | Etiquetas opcionais (transição, pick & roll, 1x1, poste, 2.ª oportunidade, sem bola, vs zona, vs pressão) · pontos por jogada em cada contexto, no jogo e na época · filtro e sequência de vídeo por contexto |
 | **Objetivos** | Metas da equipa e de cada jogador (pontos, ressaltos, perdas, %LL, assiduidade, vitórias…) com progresso automático e tendência dos últimos 3 jogos · o jogador vê os seus |
 | **Partilhar** | Imagem do jogo (1080×1350) com resultado, parciais, líderes e box score para WhatsApp/Instagram · resumo em texto |
@@ -46,12 +46,13 @@ Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/out
 | **Notas de vídeo** | Notas do treinador num momento do vídeo (tecla N), só para a equipa técnica · aparecem na timeline e podem ser enviadas a um jogador |
 | **Timeline** | Diferença no marcador ao longo do jogo e uma linha por período com cestos, perdas, substituições, notas e momentos a rever |
 | **Qualidade de lançamento** | Zonas (cesto, garrafão, meia distância, triplo canto/frontal) · pontos por lançamento vs esperado (média da época) · seleção e acerto por jogador · mapa de zonas quentes/frias · nós e adversário · local do lançamento opcional no modo ao vivo |
-| **Notificações** | Push no telemóvel: convocatória publicada, mensagens e relatórios do treinador, game plan · para a equipa técnica: "não posso ir" e jogador indisponível · funcionam também quando o treinador está offline (enviam quando voltar a rede) |
+| **Notificações** | Push no telemóvel: convocatória publicada, mensagens e relatórios do treinador, game plan · para a equipa técnica: "não posso ir" e jogador indisponível · funcionam também quando o treinador está offline (enviam quando voltar a rede) · ao terminar sessão o telemóvel deixa de receber as da conta anterior · se a chave do servidor mudar, o telemóvel volta a subscrever sozinho |
 | **Rotações** | Minutos planeados por jogador e período (tempo igual ou pela época) · no modo ao vivo: minutos em campo, avisos de "passou do previsto", muito tempo seguido, faltas cedo e quem ainda tem minutos por jogar · planeado vs real no fim |
 | **Relatório individual** | Depois do jogo, um relatório por jogador (números com ▲▼ vs a sua média, jogada para repetir e para melhorar em vídeo, objetivo, tendência) enviado a todos de uma vez |
 | **Perfil físico** | Histórico datado de altura, peso (só staff), envergadura, alcance, salto parado, salto com balanço, lane agility e sprint ¾ · sessão de testes por estação com 3 tentativas (conta a melhor; o salto é calculado a partir do alcance) · checklist de protocolo (fora do protocolo fica marcado) · evolução, velocidade de crescimento (pico de crescimento) e envergadura − altura · "Subir de escalão" leva o histórico físico para a nova equipa |
 | **Carga** | Cada jogador diz o esforço (1–10) depois do treino/jogo e se está disponível/condicionado/indisponível · carga dos últimos 7 dias vs média de 4 semanas com alertas · disponibilidade na convocatória · o treinador pode registar por quem não tem telemóvel |
 | **Offline** | A app abre e funciona sem internet (service worker); tudo fica no telemóvel e sincroniza quando voltar a ligação |
+| **Apagar jogo** | Botão 🗑 em cada jogo da lista e no topo da página do jogo (só equipa técnica) · a confirmação diz o que se perde (eventos, notas de vídeo, game plan, rotação, convocatória e esforço desse jogo) · as mensagens já enviadas aos jogadores ficam, sem ligação ao jogo · o apagão chega a todos os dispositivos e não volta |
 | **Jogo** | Relatório automático (parciais decisivos, perdas, ressaltos, LL, quintetos, jogadores acima/abaixo da média) com "▶ ver jogadas" · parciais · box score com minutos estimados, +/-, eficiência · mapa de lançamentos · quintetos · imprimir em A4 |
 | **Vídeo** | Editar qualquer evento (✎) · filtrar por jogador/tipo e **ver a sequência** das jogadas (ex.: todas as perdas do #7) · links do relatório abrem a sequência certa |
 | **Adversários** | Registo contra cada equipa, onde lançam (mapa + zonas), médias por período, notas rápidas |
@@ -76,7 +77,7 @@ Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/out
 | `U` | substituição (1–5 sai, nº + Enter entra) |
 | clique no campo | local do lançamento → `Enter` convertido, `⌫` falhado |
 | `Espaço` `←` `→` `,` `.` | play/pausa, ±5s (Shift ±1s), velocidade |
-| `Ctrl+Z` · `Esc` | anular último · cancelar pendente |
+| `Ctrl+Z` · `Esc` | anular último (só equipa técnica) · cancelar pendente |
 | ✎ na lista | editar evento |
 
 Fluxo típico: `2` → `Q` → `4` (assistência) → clique no campo. Lançamento falhado: `W` → `3` (ressalto).
@@ -85,16 +86,17 @@ Fluxo típico: `2` → `Q` → `4` (assistência) → clique no campo. Lançamen
 
 - **Next.js 16 + React 19 + Tailwind 4**, tudo no cliente.
 - **Local-first**: IndexedDB via Dexie (`src/lib/db.ts`) é sempre a fonte imediata — a app funciona sem internet.
-- **Sync** (`src/lib/sync.ts`): cada escrita local entra numa fila (`outbox`, via hooks do Dexie) e é enviada ao Supabase em lotes; o pull é incremental (`updated_at`) e as remoções chegam por `tombstones`.
+- **Sync** (`src/lib/sync.ts`): cada escrita local entra numa fila (`outbox`, via hooks do Dexie) e é enviada ao Supabase em lotes; se um lote é recusado, as linhas são reenviadas uma a uma e só as recusadas ficam de fora. O pull é incremental (`updated_at`, com 5 s de sobreposição) e as remoções chegam por `tombstones`; um trigger (`skip_deleted`) impede que um dispositivo atrasado recrie um jogo, treino, atleta ou evento já apagado.
 - **Permissões no servidor** (`supabase/schema.sql`): Row Level Security por equipa; notas do treinador em tabelas à parte (`players_private`, `games_private`) que os jogadores não conseguem ler; convites e visão de admin por funções `security definer`.
 - **Eventos como fonte da verdade** (`events`): estatísticas, +/-, minutos, quintetos e mapas são calculados (`src/lib/stats.ts`).
 
 ```
 src/
   app/            páginas (painel, equipa, treinos, jogos, logger, adversarios, estatisticas, jogadores, definicoes, admin, convite, conta)
-  components/     Shell (auth + navegação por papel), AuthScreen, InviteDialog, Court, VideoPlayer, EventLog, BoxScore, Trend
-  lib/            db (Dexie + fila), sync, auth (sessão/papéis), members, teamAdmin, stats, insights, court, season
-supabase/         schema.sql (tabelas, RLS, triggers, RPCs)
+  components/     Shell (auth + navegação por papel), AuthScreen, InviteDialog, Court, VideoPlayer, EventLog, BoxScore, Trend, DeleteGame, ShotQuality, RotationPlanner, PlayerReport, Physical…
+  lib/            db (Dexie + fila), sync, auth (sessão/papéis), members, teamAdmin, stats, insights, court, season, possessions, shotQuality, rotation, report, load, physical, push
+supabase/         schema.sql (tabelas, RLS, triggers, RPCs) · migrations/ (uma por versão)
+src/app/api/push/ única rota de servidor (envio das notificações)
 docs/             DEPLOY.md, ROADMAP.md
 ```
 

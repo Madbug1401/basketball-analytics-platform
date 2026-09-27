@@ -1,6 +1,8 @@
 # Roadmap
 
 ## Agora: validar com o ABC (antes do 1.º jogo oficial)
+- [x] Notificações push ativas em produção (chave VAPID na Vercel, 27 set)
+- [ ] Testar as notificações no telemóvel (convocatória de teste)
 - [ ] Meter o plantel real do ABC Sub-16
 - [ ] Registar um jogo antigo em vídeo com o Melvyn e cronometrar (vs o método dele)
 - [ ] Lista de "o que foi irritante / o que faltou" depois de cada jogo e treino
@@ -60,6 +62,15 @@
 - [x] Peso só visível para a equipa técnica
 - [x] Subir de escalão: novo atleta ligado ao anterior, histórico físico copiado
 - [ ] Comparação com valores de referência por idade · relatório físico em PDF
+
+## v0.9 — Apagar jogo e revisão completa
+- [x] Apagar jogo na lista de jogos e no topo do jogo, com confirmação do que se perde (pedido do Melvyn)
+- [x] O que foi apagado não volta (trigger `skip_deleted` no servidor)
+- [x] Sincronização: uma linha recusada já não leva o resto do lote; pull com sobreposição de 5 s
+- [x] Registo: um jogador já não anula eventos com Ctrl+Z; ficheiro MP4 aberto por um jogador fica só no dispositivo dele
+- [x] Ao vivo: faltas de equipa no prolongamento contam como o 4.º período (FIBA); anular "terminar período" devolve o relógio
+- [x] Notificações: terminar sessão liberta o telemóvel; nova chave VAPID → volta a subscrever sozinho
+- [x] Acesso offline guardado sempre que muda (equipa criada ou convite aceite)
 
 ## Fase 3: vídeo
 - [x] Clips/playlist: "todos os turnovers do #7" → sequência de jogadas (v0.2)

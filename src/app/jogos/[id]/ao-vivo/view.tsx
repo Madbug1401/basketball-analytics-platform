@@ -144,7 +144,7 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
     const timeouts = new Map<string, { us: number; opp: number }>();
     const ended = new Set<number>();
     for (const e of sorted) {
-      if (e.type === "PERIOD_START") { period = e.period; teamFouls = { us: 0, opp: 0 }; }
+      if (e.type === "PERIOD_START") { period = e.period; if (e.period <= game.periods) teamFouls = { us: 0, opp: 0 }; } // FIBA: overtime counts as the 4th period
       if (e.type === "PERIOD_END") ended.add(e.period);
       const p = pointsOf(e);
       if (e.side === "us") us += p; else opp += p;
@@ -268,6 +268,8 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
     const last = [...events].filter((e) => e.type !== "PERIOD_START").sort((a, b) => b.createdAt - a.createdAt)[0];
     if (!last) return;
     await db.events.delete(last.id);
+    // undoing "Terminar período" must give the clock back (it was left at 00:00)
+    if (last.type === "PERIOD_END") setClock(clockFromEvents(game, sorted.filter((e) => e.id !== last.id)));
     setFollow(null);
     setLastPlay(null);
     toast(`Anulado: ${describe(last, name)}`);

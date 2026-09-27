@@ -52,6 +52,27 @@ async function saveSubscription(sub: PushSubscription) {
   }, { onConflict: "endpoint" });
 }
 
+const sameKey = (sub: PushSubscription) => {
+  const k = sub.options?.applicationServerKey;
+  if (!k) return true; // browser doesn't expose it: assume it's ours
+  const a = new Uint8Array(k), b = b64ToBytes(VAPID_PUBLIC_KEY);
+  return a.length === b.length && a.every((x, i) => x === b[i]);
+};
+
+/** This device's subscription for the CURRENT server key. A subscription made with an older key
+ *  (the key pair was rotated) can't receive anything any more, so it is replaced. */
+async function currentSubscription(reg: ServiceWorkerRegistration, create: boolean) {
+  let sub = await reg.pushManager.getSubscription();
+  if (sub && !sameKey(sub)) {
+    await supabase?.from("push_subs").delete().eq("endpoint", sub.endpoint);
+    await sub.unsubscribe().catch(() => {});
+    sub = null;
+    create = true;
+  }
+  if (!sub && create) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(VAPID_PUBLIC_KEY) });
+  return sub;
+}
+
 /** Ask permission and subscribe this device. Returns the new state. */
 export async function enablePush(): Promise<PushState> {
   if (!pushSupported()) return pushState();
@@ -59,9 +80,8 @@ export async function enablePush(): Promise<PushState> {
   if (perm !== "granted") return perm === "denied" ? "denied" : "off";
   const reg = await registration();
   if (!reg) throw new Error("A app ainda não está instalada neste dispositivo. Recarrega a página e tenta outra vez.");
-  const sub = (await reg.pushManager.getSubscription())
-    ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(VAPID_PUBLIC_KEY) }));
-  await saveSubscription(sub);
+  const sub = await currentSubscription(reg, true);
+  if (sub) await saveSubscription(sub);
   return "on";
 }
 
@@ -79,8 +99,22 @@ export async function disablePush(): Promise<PushState> {
 export async function refreshPushSubscription() {
   if (!pushSupported() || Notification.permission !== "granted") return;
   const reg = await registration();
-  const sub = await reg?.pushManager.getSubscription();
-  if (sub) await saveSubscription(sub).catch(() => {});
+  if (!reg) return;
+  try {
+    const sub = await currentSubscription(reg, false);
+    if (sub) await saveSubscription(sub);
+  } catch {}
+}
+
+/** Before signing out: this phone stops receiving the current user's notifications
+ *  (otherwise the next person to sign in on it would get them, and couldn't claim the device). */
+export async function forgetPushDevice() {
+  if (!pushSupported()) return;
+  try {
+    const reg = await registration();
+    const sub = await reg?.pushManager.getSubscription();
+    if (sub) await supabase?.from("push_subs").delete().eq("endpoint", sub.endpoint);
+  } catch {}
 }
 
 /** Queue a notification (sent now if online, otherwise when the connection comes back). */
@@ -111,7 +145,7 @@ export async function flushPush() {
           body: JSON.stringify({ teamId: j.teamId, players: j.players ?? [], staff: !!j.staff, title: j.title, body: j.body, url: j.url, tag: j.tag }),
         });
       } catch { break; } // offline: try later
-      if (res.status >= 500 && res.status !== 501) break; // server hiccup: keep the queue
+      if ((res.status >= 500 && res.status !== 501) || res.status === 401) break; // server hiccup / expired session: keep the queue
       await db.pushQueue.delete(j.seq!); // sent, or not deliverable (not configured / not allowed)
     }
   } finally {

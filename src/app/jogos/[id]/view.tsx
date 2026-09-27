@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useRouteId } from "@/lib/route";
 import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, deleteGame } from "@/lib/db";
+import { db } from "@/lib/db";
+import { DeleteGameButton } from "@/components/DeleteGame";
 import { fmtPct, fmtTs, gameStats, possessions, reb, type Line } from "@/lib/stats";
 import { BoxTable, sortRows } from "@/components/BoxScore";
 import { ShotQuality } from "@/components/ShotQuality";
@@ -13,7 +14,6 @@ import { zoneModel } from "@/lib/shotQuality";
 import { gameInsights, type Insight } from "@/lib/insights";
 import { useSeason } from "@/lib/season";
 import { useAccess } from "@/lib/auth";
-import { ask } from "@/components/Dialog";
 import { ContextTable } from "@/components/ContextTable";
 import { ShareDialog } from "@/components/ShareDialog";
 import { LineupAnalysis } from "@/components/LineupAnalysis";
@@ -90,6 +90,7 @@ export function GamePage() {
             <button className="btn" onClick={() => window.print()}>Imprimir</button>
             {access.canEdit && <Link href={`/jogos/${id}/ao-vivo`} className={`btn ${game.video.kind === "none" ? "btn-primary" : ""}`}>Ao vivo</Link>}
             {access.canEdit && <Link href={`/jogos/${id}/logger`} className={`btn ${game.video.kind === "none" ? "" : "btn-primary"}`}>{game.video.kind === "none" ? "Registo" : "Abrir registo"}</Link>}
+            {access.canEdit && <DeleteGameButton game={game} className={shareData ? "col-span-2 sm:col-span-1" : ""} onDeleted={() => router.push("/jogos")} />}
           </div>
         </div>
       </div>
@@ -181,7 +182,7 @@ export function GamePage() {
 
       {sharing && shareData && <ShareDialog data={shareData} onClose={() => setSharing(false)} />}
 
-      {access.canEdit && <GameInfo gameId={id} onDelete={async () => { if (await ask("Apagar este jogo e todos os eventos?", { confirmText: "Apagar", danger: true })) { await deleteGame(id); router.push("/jogos"); } }} />}
+      {access.canEdit && <GameInfo gameId={id} onDelete={() => router.push("/jogos")} />}
     </div>
   );
 }
@@ -234,7 +235,7 @@ function GameInfo({ gameId, onDelete }: { gameId: string; onDelete: () => void }
           </div>
           <div className="sm:col-span-4"><label className="label">Notas do treinador</label>
             <textarea className="input" rows={3} value={game.notes ?? ""} onChange={(e) => upd({ notes: e.target.value })} /></div>
-          <div className="sm:col-span-4"><button className="btn btn-danger" onClick={onDelete}>Apagar jogo</button></div>
+          <div className="sm:col-span-4"><DeleteGameButton game={game} onDeleted={onDelete} /></div>
         </div>
       )}
     </section>

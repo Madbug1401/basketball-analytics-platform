@@ -100,7 +100,7 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
     const fouls = new Map<ID, number>();
     const onCourt = walk(upto, () => {});
     for (const e of upto) {
-      if (e.type === "PERIOD_START") { period = e.period; teamFouls = { us: 0, opp: 0 }; }
+      if (e.type === "PERIOD_START") { period = e.period; if (e.period <= game.periods) teamFouls = { us: 0, opp: 0 }; } // FIBA: overtime counts as the 4th period
       const pts = pointsOf(e);
       if (e.side === "us") us += pts; else opp += pts;
       if (e.type === "FOUL") {
@@ -109,7 +109,7 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
       }
     }
     return { period, onCourt, us, opp, fouls, teamFouls };
-  }, [sorted, now]);
+  }, [sorted, now, game.periods]);
 
   const periodNow = Math.max(1, state.period);
   const started = state.period > 0;
@@ -253,7 +253,7 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
     const k = e.key.toLowerCase();
     const v = video.current;
 
-    if ((e.ctrlKey || e.metaKey) && k === "z") { e.preventDefault(); return undo(); }
+    if ((e.ctrlKey || e.metaKey) && k === "z") { e.preventDefault(); if (readOnly) return; return undo(); }
     if (e.ctrlKey || e.metaKey || e.altKey) return;
 
     if (k === " ") { e.preventDefault(); v?.toggle(); return; }
@@ -337,7 +337,7 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
             <button className="btn py-1 text-xs pointer-coarse:hidden" onClick={() => setHelp(true)}>Atalhos <span className="kbd">?</span></button>
           </div>
         </div>
-        <VideoArea game={game} playerRef={video} />
+        <VideoArea game={game} playerRef={video} readOnly={readOnly} />
         {game.video.kind !== "none" && (
           <div className="mt-2 hidden grid-cols-5 gap-1.5 pointer-coarse:grid">
             <button className="btn px-1 text-xs" onClick={() => video.current?.nudge(-5)} aria-label="Recuar 5 segundos">−5s</button>
@@ -535,7 +535,7 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
 
 /* ---------------- sub components ---------------- */
 
-function VideoArea({ game, playerRef }: { game: Game; playerRef: React.Ref<PlayerHandle> }) {
+function VideoArea({ game, playerRef, readOnly }: { game: Game; playerRef: React.Ref<PlayerHandle>; readOnly: boolean }) {
   const [src, setSrc] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const handle = useLiveQuery(() => db.videoHandles.get(game.id), [game.id]);
@@ -555,7 +555,7 @@ function VideoArea({ game, playerRef }: { game: Game; playerRef: React.Ref<Playe
   const loadFile = async (file: File) => {
     setSrc(URL.createObjectURL(file));
     setFileName(file.name);
-    await db.games.update(game.id, { video: { kind: "file", fileName: file.name } });
+    if (!readOnly) await db.games.update(game.id, { video: { kind: "file", fileName: file.name } }); // a player only watches locally
   };
 
   const pick = async () => {

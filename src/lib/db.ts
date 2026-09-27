@@ -145,9 +145,14 @@ export async function deleteGame(gameId: string) {
     await db.events.where("gameId").equals(gameId).delete();
     await db.videoHandles.delete(gameId);
   });
+  // messages/reports sent to players stay, unlinked from the game (the server does `set null` too;
+  // queueing it also avoids a FK error if the feedback was never uploaded)
+  const linked = await db.feedback.filter((f) => f.gameId === gameId).toArray();
+  for (const f of linked) await db.feedback.update(f.id, { gameId: undefined, clipStart: undefined, clipEnd: undefined, eventIds: undefined });
   await db.games.delete(gameId);
   await db.agenda.delete(gameId);
   await db.rsvps.where("refId").equals(gameId).delete();
+  await db.wellness.filter((w) => w.refId === gameId).delete(); // same as a practice: its effort answers go too
   await localOnly(["notes"], () => db.notes.where("gameId").equals(gameId).delete()); // server cascades
 }
 

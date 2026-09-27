@@ -10,6 +10,7 @@ import { useAccess } from "@/lib/auth";
 import { gameStats } from "@/lib/stats";
 import { youtubeId } from "@/components/VideoPlayer";
 import type { VideoSource } from "@/lib/types";
+import { DeleteGameButton } from "@/components/DeleteGame";
 
 export default function GamesPage() {
   const { team } = useTeam();
@@ -74,6 +75,7 @@ export default function GamesPage() {
                   {access.canEdit && (g.video.kind === "none"
                     ? <Link href={`/jogos/${g.id}/ao-vivo`} className="btn btn-primary flex-1 sm:flex-none">Ao vivo</Link>
                     : <Link href={`/jogos/${g.id}/logger`} className="btn btn-primary flex-1 sm:flex-none">Registar</Link>)}
+                  {access.canEdit && <DeleteGameButton game={g} compact className="flex-none px-3" />}
                 </div>
               </div>
             );

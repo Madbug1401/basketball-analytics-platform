@@ -319,6 +319,7 @@ create table if not exists public.tombstones (
   deleted_at timestamptz not null default now()
 );
 create index if not exists tombstones_team on public.tombstones(team_id, id);
+create index if not exists tombstones_row on public.tombstones(table_name, row_id);
 
 -- ---------- funções de permissão ----------
 create or replace function public.is_admin() returns boolean
@@ -380,6 +381,25 @@ begin
     execute format('create trigger touch_%1$s before insert or update on public.%1$s for each row execute function public.touch_updated_at()', t);
     execute format('drop trigger if exists tomb_%1$s on public.%1$s', t);
     execute format('create trigger tomb_%1$s after delete on public.%1$s for each row execute function public.log_tombstone()', t);
+  end loop;
+end $$;
+
+-- o que foi apagado não volta: um dispositivo atrasado não recria um jogo/treino/atleta/evento apagado
+create or replace function public.skip_deleted() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if exists (select 1 from public.tombstones where table_name = tg_table_name and row_id = new.id::text) then
+    return null;
+  end if;
+  return new;
+end $$;
+
+do $$
+declare t text;
+begin
+  foreach t in array array['games','practices','players','events'] loop
+    execute format('drop trigger if exists skip_deleted_%1$s on public.%1$s', t);
+    execute format('create trigger skip_deleted_%1$s before insert on public.%1$s for each row execute function public.skip_deleted()', t);
   end loop;
 end $$;
 

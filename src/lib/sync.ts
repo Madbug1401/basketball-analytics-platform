@@ -193,9 +193,22 @@ async function flush() {
       if (error) {
         if (isNetworkError(error)) throw error;
         if (OPTIONAL.includes(table) && missingTable(error)) { unavailable.add(table); skipped.add(table); break; }
-        // permission / validation problems: don't retry forever
-        rejected.push(`${table}: ${error.message}`);
-        continue;
+        // one bad row (e.g. it points to a game deleted on another device) must not take the rest of the
+        // chunk with it: retry row by row and only give up on the rows the server refuses
+        if (rows.length > 1) {
+          let ok = 0, bad = 0;
+          for (const row of rows) {
+            if (!ok && bad >= 10) { rejected.push(`${table}: ${error.message}`); break; } // everything is refused (permissions): stop asking
+            const { error: re } = await client.from(table).upsert([row], { onConflict: "id" });
+            if (!re) { ok++; continue; }
+            if (isNetworkError(re)) throw re;
+            bad++;
+            rejected.push(`${table}: ${re.message}`);
+          }
+        } else {
+          rejected.push(`${table}: ${error.message}`); // permission / validation problems: don't retry forever
+          continue;
+        }
       }
       const priv = PRIVATE[table];
       if (priv) {
@@ -231,7 +244,9 @@ async function fetchAll(table: string, since: string | null, teamIds: string[]) 
   if (!client || !teamIds.length) return out;
   for (let from = 0; ; from += 1000) {
     let q = client.from(table).select("*").in("team_id", teamIds).order("updated_at", { ascending: true }).range(from, from + 999);
-    if (since) q = q.gt("updated_at", since);
+    // overlap a few seconds: updated_at is the transaction START time, so a row committed just after our
+    // last pull can carry an older timestamp. Re-applying a row is harmless (local pending edits are skipped).
+    if (since) q = q.gt("updated_at", new Date(Date.parse(since) - 5000).toISOString());
     const { data, error } = await q;
     if (error) throw error;
     out.push(...(data ?? []));
