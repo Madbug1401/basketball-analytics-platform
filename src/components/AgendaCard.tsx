@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { db } from "@/lib/db";
 import { callupText, dayLabel, expected, rsvpCounts, type AgendaItem } from "@/lib/agenda";
+import { readPlan } from "@/lib/gameplan";
 import { RSVP_LABEL, type Agenda, type ID, type Player, type RsvpStatus } from "@/lib/types";
 import { askText } from "./Dialog";
 
@@ -82,6 +83,7 @@ export function AgendaCard({ it, players, teamId, teamName, canEdit, myPlayerId,
             ))}
           </div>
           {mine?.note && <p className="mt-1.5 text-xs text-muted">A tua nota: {mine.note}</p>}
+          {it.kind === "game" && readPlan(it.info).length > 0 && <Link href={`/jogos/${it.id}#plano`} className="tap text-xs text-brand">Ver o game plan →</Link>}
         </div>
       )}
 
@@ -105,6 +107,7 @@ export function AgendaCard({ it, players, teamId, teamName, canEdit, myPlayerId,
             {it.kind === "game" && <button className={`btn px-2.5 py-1 text-xs ${open === "callup" ? "btn-primary" : ""}`} onClick={() => setOpen(open === "callup" ? "none" : "callup")}>Convocatória</button>}
             <button className="btn px-2.5 py-1 text-xs" onClick={share}>WhatsApp</button>
             {it.kind === "game" && it.game && <Link className="btn px-2.5 py-1 text-xs" href={`/adversarios?nome=${encodeURIComponent(it.game.opponent)}`}>Scouting</Link>}
+            {it.kind === "game" && <Link className="btn px-2.5 py-1 text-xs" href={`/jogos/${it.id}#plano`}>Game plan</Link>}
           </div>
           {open === "details" && <DetailsEditor it={it} teamId={teamId} />}
           {open === "callup" && <CallupEditor it={it} players={players} teamId={teamId} />}

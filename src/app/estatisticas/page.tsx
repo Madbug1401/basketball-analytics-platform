@@ -8,6 +8,7 @@ import { Trend } from "@/components/Trend";
 import { Kpi } from "@/components/Kpi";
 import { ContextTable } from "@/components/ContextTable";
 import { LineupAnalysis } from "@/components/LineupAnalysis";
+import { PossessionTable } from "@/components/PossessionTable";
 import { fmtPct, possessions, reb } from "@/lib/stats";
 
 export default function SeasonStats() {
@@ -86,7 +87,10 @@ export default function SeasonStats() {
       <LineupAnalysis season players={s.players}
         games={s.games.map((g) => ({ game: g.game, events: g.events, min: new Map([...g.stats.players].map(([id, l]) => [id, l.min])) }))} />
 
-      <ContextTable events={s.games.flatMap((g) => g.events)} opponent="Adversários" />
+      <div className="grid gap-4 lg:grid-cols-2">
+        <PossessionTable games={s.games} opponent="Adversários" />
+        <ContextTable events={s.games.flatMap((g) => g.events)} opponent="Adversários" />
+      </div>
 
       <section className="card overflow-x-auto">
         <div className="border-b border-line px-3 py-2"><h2 className="font-semibold">Assiduidade × produção</h2></div>

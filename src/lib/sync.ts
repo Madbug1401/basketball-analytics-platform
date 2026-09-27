@@ -19,10 +19,11 @@ const COLUMNS: Record<SyncedTable, string[]> = {
   seen: ["id", "teamId", "playerId", "seenAt"],
   drills: ["id", "teamId", "name", "focus", "minutes", "description", "createdAt"],
   scouting: ["id", "teamId", "name", "notes", "keyPlayers", "editedAt"],
+  notes: ["id", "teamId", "gameId", "videoTs", "period", "text", "author", "createdAt"],
 };
 // tables added after the first release: if the server hasn't been migrated yet, skip them
 // quietly (their changes stay queued) instead of breaking the whole sync
-const OPTIONAL: SyncedTable[] = ["goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting"];
+const OPTIONAL: SyncedTable[] = ["goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes"];
 const missingTable = (e: { code?: string; message?: string } | null) =>
   !!e && (e.code === "PGRST205" || e.code === "42P01" || /could not find the table|does not exist/i.test(e.message ?? ""));
 const unavailable = new Set<SyncedTable>();

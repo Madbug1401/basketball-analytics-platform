@@ -239,6 +239,19 @@ export interface Scouting {
   editedAt: number;
 }
 
+/* ---------- coach video notes (staff only) ---------- */
+
+export interface VideoNote {
+  id: ID;
+  teamId: ID;
+  gameId: ID;
+  videoTs: number;
+  period: number;
+  text: string;
+  author?: string;
+  createdAt: number;
+}
+
 export const ATTENDANCE_LABEL: Record<AttendanceStatus, string> = {
   present: "Presente",
   late: "Atrasado",

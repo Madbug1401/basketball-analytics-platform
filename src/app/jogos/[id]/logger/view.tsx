@@ -5,13 +5,14 @@ import { useRouteId } from "@/lib/route";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, uid } from "@/lib/db";
-import type { EventType, Game, GameEvent, ID, Player, Side } from "@/lib/types";
+import type { EventType, Game, GameEvent, ID, Player, Side, VideoNote } from "@/lib/types";
 import { describe, fmtTs, pointsOf, sortEvents, walk } from "@/lib/stats";
 import { isThree } from "@/lib/court";
 import { Court } from "@/components/Court";
 import { EventLog } from "@/components/EventLog";
 import { Html5Player, StopwatchPlayer, YouTubePlayer, youtubeId, type PlayerHandle } from "@/components/VideoPlayer";
-import { useAccess } from "@/lib/auth";
+import { useAccess, useAuth } from "@/lib/auth";
+import { askText } from "@/components/Dialog";
 import { LineupPicker } from "@/components/LineupPicker";
 import { FeedbackComposer } from "@/components/Feedback";
 import { CLIP_AFTER, CLIP_BEFORE } from "@/components/EventLog";
@@ -19,6 +20,9 @@ import { ACTIONS, type ActionDef } from "@/lib/actions";
 import { TagPicker, toggleTag } from "@/components/TagPicker";
 
 type Actor = { kind: "slot"; i: number } | { kind: "player"; id: ID } | { kind: "opp" };
+
+/** wall clock (outside components: only called from handlers) */
+const nowMs = () => Date.now();
 
 const RATES = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
@@ -39,18 +43,19 @@ function LoggerPage() {
     [game?.teamId],
   );
   const events = useLiveQuery(() => db.events.where("gameId").equals(id).toArray(), [id]);
+  const notes = useLiveQuery(() => db.notes.where("gameId").equals(id).toArray(), [id]);
 
   if (game === undefined || !players || !events) return null;
   if (!game) return <p className="text-muted">Jogo não encontrado.</p>;
-  return <Access game={game} players={players} events={events} />;
+  return <Access game={game} players={players} events={events} notes={notes ?? []} />;
 }
 
-function Access(props: { game: Game; players: Player[]; events: GameEvent[] }) {
+function Access(props: { game: Game; players: Player[]; events: GameEvent[]; notes: VideoNote[] }) {
   const a = useAccess(props.game.teamId);
-  return <Logger {...props} readOnly={!a.canEdit} />;
+  return <Logger {...props} notes={a.canEdit ? props.notes : []} readOnly={!a.canEdit} />;
 }
 
-function Logger({ game, players, events, readOnly }: { game: Game; players: Player[]; events: GameEvent[]; readOnly: boolean }) {
+function Logger({ game, players, events, notes, readOnly }: { game: Game; players: Player[]; events: GameEvent[]; notes: VideoNote[]; readOnly: boolean }) {
   const video = useRef<PlayerHandle>(null);
   const [now, setNow] = useState(0);
   const [rate, setRate] = useState(1);
@@ -65,6 +70,16 @@ function Logger({ game, players, events, readOnly }: { game: Game; players: Play
   const [help, setHelp] = useState(false);
   const [lastPlay, setLastPlay] = useState<ID | null>(null); // event that can get a context tag
   const [sending, setSending] = useState<GameEvent | null>(null); // play being sent to a player
+  const [sendingNote, setSendingNote] = useState<VideoNote | null>(null);
+  const { profile } = useAuth();
+  const addNote = async () => {
+    const ts = video.current?.getTime() ?? now;
+    video.current?.pause();
+    const text = await askText(`Nota em ${fmtTs(ts)} (só a equipa técnica vê)`, { confirmText: "Guardar" });
+    if (!text?.trim()) return;
+    await db.notes.add({ id: uid(), teamId: game.teamId, gameId: game.id, videoTs: ts, period: periodNow, text: text.trim(), author: profile?.fullName || undefined, createdAt: nowMs() });
+    toast("Nota guardada");
+  };
 
   const byId = useMemo(() => new Map(players.map((p) => [p.id, p])), [players]);
   const name = useCallback((pid?: ID) => { const p = pid ? byId.get(pid) : undefined; return p ? `#${p.number} ${p.name}` : "?"; }, [byId]);
@@ -110,7 +125,7 @@ function Logger({ game, players, events, readOnly }: { game: Game; players: Play
     async (type: EventType, side: Side, playerId: ID | undefined, meta?: GameEvent["meta"], loc?: { x: number; y: number }) => {
       const e: GameEvent = {
         id: uid(), teamId: game.teamId, gameId: game.id, side, playerId, type,
-        period: periodNow, videoTs: video.current?.getTime() ?? now, meta, createdAt: Date.now(),
+        period: periodNow, videoTs: video.current?.getTime() ?? now, meta, createdAt: nowMs(),
         ...(loc ? { x: loc.x, y: loc.y } : {}),
       };
       await db.events.add(e);
@@ -215,7 +230,7 @@ function Logger({ game, players, events, readOnly }: { game: Game; players: Play
     const next = started ? state.period + 1 : 1;
     await db.events.add({
       id: uid(), teamId: game.teamId, gameId: game.id, side: "us", type: "PERIOD_START",
-      period: next, videoTs: video.current?.getTime() ?? now, meta: { lineup }, createdAt: Date.now(),
+      period: next, videoTs: video.current?.getTime() ?? now, meta: { lineup }, createdAt: nowMs(),
     });
     setLineupDraft(null);
     toast(`Início do ${next}.º período`);
@@ -286,6 +301,7 @@ function Logger({ game, players, events, readOnly }: { game: Game; players: Play
       return;
     }
     if (k === "u") { setSub({}); return; }
+    if (k === "n") { e.preventDefault(); return addNote(); }
     if (k === "enter" && pendingLoc) return resolveLoc(true);
     if (k === "backspace" && pendingLoc) { e.preventDefault(); return resolveLoc(false); }
 
@@ -317,6 +333,7 @@ function Logger({ game, players, events, readOnly }: { game: Game; players: Play
           <Link href={`/jogos/${game.id}`} className="tap text-sm text-muted hover:text-fg">← Estatísticas do jogo</Link>
           <div className="flex items-center gap-2 text-xs text-muted">
             <span>Vídeo {fmtTs(now)} · {rate}x</span>
+            {!readOnly && <button className="btn py-1 text-xs" onClick={addNote}>📝 Nota <span className="kbd pointer-coarse:hidden">N</span></button>}
             <button className="btn py-1 text-xs pointer-coarse:hidden" onClick={() => setHelp(true)}>Atalhos <span className="kbd">?</span></button>
           </div>
         </div>
@@ -495,10 +512,15 @@ function Logger({ game, players, events, readOnly }: { game: Game; players: Play
 
       {/* event log (below the video on desktop, below the pad on phones) */}
       <div className="min-w-0 xl:col-start-1 xl:row-start-2 [&>.card]:mt-0">
-        <EventLog events={sorted} players={players} now={now} name={name} video={video} readOnly={readOnly} onSend={readOnly ? undefined : setSending} />
+        <EventLog events={sorted} players={players} now={now} name={name} video={video} readOnly={readOnly} onSend={readOnly ? undefined : setSending} notes={notes} onSendNote={readOnly ? undefined : setSendingNote} />
       </div>
 
       {help && <HelpOverlay onClose={() => setHelp(false)} />}
+      {sendingNote && (
+        <FeedbackComposer teamId={game.teamId} players={players} onClose={() => setSendingNote(null)}
+          initial={{ gameId: game.id, clipStart: Math.max(0, sendingNote.videoTs - CLIP_BEFORE), clipEnd: sendingNote.videoTs + CLIP_AFTER + 4, text: sendingNote.text,
+            context: `Nota em ${fmtTs(sendingNote.videoTs)} · P${sendingNote.period}` }} />
+      )}
       {sending && (
         <FeedbackComposer teamId={game.teamId} players={players} onClose={() => setSending(null)}
           initial={{

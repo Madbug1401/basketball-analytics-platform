@@ -6,7 +6,7 @@ import { useRouteId } from "@/lib/route";
 import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, deleteGame } from "@/lib/db";
-import { fmtPct, gameStats, possessions, reb, shotZones, type Line } from "@/lib/stats";
+import { fmtPct, fmtTs, gameStats, possessions, reb, shotZones, type Line } from "@/lib/stats";
 import { Court } from "@/components/Court";
 import { BoxTable, sortRows } from "@/components/BoxScore";
 import { ZONES } from "@/lib/court";
@@ -17,6 +17,12 @@ import { ask } from "@/components/Dialog";
 import { ContextTable } from "@/components/ContextTable";
 import { ShareDialog } from "@/components/ShareDialog";
 import { LineupAnalysis } from "@/components/LineupAnalysis";
+import { PossessionTable } from "@/components/PossessionTable";
+import { ReviewList } from "@/components/ReviewList";
+import { GamePlan } from "@/components/GamePlan";
+import { GameTimeline } from "@/components/GameTimeline";
+import { possessions as countPossessions } from "@/lib/possessions";
+import { reviewItems } from "@/lib/review";
 
 export function GamePage() {
   const id = useRouteId();
@@ -37,6 +43,8 @@ export function GamePage() {
 
   const stats = useMemo(() => (data?.game ? gameStats(data.events!, data.game.periods, data.game.periodMinutes) : null), [data]);
   const [sharing, setSharing] = useState(false);
+  const notes = useLiveQuery(() => db.notes.where("gameId").equals(id).sortBy("videoTs"), [id]);
+  const review = useMemo(() => (data?.game && data.events?.length ? reviewItems(countPossessions(data.events), data.events, data.players ?? [], data.game.periods) : []), [data]);
   const shareData = useMemo(() => {
     if (!data?.game || !data.team || !stats || !data.events?.length) return null;
     const avg = season ? new Map([...season.totals].map(([pid, l]) => [pid, { ...l, games: l.gp }])) : undefined;
@@ -84,6 +92,8 @@ export function GamePage() {
         </div>
       </div>
 
+      {events.length === 0 && <GamePlan game={game} events={events} canEdit={access.canEdit} />}
+
       {events.length === 0 ? (
         <div className="card p-10 text-center text-muted">
           <Link href={`/adversarios?nome=${encodeURIComponent(game.opponent)}`} className="btn mb-4">Scouting de {game.opponent}</Link>
@@ -104,8 +114,34 @@ export function GamePage() {
                 </tbody>
               </table>
             </div>
-            <TeamCompare us={stats.us} opp={stats.opp} opponent={game.opponent} />
+            <TeamCompare us={stats.us} opp={stats.opp} opponent={game.opponent} poss={(() => { const ps = countPossessions(events); return { us: ps.filter((p) => p.side === "us").length, opp: ps.filter((p) => p.side === "opp").length }; })()} />
           </div>
+
+          {access.canEdit && <ReviewList game={game} events={events} players={players} />}
+
+          <GameTimeline game={game} events={events} players={players} notes={access.canEdit ? notes ?? [] : []} review={access.canEdit ? review : []} />
+
+          {access.canEdit && notes && notes.length > 0 && (
+            <section className="card overflow-hidden">
+              <div className="border-b border-line px-3 py-2">
+                <h2 className="font-semibold">Notas de vídeo</h2>
+                <p className="text-xs text-muted">Só a equipa técnica vê. Adiciona-as no registo com o botão 📝 (tecla N).</p>
+              </div>
+              <ul className="divide-y divide-line/60">
+                {notes.map((n) => (
+                  <li key={n.id} className="flex items-center gap-3 px-3 py-2 text-sm">
+                    <Link href={`/jogos/${id}/logger?${new URLSearchParams({ janela: `${Math.max(0, Math.floor(n.videoTs - 6))}-${Math.ceil(n.videoTs + 6)}`, play: "1" })}`}
+                      className="tap shrink-0 font-mono text-xs text-brand">▶ {fmtTs(n.videoTs)}</Link>
+                    <span className="w-6 shrink-0 font-mono text-xs text-muted">P{n.period}</span>
+                    <span className="min-w-0 flex-1">{n.text}</span>
+                    {n.author && <span className="hidden shrink-0 text-xs text-muted sm:inline">{n.author}</span>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <GamePlan game={game} events={events} canEdit={access.canEdit} />
 
           {insights.length > 0 && <Report insights={insights} gameId={id} />}
 
@@ -114,7 +150,10 @@ export function GamePage() {
             <BoxTable rows={rows} total={stats.us} />
           </section>
 
-          <ContextTable events={events} gameId={id} opponent={game.opponent} />
+          <div className="grid gap-4 lg:grid-cols-2">
+            <PossessionTable games={[{ events }]} opponent={game.opponent} />
+            <ContextTable events={events} gameId={id} opponent={game.opponent} />
+          </div>
 
           <section className="grid gap-4 lg:grid-cols-[420px_1fr]">
             <div className="card p-3">
@@ -158,7 +197,7 @@ export function GamePage() {
   );
 }
 
-function TeamCompare({ us, opp, opponent }: { us: Line; opp: Line; opponent: string }) {
+function TeamCompare({ us, opp, opponent, poss }: { us: Line; opp: Line; opponent: string; poss: { us: number; opp: number } }) {
   const rows: [string, string, string, number, number][] = [
     ["Lançamentos campo", `${us.fgm}/${us.fga} (${fmtPct(us.fgm, us.fga)})`, `${opp.fgm}/${opp.fga} (${fmtPct(opp.fgm, opp.fga)})`, us.fgm / (us.fga || 1), opp.fgm / (opp.fga || 1)],
     ["Triplos", `${us.p3m}/${us.p3a} (${fmtPct(us.p3m, us.p3a)})`, `${opp.p3m}/${opp.p3a} (${fmtPct(opp.p3m, opp.p3a)})`, us.p3m / (us.p3a || 1), opp.p3m / (opp.p3a || 1)],
@@ -166,7 +205,7 @@ function TeamCompare({ us, opp, opponent }: { us: Line; opp: Line; opponent: str
     ["Ressaltos (of.)", `${reb(us)} (${us.oreb})`, `${reb(opp)} (${opp.oreb})`, reb(us), reb(opp)],
     ["Perdas de bola", String(us.tov), String(opp.tov), -us.tov, -opp.tov],
     ["Faltas", String(us.pf), String(opp.pf), -us.pf, -opp.pf],
-    ["Posses (est.)", possessions(us).toFixed(0), possessions(opp).toFixed(0), 0, 0],
+    ["Posses", String(poss.us || Math.round(possessions(us))), String(poss.opp || Math.round(possessions(opp))), 0, 0],
   ];
   return (
     <div className="card overflow-x-auto">

@@ -36,9 +36,18 @@
 - [x] Quintetos avançados (por 100 posses, com/sem, duplas/trios) e gestão de minutos
 - [ ] Notificações no telemóvel (push) para convocatórias e mensagens
 
+## v0.6 — Basketball Intelligence (base)
+- [x] Motor de posses (derivado dos eventos) e métricas por posse
+- [x] "O que rever": momentos críticos com vídeo
+- [x] Game plan com verificação automática
+- [x] Notas do treinador ligadas ao vídeo
+- [x] Timeline visual do jogo
+- [ ] Qualidade de lançamento (opcional, como etiqueta)
+- [ ] Planeador de rotações · assistente de IA sobre os dados
+
 ## Fase 3: vídeo
 - [x] Clips/playlist: "todos os turnovers do #7" → sequência de jogadas (v0.2)
-- [ ] Marcadores e notas no vídeo
+- [x] Marcadores e notas no vídeo (v0.6)
 - [x] Partilhar um clip com um jogador (v0.5, vídeos do YouTube ou link)
 
 ## Fase 4: intelligence

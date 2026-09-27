@@ -347,9 +347,31 @@ const feedback = [
   { id: uuid(), teamId, playerId: players[0].id, text: "Esta semana: 50 lances livres depois de cada treino.", author: "Melvyn", createdAt: Date.parse(TODAY + "T08:05:00Z") },
 ];
 
+// ---------- notas de vídeo e game plans ----------
+const notes = [
+  { id: uuid(), teamId, gameId: lastGame.id, videoTs: 420, period: 1, text: "Estamos a atacar demasiado cedo — só um passe antes de lançar.", author: "Melvyn", createdAt: Date.parse(TODAY + "T09:00:00Z") },
+  { id: uuid(), teamId, gameId: lastGame.id, videoTs: 1900, period: 2, text: "O #11 abandona o canto na ajuda: rever com ele.", author: "Nico", createdAt: Date.parse(TODAY + "T09:01:00Z") },
+  { id: uuid(), teamId, gameId: lastGame.id, videoTs: 3300, period: 3, text: "Boa execução do pick & roll lateral.", author: "Nico", createdAt: Date.parse(TODAY + "T09:02:00Z") },
+];
+const gp = (area, text, metric, op, value) => ({ id: uuid(), area, text, ...(metric ? { check: { metric, op, value } } : {}) });
+const lastAgenda = agenda.find((a) => a.id === lastGame.id);
+lastAgenda.plan = [
+  gp("defesa", "Não deixar correr: máx. 8 pts em transição", "opp_transition_pts", "lte", 8),
+  gp("defesa", "Bloquear o ressalto: máx. 8 ressaltos ofensivos deles", "opp_oreb", "lte", 8),
+  gp("ataque", "Cuidar da bola: máx. 12 perdas", "our_tov", "lte", 12),
+  gp("ataque", "Procurar o poste baixo no 1.º período"),
+];
+const nextAgenda = agenda.find((a) => a.kind === "game" && games.find((g) => g.id === a.id)?.date === nextSat);
+nextAgenda.plan = [
+  gp("defesa", "Não deixar correr: máx. 8 pts em transição", "opp_transition_pts", "lte", 8),
+  gp("defesa", "Forçar o #10 deles para a mão esquerda"),
+  gp("ataque", "Contra a pressão: 3 apoios à bola e passe por cima", "our_tov", "lte", 12),
+  gp("ataque", "Atacar a zona 2-3 com o poste alto"),
+];
+
 const data = {
   app: "basketball-analytics", version: 1, exportedAt: new Date().toISOString(), demo: true,
-  teams: [team], players, practices, attendance, games, events, goals, agenda, rsvps, drills, scouting, feedback,
+  teams: [team], players, practices, attendance, games, events, goals, agenda, rsvps, drills, scouting, feedback, notes,
 };
 
 mkdirSync(dirname(OUT), { recursive: true });

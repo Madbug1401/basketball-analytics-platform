@@ -24,7 +24,7 @@ Precisas do Node 20 ou mais recente.
 
 Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/outra.json 42 2026-10-15` (seed e "hoje").
 
-## O que já faz (v0.5)
+## O que já faz (v0.6)
 
 | Área | Funcionalidades |
 |---|---|
@@ -40,6 +40,11 @@ Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/out
 | **Planeador de treinos** | Biblioteca de exercícios (16 de base) · plano de cada treino com minutos · sugestões a partir dos jogos (perdas, lances livres, ressalto, pressão…) · tempo por área na época |
 | **Scouting** | Notas e jogadores a vigiar por adversário · chaves do jogo automáticas · relatório pré-jogo em imagem/texto |
 | **Quintetos** | Saldo por 100 posses de quintetos, duplas e trios · equipa com/sem cada jogador · gestão de minutos com alertas de carga |
+| **Posses** | Os eventos agrupados em posses (sem registar nada a mais): pontos por posse, eFG%, % perdas, % ressalto ofensivo, lances livres por lançamento, transição vs ataque organizado, 2.ª oportunidade · quintetos com posses reais (ataque/defesa por 100) |
+| **O que rever** | Os momentos críticos de cada jogo (sequências de perdas, parciais, secas, 2.ª oportunidade cedida, quintetos que afundaram) com o bocado de vídeo certo |
+| **Game plan** | Objetivos do jogo (a partir do scouting) verificados automaticamente depois do jogo ✅ ⚠️ ❌ · partilha no WhatsApp |
+| **Notas de vídeo** | Notas do treinador num momento do vídeo (tecla N), só para a equipa técnica · aparecem na timeline e podem ser enviadas a um jogador |
+| **Timeline** | Diferença no marcador ao longo do jogo e uma linha por período com cestos, perdas, substituições, notas e momentos a rever |
 | **Offline** | A app abre e funciona sem internet (service worker); tudo fica no telemóvel e sincroniza quando voltar a ligação |
 | **Jogo** | Relatório automático (parciais decisivos, perdas, ressaltos, LL, quintetos, jogadores acima/abaixo da média) com "▶ ver jogadas" · parciais · box score com minutos estimados, +/-, eficiência · mapa de lançamentos · quintetos · imprimir em A4 |
 | **Vídeo** | Editar qualquer evento (✎) · filtrar por jogador/tipo e **ver a sequência** das jogadas (ex.: todas as perdas do #7) · links do relatório abrem a sequência certa |

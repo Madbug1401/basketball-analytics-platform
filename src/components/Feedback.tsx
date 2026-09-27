@@ -34,12 +34,12 @@ export function ClipPlayer({ game, start, end }: { game?: Game; start?: number; 
 /** Compose a message (optionally with a clip) to one player. */
 export function FeedbackComposer({ teamId, players, initial, onClose }: {
   teamId: ID; players: Player[];
-  initial: { playerId?: ID; gameId?: ID; clipStart?: number; clipEnd?: number; eventIds?: ID[]; context?: string };
+  initial: { playerId?: ID; gameId?: ID; clipStart?: number; clipEnd?: number; eventIds?: ID[]; context?: string; text?: string };
   onClose: () => void;
 }) {
   const { profile } = useAuth();
   const [playerId, setPlayerId] = useState<ID>(initial.playerId ?? players[0]?.id ?? "");
-  const [text, setText] = useState("");
+  const [text, setText] = useState(initial.text ?? "");
   const [range, setRange] = useState({ s: initial.clipStart, e: initial.clipEnd });
   const [err, setErr] = useState("");
 

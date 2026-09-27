@@ -232,6 +232,20 @@ create table if not exists public.scouting (
 );
 create index if not exists scouting_team on public.scouting(team_id, updated_at);
 
+-- notas do treinador ligadas ao vídeo (só a equipa técnica)
+create table if not exists public.notes (
+  id uuid primary key default gen_random_uuid(),
+  team_id uuid not null references public.teams(id) on delete cascade,
+  game_id uuid not null references public.games(id) on delete cascade,
+  video_ts double precision not null default 0,
+  period smallint not null default 1,
+  text text not null default '',
+  author text,
+  created_at bigint not null default 0,
+  updated_at timestamptz not null default now()
+);
+create index if not exists notes_team on public.notes(team_id, updated_at);
+
 -- convites (código de 6 caracteres)
 create table if not exists public.invites (
   code text primary key,
@@ -311,7 +325,7 @@ end $$;
 do $$
 declare t text;
 begin
-  foreach t in array array['teams','players','players_private','practices','attendance','games','games_private','events','goals','agenda','rsvps','feedback','seen','drills','scouting'] loop
+  foreach t in array array['teams','players','players_private','practices','attendance','games','games_private','events','goals','agenda','rsvps','feedback','seen','drills','scouting','notes'] loop
     execute format('drop trigger if exists touch_%1$s on public.%1$s', t);
     execute format('create trigger touch_%1$s before insert or update on public.%1$s for each row execute function public.touch_updated_at()', t);
     execute format('drop trigger if exists tomb_%1$s on public.%1$s', t);
@@ -362,6 +376,7 @@ alter table public.feedback enable row level security;
 alter table public.seen enable row level security;
 alter table public.drills enable row level security;
 alter table public.scouting enable row level security;
+alter table public.notes enable row level security;
 alter table public.invites enable row level security;
 alter table public.tombstones enable row level security;
 
@@ -448,6 +463,9 @@ create policy feedback_select on public.feedback for select using (
 create policy feedback_write on public.feedback for insert with check (public.is_staff(team_id));
 create policy feedback_update on public.feedback for update using (public.is_staff(team_id));
 create policy feedback_delete on public.feedback for delete using (public.is_staff(team_id));
+
+-- notas de vídeo: só staff
+create policy notes_all on public.notes for all using (public.is_staff(team_id)) with check (public.is_staff(team_id));
 
 create policy invites_select on public.invites for select using (public.is_staff(team_id));
 create policy invites_delete on public.invites for delete using (public.is_staff(team_id));

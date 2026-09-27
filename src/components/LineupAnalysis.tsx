@@ -26,7 +26,7 @@ export function LineupAnalysis({ games, players, season }: {
   const sorter = (a: Rated, b: Rated) => (sort === "min" ? b.min - a.min : (b.net100 ?? -999) - (a.net100 ?? -999));
 
   const rows = useMemo(() => {
-    if (tab === "units") return [...units.values()].map((u) => rate(u.ids, u.secs, u.us, u.opp));
+    if (tab === "units") return [...units.values()].map((u) => rate(u.ids, u.secs, u.us, u.opp, u.possUs, u.possOpp));
     if (tab === "duos") return combos(units, 2);
     if (tab === "trios") return combos(units, 3);
     return [];
@@ -105,18 +105,22 @@ export function LineupAnalysis({ games, players, season }: {
       ) : (
         <div className="overflow-x-auto">
           <table className="tbl">
-            <thead><tr><th>{tab === "units" ? "Quinteto" : tab === "duos" ? "Dupla" : "Trio"}</th><th>Min</th><th>Marc.</th><th>Sofr.</th><th>+/-</th><th title="Saldo por 100 posses">Por 100</th></tr></thead>
+            <thead><tr><th>{tab === "units" ? "Quinteto" : tab === "duos" ? "Dupla" : "Trio"}</th><th>Min</th><th>Posses</th><th>+/-</th><th title="Saldo por 100 posses">Por 100</th><th title="Pontos marcados por 100 posses">Ataque</th><th title="Pontos sofridos por 100 posses">Defesa</th><th title="% de posses perdidas">Perdas</th><th title="% dos ressaltos ofensivos disponíveis">R. of.</th></tr></thead>
             <tbody>
               {rows.filter((r) => r.min >= minMin).sort(sorter).slice(0, 15).map((r) => (
                 <tr key={r.ids.join()}>
                   <td className="whitespace-nowrap">{label(r.ids)}</td>
                   <td>{r.min.toFixed(0)}</td>
-                  <td>{r.pf}</td><td>{r.pa}</td>
+                  <td className="text-muted">{Math.round(r.poss)}</td>
                   <td className={netClass(r.pf - r.pa)}>{r.pf - r.pa > 0 ? "+" : ""}{r.pf - r.pa}</td>
                   <td className={`font-semibold ${netClass(r.net100)}`}>{fmtNet(r.net100)}</td>
+                  <td>{r.ortg === null ? "–" : r.ortg.toFixed(0)}</td>
+                  <td>{r.drtg === null ? "–" : r.drtg.toFixed(0)}</td>
+                  <td className="text-muted">{r.tovPct === null ? "–" : `${r.tovPct.toFixed(0)}%`}</td>
+                  <td className="text-muted">{r.orebPct === null ? "–" : `${r.orebPct.toFixed(0)}%`}</td>
                 </tr>
               ))}
-              {rows.filter((r) => r.min >= minMin).length === 0 && <tr><td colSpan={6} className="py-6 text-center! text-muted">Ainda sem minutos suficientes.</td></tr>}
+              {rows.filter((r) => r.min >= minMin).length === 0 && <tr><td colSpan={9} className="py-6 text-center! text-muted">Ainda sem minutos suficientes.</td></tr>}
             </tbody>
           </table>
         </div>

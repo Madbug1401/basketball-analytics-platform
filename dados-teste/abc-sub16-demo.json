@@ -1,7 +1,7 @@
 {
  "app": "basketball-analytics",
  "version": 1,
- "exportedAt": "2026-09-27T01:43:56.565Z",
+ "exportedAt": "2026-09-27T02:37:30.609Z",
  "demo": true,
  "teams": [
   {
@@ -53009,7 +53009,44 @@
     "666386a2-6df6-4fe5-a706-bcb5f555297d",
     "cb406658-c174-4450-a31b-d1ff1602bbb1"
    ],
-   "published": true
+   "published": true,
+   "plan": [
+    {
+     "id": "072bd86d-9893-438f-aa61-2eec2e76782f",
+     "area": "defesa",
+     "text": "Não deixar correr: máx. 8 pts em transição",
+     "check": {
+      "metric": "opp_transition_pts",
+      "op": "lte",
+      "value": 8
+     }
+    },
+    {
+     "id": "4bd335eb-88f7-4022-ad42-7e83369d2ed1",
+     "area": "defesa",
+     "text": "Bloquear o ressalto: máx. 8 ressaltos ofensivos deles",
+     "check": {
+      "metric": "opp_oreb",
+      "op": "lte",
+      "value": 8
+     }
+    },
+    {
+     "id": "d4303e80-c4ee-431c-ab7a-0c7bf67a819a",
+     "area": "ataque",
+     "text": "Cuidar da bola: máx. 12 perdas",
+     "check": {
+      "metric": "our_tov",
+      "op": "lte",
+      "value": 12
+     }
+    },
+    {
+     "id": "8da7ac73-6616-411b-a63b-f6d02b87999b",
+     "area": "ataque",
+     "text": "Procurar o poste baixo no 1.º período"
+    }
+   ]
   },
   {
    "id": "407cf97d-6c6e-461a-a68e-61d62060b3ed",
@@ -53298,7 +53335,39 @@
     "666386a2-6df6-4fe5-a706-bcb5f555297d"
    ],
    "published": true,
-   "note": "Equipamento branco. Chegar a horas para o aquecimento."
+   "note": "Equipamento branco. Chegar a horas para o aquecimento.",
+   "plan": [
+    {
+     "id": "b135961e-ebfb-41bf-a7f9-3f99576541d3",
+     "area": "defesa",
+     "text": "Não deixar correr: máx. 8 pts em transição",
+     "check": {
+      "metric": "opp_transition_pts",
+      "op": "lte",
+      "value": 8
+     }
+    },
+    {
+     "id": "0f032a48-b7e3-4d59-a44c-edf6e0a7a729",
+     "area": "defesa",
+     "text": "Forçar o #10 deles para a mão esquerda"
+    },
+    {
+     "id": "d5c1a7b2-c956-4418-a7e9-9a64ce07aef0",
+     "area": "ataque",
+     "text": "Contra a pressão: 3 apoios à bola e passe por cima",
+     "check": {
+      "metric": "our_tov",
+      "op": "lte",
+      "value": 12
+     }
+    },
+    {
+     "id": "c10bebb1-1c88-4330-a703-56602599e1f7",
+     "area": "ataque",
+     "text": "Atacar a zona 2-3 com o poste alto"
+    }
+   ]
   },
   {
    "id": "c00fc952-549d-49b7-adbc-c23835bcc740",
@@ -53593,6 +53662,38 @@
    "text": "Esta semana: 50 lances livres depois de cada treino.",
    "author": "Melvyn",
    "createdAt": 1790496300000
+  }
+ ],
+ "notes": [
+  {
+   "id": "e9072bfd-c797-4189-a4d7-4e4821e1ea58",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "gameId": "aedd69a5-74cd-49a5-a0dc-2ea86007ec8f",
+   "videoTs": 420,
+   "period": 1,
+   "text": "Estamos a atacar demasiado cedo — só um passe antes de lançar.",
+   "author": "Melvyn",
+   "createdAt": 1790499600000
+  },
+  {
+   "id": "7c5b2875-0b75-4976-a7b2-1bdf4dc61bff",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "gameId": "aedd69a5-74cd-49a5-a0dc-2ea86007ec8f",
+   "videoTs": 1900,
+   "period": 2,
+   "text": "O #11 abandona o canto na ajuda: rever com ele.",
+   "author": "Nico",
+   "createdAt": 1790499660000
+  },
+  {
+   "id": "a475d028-7f48-43b4-a22f-c66673a4e206",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "gameId": "aedd69a5-74cd-49a5-a0dc-2ea86007ec8f",
+   "videoTs": 3300,
+   "period": 3,
+   "text": "Boa execução do pick & roll lateral.",
+   "author": "Nico",
+   "createdAt": 1790499720000
   }
  ]
 }
