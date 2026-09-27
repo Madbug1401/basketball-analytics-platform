@@ -11,12 +11,17 @@ import { Court } from "@/components/Court";
 import { Trend } from "@/components/Trend";
 import { Kpi } from "@/components/Kpi";
 import { GoalCard } from "@/components/Goals";
+import { FeedbackComposer, FeedbackList } from "@/components/Feedback";
+import { useAccess } from "@/lib/auth";
+import { useState } from "react";
 
 export function PlayerPage() {
   const id = useRouteId();
   const player = useLiveQuery(() => db.players.get(id), [id]);
   const s = useSeason(player?.teamId);
   const goals = useLiveQuery(() => db.goals.where("playerId").equals(id).filter((g) => g.active).toArray(), [id]);
+  const access = useAccess(player?.teamId);
+  const [composing, setComposing] = useState(false);
   if (!player || !s) return null;
 
   const t = s.totals.get(id);
@@ -108,7 +113,15 @@ export function PlayerPage() {
         </table>
       </section>
 
-      {player.notes && <section className="card p-4 text-sm"><h2 className="mb-1 font-semibold">Notas</h2><p className="whitespace-pre-wrap text-muted">{player.notes}</p></section>}
+      {access.canEdit && (
+        <div className="-mb-3 flex justify-end">
+          <button className="btn" onClick={() => setComposing(true)}>✉ Enviar mensagem a {player.name.split(" ")[0]}</button>
+        </div>
+      )}
+      <FeedbackList player={player} isMe={access.isPlayer && access.playerId === player.id} canEdit={access.canEdit} />
+      {composing && <FeedbackComposer teamId={player.teamId} players={[player]} initial={{ playerId: player.id }} onClose={() => setComposing(false)} />}
+
+      {player.notes && access.canEdit && <section className="card p-4 text-sm"><h2 className="mb-1 font-semibold">Notas</h2><p className="whitespace-pre-wrap text-muted">{player.notes}</p></section>}
     </div>
   );
 }

@@ -152,6 +152,86 @@ create table if not exists public.goals (
 );
 create index if not exists goals_team on public.goals(team_id, updated_at);
 
+-- agenda: hora, local, convocatória e plano de treino de cada jogo/treino (id = id do jogo ou treino)
+create table if not exists public.agenda (
+  id text primary key,
+  team_id uuid not null references public.teams(id) on delete cascade,
+  kind text not null check (kind in ('game','practice')),
+  time text,
+  meet_time text,
+  location text,
+  callup jsonb,
+  published boolean,
+  plan jsonb,
+  note text,
+  updated_at timestamptz not null default now()
+);
+create index if not exists agenda_team on public.agenda(team_id, updated_at);
+
+-- respostas dos jogadores (vou / talvez / não posso); id = `${ref_id}:${player_id}`
+create table if not exists public.rsvps (
+  id text primary key,
+  team_id uuid not null references public.teams(id) on delete cascade,
+  ref_id text not null,
+  player_id uuid not null references public.players(id) on delete cascade,
+  status text not null check (status in ('yes','maybe','no')),
+  note text,
+  answered_at bigint not null default 0,
+  updated_at timestamptz not null default now()
+);
+create index if not exists rsvps_team on public.rsvps(team_id, updated_at);
+
+-- feedback do treinador para um jogador (nota + jogada do vídeo)
+create table if not exists public.feedback (
+  id uuid primary key default gen_random_uuid(),
+  team_id uuid not null references public.teams(id) on delete cascade,
+  player_id uuid not null references public.players(id) on delete cascade,
+  game_id uuid references public.games(id) on delete set null,
+  clip_start double precision,
+  clip_end double precision,
+  event_ids jsonb,
+  text text not null default '',
+  author text,
+  created_at bigint not null default 0,
+  updated_at timestamptz not null default now()
+);
+create index if not exists feedback_team on public.feedback(team_id, updated_at);
+
+-- "visto" pelo jogador (id = id do feedback)
+create table if not exists public.seen (
+  id text primary key,
+  team_id uuid not null references public.teams(id) on delete cascade,
+  player_id uuid not null references public.players(id) on delete cascade,
+  seen_at bigint not null default 0,
+  updated_at timestamptz not null default now()
+);
+create index if not exists seen_team on public.seen(team_id, updated_at);
+
+-- biblioteca de exercícios
+create table if not exists public.drills (
+  id uuid primary key default gen_random_uuid(),
+  team_id uuid not null references public.teams(id) on delete cascade,
+  name text not null,
+  focus jsonb,
+  minutes smallint,
+  description text,
+  created_at bigint not null default 0,
+  updated_at timestamptz not null default now()
+);
+create index if not exists drills_team on public.drills(team_id, updated_at);
+
+-- notas de scouting por adversário
+create table if not exists public.scouting (
+  id uuid primary key default gen_random_uuid(),
+  team_id uuid not null references public.teams(id) on delete cascade,
+  name text not null,
+  notes text,
+  key_players text,
+  edited_at bigint not null default 0,
+  updated_at timestamptz not null default now()
+);
+create index if not exists scouting_team on public.scouting(team_id, updated_at);
+
 -- convites (código de 6 caracteres)
 create table if not exists public.invites (
   code text primary key,
@@ -231,7 +311,7 @@ end $$;
 do $$
 declare t text;
 begin
-  foreach t in array array['teams','players','players_private','practices','attendance','games','games_private','events','goals'] loop
+  foreach t in array array['teams','players','players_private','practices','attendance','games','games_private','events','goals','agenda','rsvps','feedback','seen','drills','scouting'] loop
     execute format('drop trigger if exists touch_%1$s on public.%1$s', t);
     execute format('create trigger touch_%1$s before insert or update on public.%1$s for each row execute function public.touch_updated_at()', t);
     execute format('drop trigger if exists tomb_%1$s on public.%1$s', t);
@@ -276,6 +356,12 @@ alter table public.games enable row level security;
 alter table public.games_private enable row level security;
 alter table public.events enable row level security;
 alter table public.goals enable row level security;
+alter table public.agenda enable row level security;
+alter table public.rsvps enable row level security;
+alter table public.feedback enable row level security;
+alter table public.seen enable row level security;
+alter table public.drills enable row level security;
+alter table public.scouting enable row level security;
 alter table public.invites enable row level security;
 alter table public.tombstones enable row level security;
 
@@ -331,6 +417,37 @@ create policy goals_select on public.goals for select using (
 create policy goals_write on public.goals for insert with check (public.is_staff(team_id));
 create policy goals_update on public.goals for update using (public.is_staff(team_id));
 create policy goals_delete on public.goals for delete using (public.is_staff(team_id));
+
+-- agenda, exercícios e scouting: membros leem, staff escreve
+do $$
+declare t text;
+begin
+  foreach t in array array['agenda','drills','scouting'] loop
+    execute format('create policy %1$s_select on public.%1$s for select using (public.is_member(team_id))', t);
+    execute format('create policy %1$s_write on public.%1$s for insert with check (public.is_staff(team_id))', t);
+    execute format('create policy %1$s_update on public.%1$s for update using (public.is_staff(team_id))', t);
+    execute format('create policy %1$s_delete on public.%1$s for delete using (public.is_staff(team_id))', t);
+  end loop;
+end $$;
+
+-- respostas e "visto": o jogador escreve as suas; o staff vê e gere todas
+do $$
+declare t text;
+begin
+  foreach t in array array['rsvps','seen'] loop
+    execute format('create policy %1$s_select on public.%1$s for select using (public.is_staff(team_id) or player_id = public.my_player_id(team_id))', t);
+    execute format('create policy %1$s_write on public.%1$s for insert with check (public.is_staff(team_id) or player_id = public.my_player_id(team_id))', t);
+    execute format('create policy %1$s_update on public.%1$s for update using (public.is_staff(team_id) or player_id = public.my_player_id(team_id)) with check (public.is_staff(team_id) or player_id = public.my_player_id(team_id))', t);
+    execute format('create policy %1$s_delete on public.%1$s for delete using (public.is_staff(team_id) or player_id = public.my_player_id(team_id))', t);
+  end loop;
+end $$;
+
+-- feedback: staff escreve; cada jogador só vê o seu
+create policy feedback_select on public.feedback for select using (
+  public.is_staff(team_id) or player_id = public.my_player_id(team_id));
+create policy feedback_write on public.feedback for insert with check (public.is_staff(team_id));
+create policy feedback_update on public.feedback for update using (public.is_staff(team_id));
+create policy feedback_delete on public.feedback for delete using (public.is_staff(team_id));
 
 create policy invites_select on public.invites for select using (public.is_staff(team_id));
 create policy invites_delete on public.invites for delete using (public.is_staff(team_id));

@@ -6,6 +6,8 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db, today, uid } from "@/lib/db";
 import { useTeam } from "@/lib/team";
 import { StaffOnly } from "@/components/Guard";
+import { timeByFocus } from "@/lib/planner";
+import { FOCUS_LABEL } from "@/lib/types";
 
 export default function PracticesPageGuarded() {
   return <StaffOnly><PracticesPage /></StaffOnly>;
@@ -16,16 +18,18 @@ function PracticesPage() {
   const router = useRouter();
   const data = useLiveQuery(async () => {
     if (!team) return null;
-    const [practices, attendance, players] = await Promise.all([
+    const [practices, attendance, players, agenda] = await Promise.all([
       db.practices.where("teamId").equals(team.id).reverse().sortBy("date"),
       db.attendance.where("teamId").equals(team.id).toArray(),
       db.players.where("teamId").equals(team.id).filter((p) => p.active).sortBy("number"),
+      db.agenda.where("teamId").equals(team.id).filter((a) => a.kind === "practice").toArray(),
     ]);
-    return { practices, attendance, players };
+    return { practices, attendance, players, agenda };
   }, [team?.id]);
 
   if (!team || !data) return null;
-  const { practices, attendance, players } = data;
+  const { practices, attendance, players, agenda } = data;
+  const tbf = timeByFocus(agenda);
 
   const create = async () => {
     const id = uid();
@@ -54,7 +58,10 @@ function PracticesPage() {
       <section>
         <div className="mb-4 flex items-end justify-between">
           <h1 className="text-2xl font-semibold">Treinos</h1>
-          <button className="btn btn-primary" onClick={create}>+ Novo treino</button>
+          <div className="flex gap-2">
+            <Link href="/treinos/exercicios" className="btn">Exercícios</Link>
+            <button className="btn btn-primary" onClick={create}>+ Novo treino</button>
+          </div>
         </div>
         <div className="card divide-y divide-line">
           {practices.map((p) => {
@@ -103,6 +110,22 @@ function PracticesPage() {
           </table>
         </div>
         <p className="mt-2 text-xs text-muted">Atrasos contam como presença; faltas justificadas não contam para a percentagem.</p>
+
+        <h2 className="mb-3 mt-6 text-lg font-semibold">Tempo por área</h2>
+        <div className="card p-4">
+          {tbf.total ? (
+            <ul className="grid gap-2">
+              {tbf.byFocus.map(([f, m]) => (
+                <li key={f} className="grid grid-cols-[8rem_1fr_3.5rem] items-center gap-2 text-sm">
+                  <span className="truncate text-muted">{FOCUS_LABEL[f]}</span>
+                  <div className="h-2 overflow-hidden rounded bg-bg"><div className="h-full rounded bg-brand" style={{ width: `${Math.round((m / tbf.byFocus[0][1]) * 100)}%` }} /></div>
+                  <span className="text-right font-mono text-xs">{Math.round(m)}′</span>
+                </li>
+              ))}
+            </ul>
+          ) : <p className="text-sm text-muted">Monta o plano dos treinos (com exercícios da biblioteca) para ver onde vai o tempo.</p>}
+          {tbf.total > 0 && <p className="mt-3 text-xs text-muted">{Math.round(tbf.total)} minutos planeados em {agenda.filter((a) => a.plan?.length).length} treinos.</p>}
+        </div>
       </section>
     </div>
   );

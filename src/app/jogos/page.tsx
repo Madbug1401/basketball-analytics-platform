@@ -26,7 +26,7 @@ export default function GamesPage() {
     });
   }, [team?.id]);
 
-  const [f, setF] = useState({ opponent: "", date: today(), home: true, competition: "Regional", videoKind: "youtube" as VideoSource["kind"] | "live", url: "", periodMinutes: 10 });
+  const [f, setF] = useState({ opponent: "", date: today(), home: true, competition: "Regional", time: "", location: "", videoKind: "youtube" as VideoSource["kind"] | "live", url: "", periodMinutes: 10 });
   const [err, setErr] = useState("");
 
   if (!team || !data) return null;
@@ -45,6 +45,7 @@ export default function GamesPage() {
       id, teamId: team.id, date: f.date, opponent: f.opponent.trim(), home: f.home,
       competition: f.competition || undefined, periods: 4, periodMinutes: f.periodMinutes, video, createdAt: Date.now(),
     });
+    if (f.time || f.location.trim()) await db.agenda.put({ id, teamId: team.id, kind: "game", time: f.time || undefined, location: f.location.trim() || undefined });
     router.push(`/jogos/${id}/${f.videoKind === "live" ? "ao-vivo" : "logger"}`);
   };
 
@@ -97,6 +98,16 @@ export default function GamesPage() {
             <select className="input" value={f.home ? "1" : "0"} onChange={(e) => setF({ ...f, home: e.target.value === "1" })}>
               <option value="1">Casa</option><option value="0">Fora</option>
             </select>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="label">Hora</label>
+            <input type="time" className="input" value={f.time} onChange={(e) => setF({ ...f, time: e.target.value })} />
+          </div>
+          <div>
+            <label className="label">Pavilhão</label>
+            <input className="input" value={f.location} onChange={(e) => setF({ ...f, location: e.target.value })} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">

@@ -146,6 +146,99 @@ export interface Goal {
   createdAt: number;
 }
 
+/* ---------- calendar / call-ups ---------- */
+
+/** Extra info for a game or practice (same id): time, place, call-up. Staff edit, everyone reads. */
+export interface Agenda {
+  id: ID; // game or practice id
+  teamId: ID;
+  kind: "game" | "practice";
+  time?: string; // HH:MM
+  meetTime?: string; // HH:MM (concentração)
+  location?: string;
+  callup?: ID[]; // convocados (games)
+  published?: boolean; // call-up visible to players
+  plan?: PlanItem[]; // practice plan
+  note?: string; // message to the players
+}
+
+export type RsvpStatus = "yes" | "maybe" | "no";
+
+/** A player's answer for a game/practice. id = `${refId}:${playerId}`. Players write their own. */
+export interface Rsvp {
+  id: ID;
+  teamId: ID;
+  refId: ID;
+  playerId: ID;
+  status: RsvpStatus;
+  note?: string;
+  answeredAt: number;
+}
+
+export const RSVP_LABEL: Record<RsvpStatus, string> = { yes: "Vou", maybe: "Talvez", no: "Não posso" };
+
+/* ---------- feedback ---------- */
+
+export interface Feedback {
+  id: ID;
+  teamId: ID;
+  playerId: ID;
+  gameId?: ID;
+  clipStart?: number; // video seconds
+  clipEnd?: number;
+  eventIds?: ID[];
+  text: string;
+  author?: string;
+  createdAt: number;
+}
+
+/** "Seen" receipt a player writes for a feedback item (id = feedback id). */
+export interface Seen {
+  id: ID;
+  teamId: ID;
+  playerId: ID;
+  seenAt: number;
+}
+
+/* ---------- practice planning ---------- */
+
+export type DrillFocus = "lancamento" | "ll" | "passe" | "tov" | "ressalto" | "defesa" | "transicao" | "pressao" | "zona" | "pnr" | "fisico" | "tatica";
+
+export const FOCUS_LABEL: Record<DrillFocus, string> = {
+  lancamento: "Lançamento", ll: "Lances livres", passe: "Passe", tov: "Perdas de bola", ressalto: "Ressalto",
+  defesa: "Defesa", transicao: "Transição", pressao: "Contra pressão", zona: "Contra zona", pnr: "Pick & roll",
+  fisico: "Físico", tatica: "Tática / sistemas",
+};
+
+export interface Drill {
+  id: ID;
+  teamId: ID;
+  name: string;
+  focus: DrillFocus[];
+  minutes?: number;
+  description?: string;
+  createdAt: number;
+}
+
+export interface PlanItem {
+  drillId?: ID;
+  name: string;
+  minutes: number;
+  focus?: DrillFocus[];
+  note?: string;
+}
+
+/* ---------- scouting ---------- */
+
+export interface Scouting {
+  id: ID;
+  teamId: ID;
+  name: string; // opponent name (as written in games)
+  notes?: string;
+  keyPlayers?: string;
+  editedAt: number;
+}
+
 export const ATTENDANCE_LABEL: Record<AttendanceStatus, string> = {
   present: "Presente",
   late: "Atrasado",

@@ -58,7 +58,7 @@ function matches(e: GameEvent, f: LogFilter) {
 }
 
 export function EventLog({
-  events, players, now, name, video, readOnly = false,
+  events, players, now, name, video, readOnly = false, onSend,
 }: {
   events: GameEvent[];
   players: Player[];
@@ -66,6 +66,7 @@ export function EventLog({
   name: (id?: ID) => string;
   video: RefObject<PlayerHandle | null>;
   readOnly?: boolean;
+  onSend?: (e: GameEvent) => void; // send this play to a player
 }) {
   const [init] = useState(readFilterFromUrl);
   const [f, setF] = useState<LogFilter>({ side: init.side ?? "all", player: init.player ?? "all", type: init.type ?? "all", tag: init.tag ?? "all" });
@@ -158,6 +159,9 @@ export function EventLog({
                   {describe(e, name)}{e.type === "SHOT" && e.x === undefined ? " · sem local" : ""}
                   {e.meta?.tags?.map((t) => <span key={t} className="ml-1.5 rounded-full border border-brand/40 px-1.5 text-[10px] text-brand">{TAG_LABEL[t]}</span>)}
                 </span>
+                {onSend && e.type !== "PERIOD_START" && e.type !== "PERIOD_END" && (
+                  <button onClick={() => onSend(e)} className="invisible -my-1.5 grid h-8 w-7 shrink-0 place-items-center text-muted hover:text-brand group-hover:visible pointer-coarse:visible" title="Enviar ao jogador" aria-label="Enviar ao jogador">➤</button>
+                )}
                 {!readOnly && <><button onClick={() => setEditing(editing === e.id ? null : e.id)} className={`${editing === e.id ? "visible text-brand" : "invisible pointer-coarse:visible"} -my-1.5 grid h-8 w-7 shrink-0 place-items-center text-muted hover:text-fg group-hover:visible`} title="Editar" aria-label="Editar">✎</button>
                 <button onClick={async () => { if (!matchMedia("(pointer: coarse)").matches || await ask("Apagar este evento?", { confirmText: "Apagar", danger: true })) void db.events.delete(e.id); }} className="invisible -my-1.5 grid h-8 w-7 shrink-0 place-items-center text-muted hover:text-bad group-hover:visible pointer-coarse:visible" title="Apagar" aria-label="Apagar">✕</button></>}
               </div>

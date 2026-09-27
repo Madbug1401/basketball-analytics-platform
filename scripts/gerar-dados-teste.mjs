@@ -1,8 +1,10 @@
 // Gera uma época fictícia completa (plantel, treinos, presenças, jogos com eventos)
 // no formato de "Definições → Importar".
 //
-//   node scripts/gerar-dados-teste.mjs [ficheiro] [seed]
-//   ex.: node scripts/gerar-dados-teste.mjs dados-teste/abc-sub16-demo.json 7
+//   node scripts/gerar-dados-teste.mjs [ficheiro] [seed] [hoje AAAA-MM-DD]
+//   ex.: node scripts/gerar-dados-teste.mjs dados-teste/abc-sub16-demo.json 7 2026-09-27
+//
+// Os 10 jogos são nos 10 sábados antes de "hoje"; a agenda tem os próximos jogos e treinos.
 //
 // Determinístico: a mesma seed gera sempre os mesmos dados.
 
@@ -11,6 +13,12 @@ import { dirname } from "node:path";
 
 const OUT = process.argv[2] ?? "dados-teste/abc-sub16-demo.json";
 let seed = Number(process.argv[3] ?? 2026);
+const TODAY = process.argv[4] ?? new Date().toISOString().slice(0, 10);
+const addDays = (d, n) => { const x = new Date(d + "T12:00:00Z"); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+// last Saturday strictly before today
+let LAST_SAT = addDays(TODAY, -1);
+while (new Date(LAST_SAT + "T12:00:00Z").getUTCDay() !== 6) LAST_SAT = addDays(LAST_SAT, -1);
+const FIRST_SAT = addDays(LAST_SAT, -63);
 
 // ---------- PRNG ----------
 const rnd = () => {
@@ -47,7 +55,7 @@ const r2 = (n) => Math.round(n * 100) / 100;
 
 // ---------- equipa ----------
 const teamId = uuid();
-const created = Date.parse("2026-09-01T10:00:00Z");
+const created = Date.parse(addDays(FIRST_SAT, -30) + "T10:00:00Z");
 const team = { id: teamId, name: "ABC", category: "Sub-16", gender: "M", season: "2026/27", createdAt: created };
 
 // usage = peso ofensivo, p2/p3/ft = % base, r3 = % dos lançamentos que são triplos,
@@ -82,7 +90,7 @@ const THEMES = [
   "Defesa homem-a-homem, fechar o garrafão", "Ataque contra zona 2-3", "Ressalto: bloquear e sair em contra-ataque",
   "Situações especiais (fim de período, reposições)", "Condição física + 1x1", "Preparação do jogo de sábado",
 ];
-for (let d = new Date("2026-09-07T12:00:00Z"); d <= new Date("2026-12-11T12:00:00Z"); d.setUTCDate(d.getUTCDate() + 1)) {
+for (let d = new Date(addDays(FIRST_SAT, -26) + "T12:00:00Z"); d < new Date(TODAY + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + 1)) {
   const wd = d.getUTCDay();
   if (![1, 3, 5].includes(wd)) continue;
   if (chance(0.05)) continue; // treino cancelado
@@ -103,17 +111,10 @@ for (let d = new Date("2026-09-07T12:00:00Z"); d <= new Date("2026-12-11T12:00:0
 // ---------- jogos ----------
 // strength: >1 adversário mais forte (lança melhor e perde menos bolas)
 const SCHEDULE = [
-  ["2026-10-03", "Seven Stars", true, 1.00],
-  ["2026-10-10", "Académica da Praia", false, 1.12],
-  ["2026-10-17", "Travadores", true, 0.90],
-  ["2026-10-24", "Sporting da Praia", false, 1.08],
-  ["2026-10-31", "Bairro", true, 0.85],
-  ["2026-11-07", "Boavista", false, 1.00],
-  ["2026-11-14", "Achada Grande", true, 0.92],
-  ["2026-11-21", "Seven Stars", false, 1.02],
-  ["2026-11-28", "Académica da Praia", true, 1.06],
-  ["2026-12-05", "Travadores", false, 0.95],
-];
+  ["Seven Stars", true, 1.00], ["Académica da Praia", false, 1.12], ["Travadores", true, 0.90], ["Sporting da Praia", false, 1.08],
+  ["Bairro", true, 0.85], ["Boavista", false, 1.00], ["Achada Grande", true, 0.92], ["Seven Stars", false, 1.02],
+  ["Académica da Praia", true, 1.06], ["Travadores", false, 0.95],
+].map((g, i) => [addDays(FIRST_SAT, i * 7), ...g]);
 const VIDEOS = ["https://www.youtube.com/watch?v=dQw4w9WgXcQ", "https://www.youtube.com/watch?v=aqz-KE-bpKQ"];
 
 const games = [];
@@ -287,23 +288,70 @@ SCHEDULE.forEach(([date, opponent, home, strength], gi) => {
 });
 
 // objetivos de exemplo
-const now0 = Date.parse("2026-10-01T12:00:00Z");
+const now0 = Date.parse(FIRST_SAT + "T12:00:00Z");
 const g = (i, o) => ({ id: uuid(), teamId, active: true, createdAt: now0 + i, ...o });
 const goals = [
   g(1, { metric: "tov", target: 15, title: "Menos de 15 perdas por jogo" }),
   g(2, { metric: "opp_pts", target: 55 }),
-  g(3, { metric: "wins", target: 7, dueDate: "2027-03-31" }),
+  g(3, { metric: "wins", target: 7, dueDate: addDays(TODAY, 150) }),
   g(4, { playerId: players[0].id, metric: "ast", target: 4 }),
   g(5, { playerId: players[1].id, metric: "ft_pct", target: 70 }),
   g(6, { playerId: players[2].id, metric: "pts", target: 12 }),
   g(7, { playerId: players[3].id, metric: "att_pct", target: 90 }),
 ];
 
+// ---------- agenda: próximos jogos e treinos ----------
+const PAV = "Pavilhão Municipal";
+const agenda = [];
+const rsvps = [];
+for (const gm of games) agenda.push({ id: gm.id, teamId, kind: "game", time: "17:00", location: gm.home ? PAV : "Fora", callup: players.slice(0, 12).map((p) => p.id), published: true });
+for (const pr of practices) agenda.push({ id: pr.id, teamId, kind: "practice", time: "18:30", location: PAV });
+const nextSat = addDays(LAST_SAT, 7);
+const UPCOMING = [[nextSat, "Sporting da Praia", true], [addDays(nextSat, 7), "Bairro", false]];
+UPCOMING.forEach(([date, opponent, home], i) => {
+  const id = uuid();
+  games.push({ id, teamId, date, opponent, home, competition: "Regional Sub-16 — Santiago Sul", periods: 4, periodMinutes: 10, video: { kind: "none" }, createdAt: Date.parse(TODAY + "T10:00:00Z") + i });
+  const callup = players.slice(0, 11).map((p) => p.id);
+  agenda.push({ id, teamId, kind: "game", time: "17:00", meetTime: "16:15", location: home ? PAV : "Pavilhão do Bairro", callup: i === 0 ? callup : [], published: i === 0, note: i === 0 ? "Equipamento branco. Chegar a horas para o aquecimento." : undefined });
+  if (i === 0) callup.forEach((pid, k) => { if (k < 7) rsvps.push({ id: `${id}:${pid}`, teamId, refId: id, playerId: pid, status: k === 5 ? "maybe" : k === 6 ? "no" : "yes", note: k === 6 ? "Exame na escola" : undefined, answeredAt: Date.parse(TODAY + "T12:00:00Z") + k }); });
+});
+const futurePractices = [];
+for (let d = 0; d < 14; d++) {
+  const date = addDays(TODAY, d);
+  const wd = new Date(date + "T12:00:00Z").getUTCDay();
+  if (![1, 3, 5].includes(wd)) continue;
+  const id = uuid();
+  futurePractices.push(id);
+  practices.push({ id, teamId, date, title: `Treino #${practices.length + 1}`, durationMin: wd === 5 ? 75 : 90, createdAt: Date.parse(TODAY + "T09:00:00Z") + d });
+  agenda.push({ id, teamId, kind: "practice", time: "18:30", location: PAV });
+}
+
+// ---------- exercícios e plano dos próximos treinos ----------
+const BASE = [
+  ["Lançamento em 5 posições", ["lancamento"], 12], ["Lances livres com fadiga", ["ll"], 10], ["3x2 / 2x1 contínuo", ["transicao"], 12],
+  ["Box-out 1x1 e 3x3", ["ressalto"], 10], ["Ataque contra pressão (4x4 + 1)", ["pressao", "tov"], 12], ["Pick & roll 2x2 — leituras", ["pnr"], 12],
+  ["Shell drill 4x4", ["defesa"], 12], ["5x5 com regras", ["tatica"], 15],
+];
+const drills = BASE.map(([name, focus, minutes], i) => ({ id: uuid(), teamId, name, focus, minutes, createdAt: now0 + i }));
+const plan = (ids) => ids.map((i) => ({ drillId: drills[i].id, name: drills[i].name, minutes: drills[i].minutes, focus: drills[i].focus }));
+futurePractices.slice(0, 2).forEach((pid, k) => {
+  const a = agenda.find((x) => x.id === pid);
+  a.plan = k === 0 ? plan([0, 4, 3, 7]) : plan([1, 2, 6, 7]);
+});
+
+// ---------- scouting e feedback ----------
+const scouting = [{ id: uuid(), teamId, name: "Sporting da Praia", keyPlayers: "#10 base rápido, entra sempre pela direita · #14 poste forte, fraco nos lances livres", notes: "Pressionam a campo inteiro depois de cesto. Defendem à zona 2-3 no 2.º período.", editedAt: now0 }];
+const lastGame = games.filter((x) => x.date < TODAY).sort((a, b) => b.date.localeCompare(a.date))[0];
+const feedback = [
+  { id: uuid(), teamId, playerId: players[0].id, gameId: lastGame.id, clipStart: 600, clipEnd: 612, text: "Boa leitura no pick & roll! Aqui o defesa fechou cedo — o passe para o canto estava aberto.", author: "Melvyn", createdAt: Date.parse(TODAY + "T08:00:00Z") },
+  { id: uuid(), teamId, playerId: players[0].id, text: "Esta semana: 50 lances livres depois de cada treino.", author: "Melvyn", createdAt: Date.parse(TODAY + "T08:05:00Z") },
+];
+
 const data = {
   app: "basketball-analytics", version: 1, exportedAt: new Date().toISOString(), demo: true,
-  teams: [team], players, practices, attendance, games, events, goals,
+  teams: [team], players, practices, attendance, games, events, goals, agenda, rsvps, drills, scouting, feedback,
 };
 
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, JSON.stringify(data, null, 1));
-console.log(`✓ ${OUT}: ${players.length} jogadores, ${practices.length} treinos, ${games.length} jogos, ${events.length} eventos, ${goals.length} objetivos`);
+console.log(`✓ ${OUT}: ${players.length} jogadores, ${practices.length} treinos, ${games.length} jogos, ${events.length} eventos, ${goals.length} objetivos, agenda ${agenda.length}, ${drills.length} exercícios`);

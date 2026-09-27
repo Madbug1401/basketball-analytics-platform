@@ -7,7 +7,7 @@ const CACHE = `courtside-${VERSION}`;
 
 // every page of the app; dynamic pages are served from one shell ("_") — they read the id from the URL
 const ROUTES = [
-  "/", "/equipa", "/treinos", "/jogos", "/adversarios", "/estatisticas", "/objetivos", "/definicoes",
+  "/", "/agenda", "/equipa", "/treinos", "/treinos/exercicios", "/jogos", "/adversarios", "/estatisticas", "/objetivos", "/definicoes",
   "/conta", "/convite", "/admin",
   "/jogos/_", "/jogos/_/logger", "/jogos/_/ao-vivo", "/treinos/_", "/jogadores/_",
 ];
@@ -16,6 +16,7 @@ const EXTRA = ["/manifest.webmanifest", "/icon-192.png", "/icon-512.png", "/icon
 /** /jogos/abc/logger → /jogos/_/logger */
 function shellFor(pathname) {
   const p = pathname.replace(/\/+$/, "") || "/";
+  if (p === "/treinos/exercicios") return p;
   const m = p.match(/^\/(jogos|treinos|jogadores)\/[^/]+(\/(logger|ao-vivo))?$/);
   if (m) return `/${m[1]}/_${m[2] || ""}`;
   return p;

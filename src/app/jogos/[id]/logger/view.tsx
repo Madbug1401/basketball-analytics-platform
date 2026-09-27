@@ -13,6 +13,8 @@ import { EventLog } from "@/components/EventLog";
 import { Html5Player, StopwatchPlayer, YouTubePlayer, youtubeId, type PlayerHandle } from "@/components/VideoPlayer";
 import { useAccess } from "@/lib/auth";
 import { LineupPicker } from "@/components/LineupPicker";
+import { FeedbackComposer } from "@/components/Feedback";
+import { CLIP_AFTER, CLIP_BEFORE } from "@/components/EventLog";
 import { ACTIONS, type ActionDef } from "@/lib/actions";
 import { TagPicker, toggleTag } from "@/components/TagPicker";
 
@@ -62,6 +64,7 @@ function Logger({ game, players, events, readOnly }: { game: Game; players: Play
   const [flash, setFlash] = useState<string>("");
   const [help, setHelp] = useState(false);
   const [lastPlay, setLastPlay] = useState<ID | null>(null); // event that can get a context tag
+  const [sending, setSending] = useState<GameEvent | null>(null); // play being sent to a player
 
   const byId = useMemo(() => new Map(players.map((p) => [p.id, p])), [players]);
   const name = useCallback((pid?: ID) => { const p = pid ? byId.get(pid) : undefined; return p ? `#${p.number} ${p.name}` : "?"; }, [byId]);
@@ -492,10 +495,18 @@ function Logger({ game, players, events, readOnly }: { game: Game; players: Play
 
       {/* event log (below the video on desktop, below the pad on phones) */}
       <div className="min-w-0 xl:col-start-1 xl:row-start-2 [&>.card]:mt-0">
-        <EventLog events={sorted} players={players} now={now} name={name} video={video} readOnly={readOnly} />
+        <EventLog events={sorted} players={players} now={now} name={name} video={video} readOnly={readOnly} onSend={readOnly ? undefined : setSending} />
       </div>
 
       {help && <HelpOverlay onClose={() => setHelp(false)} />}
+      {sending && (
+        <FeedbackComposer teamId={game.teamId} players={players} onClose={() => setSending(null)}
+          initial={{
+            playerId: sending.playerId ?? sending.meta?.in, gameId: game.id, eventIds: [sending.id],
+            clipStart: Math.max(0, sending.videoTs - CLIP_BEFORE), clipEnd: sending.videoTs + CLIP_AFTER,
+            context: `${fmtTs(sending.videoTs)} · P${sending.period} · ${sending.side === "opp" ? "Adversário — " : ""}${describe(sending, name)}`,
+          }} />
+      )}
     </div>
   );
 }

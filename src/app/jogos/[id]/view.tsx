@@ -16,6 +16,7 @@ import { useAccess } from "@/lib/auth";
 import { ask } from "@/components/Dialog";
 import { ContextTable } from "@/components/ContextTable";
 import { ShareDialog } from "@/components/ShareDialog";
+import { LineupAnalysis } from "@/components/LineupAnalysis";
 
 export function GamePage() {
   const id = useRouteId();
@@ -45,7 +46,6 @@ export function GamePage() {
   if (!data) return null;
   if (!data.game || !stats) return <p className="text-muted">Jogo não encontrado.</p>;
   const { game, players = [], events = [] } = data;
-  const byId = new Map(players.map((p) => [p.id, p]));
   const rows = sortRows(players, stats.players);
   const seasonAvg = season ? new Map([...season.totals].map(([pid, l]) => [pid, { ...l, games: l.gp }])) : undefined;
   const insights = events.length ? gameInsights(game, stats, events, players, seasonAvg) : [];
@@ -53,7 +53,6 @@ export function GamePage() {
   const shotEvents = events.filter((e) => e.type === "SHOT" && (shotFilter === "opp" ? e.side === "opp" : shotFilter === "us" ? e.side === "us" : e.playerId === shotFilter));
   const zones = shotZones(shotEvents);
 
-  const lineups = [...stats.lineups.values()].filter((l) => l.pf + l.pa > 0).sort((a, b) => b.pf - b.pa - (a.pf - a.pa));
 
   return (
     <div className="grid gap-6">
@@ -87,6 +86,8 @@ export function GamePage() {
 
       {events.length === 0 ? (
         <div className="card p-10 text-center text-muted">
+          <Link href={`/adversarios?nome=${encodeURIComponent(game.opponent)}`} className="btn mb-4">Scouting de {game.opponent}</Link>
+          <br />
           Ainda sem eventos. <Link href={`/jogos/${id}/logger`} className="text-brand">Abre o registo</Link> e começa pelo 5 inicial.
         </div>
       ) : (
@@ -145,25 +146,7 @@ export function GamePage() {
               </div>
             </div>
 
-            <div className="card h-fit overflow-x-auto">
-              <div className="border-b border-line px-3 py-2">
-                <h2 className="font-semibold">Quintetos</h2>
-                <p className="text-xs text-muted">Pontos marcados e sofridos com cada 5 em campo.</p>
-              </div>
-              <table className="tbl">
-                <thead><tr><th>Quinteto</th><th>Marc.</th><th>Sofr.</th><th>+/-</th></tr></thead>
-                <tbody>
-                  {lineups.map((l) => (
-                    <tr key={l.ids.join()}>
-                      <td className="whitespace-nowrap">{l.ids.map((pid) => byId.get(pid)).sort((a, b) => (a?.number ?? 0) - (b?.number ?? 0)).map((p) => `#${p?.number}`).join(" · ")}</td>
-                      <td>{l.pf}</td><td>{l.pa}</td>
-                      <td className={l.pf - l.pa > 0 ? "text-good" : l.pf - l.pa < 0 ? "text-bad" : ""}>{l.pf - l.pa > 0 ? "+" : ""}{l.pf - l.pa}</td>
-                    </tr>
-                  ))}
-                  {lineups.length === 0 && <tr><td colSpan={4} className="py-6 text-center! text-muted">Regista o 5 inicial e as substituições para ver quintetos.</td></tr>}
-                </tbody>
-              </table>
-            </div>
+            <LineupAnalysis games={[{ game, events }]} players={players} />
           </section>
         </>
       )}

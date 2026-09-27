@@ -7,6 +7,7 @@ import { BoxTable, sortRows } from "@/components/BoxScore";
 import { Trend } from "@/components/Trend";
 import { Kpi } from "@/components/Kpi";
 import { ContextTable } from "@/components/ContextTable";
+import { LineupAnalysis } from "@/components/LineupAnalysis";
 import { fmtPct, possessions, reb } from "@/lib/stats";
 
 export default function SeasonStats() {
@@ -81,6 +82,9 @@ export default function SeasonStats() {
         <h2 className="mb-3 text-lg font-semibold">Jogadores</h2>
         <BoxTable rows={rows} total={s.team} perGame={mode === "avg"} />
       </section>
+
+      <LineupAnalysis season players={s.players}
+        games={s.games.map((g) => ({ game: g.game, events: g.events, min: new Map([...g.stats.players].map(([id, l]) => [id, l.min])) }))} />
 
       <ContextTable events={s.games.flatMap((g) => g.events)} opponent="Adversários" />
 

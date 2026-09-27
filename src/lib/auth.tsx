@@ -66,7 +66,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setProfile(c?.profile ?? { id: uid, email: s.user.email ?? "", fullName: "", isAdmin: false });
       setMemberships(c?.memberships ?? []);
     };
-    // offline, requests would wait for a token refresh that can't happen: use the cache right away
+    // start with what we knew last time (instant, and works on gym wifi without internet),
+    // then confirm with the server
+    if (cachedAccess(uid)) applyCache();
     if (offline()) { applyCache(); return; }
     const res = await Promise.race([
       Promise.all([
@@ -138,7 +140,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const uid = s?.user.id ?? null;
       if (uid && uid !== current) {
         current = uid;
-        await load(s);
+        const loading = load(s);
+        if (cachedAccess(uid)) setReady(true); // roles known from last time: don't wait for the server
+        await loading;
         setReady(true);
         let pending: string | null = null;
         try { pending = localStorage.getItem(PENDING_INVITE_KEY); } catch {}

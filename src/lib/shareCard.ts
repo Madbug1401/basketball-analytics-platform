@@ -5,12 +5,12 @@ import type { Game, Player, Team } from "./types";
 
 /* Builds a 1080×1350 PNG (good for WhatsApp / Instagram) and a plain-text summary of a game. */
 
-const C = {
+export const C = {
   bg: "#0b0e13", panel: "#131821", panel2: "#1a2130", line: "#263044", muted: "#8a96ab",
   fg: "#e8edf5", brand: "#ff7a1a", good: "#34d399", bad: "#f87171", opp: "#60a5fa",
 };
-const FONT = 'ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-const MONO = 'ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace';
+export const FONT = 'ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+export const MONO = 'ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace';
 
 export interface CardData {
   team: Team;
@@ -37,7 +37,7 @@ function leader(d: CardData, f: (l: Line) => number) {
   return r && r.v > 0 ? r : null;
 }
 
-function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+export function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
   ctx.arcTo(x + w, y, x + w, y + h, r);
@@ -47,7 +47,7 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
   ctx.closePath();
 }
 
-function fit(ctx: CanvasRenderingContext2D, text: string, max: number) {
+export function fit(ctx: CanvasRenderingContext2D, text: string, max: number) {
   if (ctx.measureText(text).width <= max) return text;
   let t = text;
   while (t.length > 1 && ctx.measureText(t + "…").width > max) t = t.slice(0, -1);
@@ -223,4 +223,22 @@ export function summaryText(d: CardData) {
   const hi = d.insights.filter((x) => x.tone !== "info").slice(0, 2);
   if (hi.length) lines.push("", ...hi.map((x) => `• ${x.title}`));
   return lines.join("\n");
+}
+
+/** Draws wrapped text; returns the y after the last line. */
+export function wrap(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxW: number, lineH: number, maxLines = 99) {
+  const words = text.split(/\s+/);
+  let line = "";
+  let lines = 0;
+  for (let i = 0; i < words.length; i++) {
+    const test = line ? `${line} ${words[i]}` : words[i];
+    if (ctx.measureText(test).width > maxW && line) {
+      if (lines === maxLines - 1) { ctx.fillText(fit(ctx, line + " " + words.slice(i).join(" "), maxW), x, y); return y + lineH; }
+      ctx.fillText(line, x, y);
+      y += lineH; lines++;
+      line = words[i];
+    } else line = test;
+  }
+  if (line) { ctx.fillText(line, x, y); y += lineH; }
+  return y;
 }

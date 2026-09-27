@@ -9,12 +9,17 @@ import { useSeason } from "@/lib/season";
 import { reb, type Line } from "@/lib/stats";
 import { Kpi } from "@/components/Kpi";
 import { GoalCard } from "@/components/Goals";
+import { AgendaCard } from "@/components/AgendaCard";
+import { isUpcoming, useAgenda } from "@/lib/agenda";
+import { useUnseenFeedback } from "@/components/Feedback";
 
 export default function Dashboard() {
   const { team } = useTeam();
   const access = useAccess(team?.id);
   const s = useSeason(team?.id);
   const practices = useLiveQuery(() => (team ? db.practices.where("teamId").equals(team.id).count() : 0), [team?.id]);
+  const agenda = useAgenda(team?.id);
+  const unseen = useUnseenFeedback(access.isPlayer ? access.playerId : undefined);
   const goals = useLiveQuery(() => (team ? db.goals.where("teamId").equals(team.id).filter((g) => g.active).toArray() : []), [team?.id]);
   if (!team || !s) return null;
   const byId = new Map(s.players.map((p) => [p.id, p]));
@@ -65,6 +70,14 @@ export default function Dashboard() {
         );
       })()}
 
+      {access.isPlayer && unseen > 0 && (
+        <Link href={`/jogadores/${access.playerId}#feedback`} className="card flex items-center gap-3 border-brand bg-brand/10 p-4 hover:bg-brand/15">
+          <span className="grid h-10 w-10 place-items-center rounded-full bg-brand text-lg text-black">✉</span>
+          <span className="flex-1 font-semibold">{unseen === 1 ? "Tens 1 mensagem nova do treinador" : `Tens ${unseen} mensagens novas do treinador`}</span>
+          <span className="text-brand">→</span>
+        </Link>
+      )}
+
       {access.canEdit && steps.some((x) => !x.done) && (
         <div className="card p-4">
           <h2 className="mb-2 font-semibold">Primeiros passos</h2>
@@ -77,6 +90,21 @@ export default function Dashboard() {
             ))}
           </ol>
         </div>
+      )}
+
+      {agenda && agenda.items.some(isUpcoming) && (
+        <section>
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="font-semibold">Próximos</h2>
+            <Link href="/agenda" className="tap text-sm text-brand">Agenda</Link>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2">
+            {agenda.items.filter(isUpcoming).slice(0, access.isPlayer ? 3 : 2).map((it) => (
+              <AgendaCard key={it.id} it={it} players={agenda.players} teamId={team.id} teamName={`${team.name} ${team.category}`}
+                canEdit={false} myPlayerId={access.isPlayer ? access.playerId : undefined} compact />
+            ))}
+          </div>
+        </section>
       )}
 
       {shownGoals.length > 0 && (

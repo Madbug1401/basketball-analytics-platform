@@ -26,12 +26,20 @@
 - [x] Pôr online (Supabase + Vercel) — ver docs/DEPLOY.md
 - [ ] Emails próprios (SMTP) para confirmação e recuperação de password
 - [x] Contexto das jogadas (contra-ataque, pick & roll, isolamento…) como etiquetas nos eventos — v0.4
-- [ ] Análise do adversário: mapa de lançamentos e tendências por equipa adversária
+- [x] Análise do adversário: mapa de lançamentos, tendências e relatório pré-jogo (v0.5)
+
+## v0.5
+- [x] Agenda e convocatórias com respostas dos jogadores
+- [x] Feedback e jogadas enviadas a cada jogador
+- [x] Planeador de treinos e biblioteca de exercícios
+- [x] Relatório de scouting pré-jogo
+- [x] Quintetos avançados (por 100 posses, com/sem, duplas/trios) e gestão de minutos
+- [ ] Notificações no telemóvel (push) para convocatórias e mensagens
 
 ## Fase 3: vídeo
 - [x] Clips/playlist: "todos os turnovers do #7" → sequência de jogadas (v0.2)
 - [ ] Marcadores e notas no vídeo
-- [ ] Partilhar um clip com um jogador
+- [x] Partilhar um clip com um jogador (v0.5, vídeos do YouTube ou link)
 
 ## Fase 4: intelligence
 - [x] Relatório automático pós-jogo (regras simples, v0.2)

@@ -13,10 +13,16 @@ const COLUMNS: Record<SyncedTable, string[]> = {
   games: ["id", "teamId", "date", "opponent", "home", "competition", "periods", "periodMinutes", "video", "createdAt"],
   events: ["id", "teamId", "gameId", "side", "playerId", "type", "period", "videoTs", "x", "y", "meta", "createdAt"],
   goals: ["id", "teamId", "playerId", "metric", "target", "title", "dueDate", "active", "createdAt"],
+  agenda: ["id", "teamId", "kind", "time", "meetTime", "location", "callup", "published", "plan", "note"],
+  rsvps: ["id", "teamId", "refId", "playerId", "status", "note", "answeredAt"],
+  feedback: ["id", "teamId", "playerId", "gameId", "clipStart", "clipEnd", "eventIds", "text", "author", "createdAt"],
+  seen: ["id", "teamId", "playerId", "seenAt"],
+  drills: ["id", "teamId", "name", "focus", "minutes", "description", "createdAt"],
+  scouting: ["id", "teamId", "name", "notes", "keyPlayers", "editedAt"],
 };
 // tables added after the first release: if the server hasn't been migrated yet, skip them
 // quietly (their changes stay queued) instead of breaking the whole sync
-const OPTIONAL: SyncedTable[] = ["goals"];
+const OPTIONAL: SyncedTable[] = ["goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting"];
 const missingTable = (e: { code?: string; message?: string } | null) =>
   !!e && (e.code === "PGRST205" || e.code === "42P01" || /could not find the table|does not exist/i.test(e.message ?? ""));
 const unavailable = new Set<SyncedTable>();

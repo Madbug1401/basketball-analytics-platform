@@ -8,6 +8,7 @@ import { db, deletePractice } from "@/lib/db";
 import { ATTENDANCE_LABEL, type AttendanceStatus, type Practice } from "@/lib/types";
 import { StaffOnly } from "@/components/Guard";
 import { ask } from "@/components/Dialog";
+import { PracticePlan } from "@/components/PracticePlan";
 
 const ORDER: AttendanceStatus[] = ["present", "late", "absent", "excused"];
 const STYLE: Record<AttendanceStatus, string> = {
@@ -27,16 +28,18 @@ function PracticeDetail() {
   const data = useLiveQuery(async () => {
     const practice = await db.practices.get(id);
     if (!practice) return { practice: null };
-    const [players, attendance] = await Promise.all([
+    const [players, attendance, rsvps] = await Promise.all([
       db.players.where("teamId").equals(practice.teamId).filter((p) => p.active).sortBy("number"),
       db.attendance.where("practiceId").equals(id).toArray(),
+      db.rsvps.where("refId").equals(id).toArray(),
     ]);
-    return { practice, players, attendance };
+    return { practice, players, attendance, rsvps };
   }, [id]);
 
   if (!data) return null;
   if (!data.practice) return <p className="text-muted">Treino não encontrado.</p>;
-  const { practice, players = [], attendance = [] } = data;
+  const { practice, players = [], attendance = [], rsvps = [] } = data;
+  const answers = new Map(rsvps.map((r) => [r.playerId, r]));
   const status = new Map(attendance.map((a) => [a.playerId, a]));
 
   const set = (playerId: string, s: AttendanceStatus) =>
@@ -78,6 +81,8 @@ function PracticeDetail() {
         </div>
       </div>
 
+      <PracticePlan practice={practice} />
+
       <div className="mt-6 flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-semibold">Presenças</h2>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted">
@@ -91,7 +96,15 @@ function PracticeDetail() {
           return (
             <div key={p.id} className="card flex flex-wrap items-center gap-3 px-3 py-2">
               <span className="grid h-9 w-9 place-items-center rounded-full bg-panel-2 font-mono font-semibold">{p.number}</span>
-              <span className="min-w-0 flex-1 truncate font-medium">{p.name}</span>
+              <span className="min-w-0 flex-1 truncate font-medium">
+                {p.name}
+                {answers.get(p.id) && (
+                  <span className={`ml-2 text-xs font-normal ${answers.get(p.id)!.status === "yes" ? "text-good" : answers.get(p.id)!.status === "no" ? "text-bad" : "text-brand"}`}
+                    title={answers.get(p.id)!.note}>
+                    {answers.get(p.id)!.status === "yes" ? "disse que vinha" : answers.get(p.id)!.status === "no" ? `avisou que não vinha${answers.get(p.id)!.note ? ` (${answers.get(p.id)!.note})` : ""}` : "talvez"}
+                  </span>
+                )}
+              </span>
               <div className="grid w-full grid-cols-4 gap-1 sm:flex sm:w-auto">
                 {ORDER.map((s) => (
                   <button key={s} onClick={() => set(p.id, s)}

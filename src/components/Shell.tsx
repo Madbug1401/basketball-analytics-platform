@@ -14,6 +14,7 @@ import { ask, notify, DialogHost } from "@/components/Dialog";
 type NavItem = { href: string; label: string; staff?: boolean };
 const NAV: NavItem[] = [
   { href: "/", label: "Painel" },
+  { href: "/agenda", label: "Agenda" },
   { href: "/equipa", label: "Plantel" },
   { href: "/treinos", label: "Treinos", staff: true },
   { href: "/jogos", label: "Jogos" },

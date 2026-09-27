@@ -20,11 +20,11 @@ Precisas do Node 20 ou mais recente.
 
 ## Dados de teste
 
-`dados-teste/abc-sub16-demo.json` tem uma época fictícia do ABC Sub-16: 12 jogadores, cerca de 40 treinos com presenças, 10 jogos com todos os eventos (lançamentos com local, substituições, adversário, contexto das jogadas) e 7 objetivos. No primeiro ecrã, carrega em **importar uma cópia (.json)**; se já tens uma equipa, usa Definições → Importar.
+`dados-teste/abc-sub16-demo.json` tem uma época fictícia do ABC Sub-16: 12 jogadores, cerca de 40 treinos com presenças, 10 jogos com todos os eventos (lançamentos com local, substituições, adversário, contexto das jogadas), 7 objetivos, agenda com os próximos jogos e treinos, convocatória, exercícios, scouting e mensagens de feedback. As datas são relativas ao dia em que o ficheiro foi gerado. No primeiro ecrã, carrega em **importar uma cópia (.json)**; se já tens uma equipa, usa Definições → Importar.
 
-Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/outra.json 42` (o último número é a seed).
+Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/outra.json 42 2026-10-15` (seed e "hoje").
 
-## O que já faz (v0.4)
+## O que já faz (v0.5)
 
 | Área | Funcionalidades |
 |---|---|
@@ -35,6 +35,11 @@ Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/out
 | **Contexto das jogadas** | Etiquetas opcionais (transição, pick & roll, 1x1, poste, 2.ª oportunidade, sem bola, vs zona, vs pressão) · pontos por jogada em cada contexto, no jogo e na época · filtro e sequência de vídeo por contexto |
 | **Objetivos** | Metas da equipa e de cada jogador (pontos, ressaltos, perdas, %LL, assiduidade, vitórias…) com progresso automático e tendência dos últimos 3 jogos · o jogador vê os seus |
 | **Partilhar** | Imagem do jogo (1080×1350) com resultado, parciais, líderes e box score para WhatsApp/Instagram · resumo em texto |
+| **Agenda** | Treinos e jogos com hora, concentração e local · convocatória (rascunho/publicada) · cada jogador responde "vou / talvez / não posso" com nota · resumo de quem vem · mensagem pronta para o WhatsApp · respostas visíveis na folha de presenças |
+| **Feedback** | O treinador envia a um jogador uma nota com a jogada do vídeo (botão ➤ no registo) · o jogador vê a jogada no telemóvel (YouTube/link) e fica marcado como "visto" |
+| **Planeador de treinos** | Biblioteca de exercícios (16 de base) · plano de cada treino com minutos · sugestões a partir dos jogos (perdas, lances livres, ressalto, pressão…) · tempo por área na época |
+| **Scouting** | Notas e jogadores a vigiar por adversário · chaves do jogo automáticas · relatório pré-jogo em imagem/texto |
+| **Quintetos** | Saldo por 100 posses de quintetos, duplas e trios · equipa com/sem cada jogador · gestão de minutos com alertas de carga |
 | **Offline** | A app abre e funciona sem internet (service worker); tudo fica no telemóvel e sincroniza quando voltar a ligação |
 | **Jogo** | Relatório automático (parciais decisivos, perdas, ressaltos, LL, quintetos, jogadores acima/abaixo da média) com "▶ ver jogadas" · parciais · box score com minutos estimados, +/-, eficiência · mapa de lançamentos · quintetos · imprimir em A4 |
 | **Vídeo** | Editar qualquer evento (✎) · filtrar por jogador/tipo e **ver a sequência** das jogadas (ex.: todas as perdas do #7) · links do relatório abrem a sequência certa |
