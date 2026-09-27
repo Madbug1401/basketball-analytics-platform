@@ -50,6 +50,12 @@ function Inner({ children }: { children: ReactNode }) {
   const compact = path.endsWith("/logger");
   const teamless = TEAMLESS.some((p) => path.startsWith(p));
   const [menu, setMenu] = useState(false);
+  const [creating, setCreating] = useState(false);
+  useEffect(() => {
+    const open = () => setCreating(true);
+    window.addEventListener("courtside:new-team", open);
+    return () => window.removeEventListener("courtside:new-team", open);
+  }, []);
   const [menuPath, setMenuPath] = useState(path);
   if (menuPath !== path) { setMenuPath(path); if (menu) setMenu(false); }
   useEffect(() => {
@@ -78,10 +84,12 @@ function Inner({ children }: { children: ReactNode }) {
   const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
   const teamSelect = (cls: string) =>
     teams.length > 0 && (
-      <select className={`input py-1.5 ${cls}`} value={team?.id} onChange={(e) => setTeamId(e.target.value)} aria-label="Equipa">
+      <select className={`input py-1.5 ${cls}`} value={team?.id} aria-label="Equipa"
+        onChange={(e) => { if (e.target.value === NEW_TEAM) { setMenu(false); setCreating(true); } else setTeamId(e.target.value); }}>
         {teams.map((t) => (
           <option key={t.id} value={t.id}>{t.name} {t.category} {t.gender} · {t.season}</option>
         ))}
+        <option value={NEW_TEAM}>+ Nova equipa…</option>
       </select>
     );
 
@@ -143,6 +151,27 @@ function Inner({ children }: { children: ReactNode }) {
       )}
 
       <main className={`mx-auto w-full min-w-0 flex-1 px-3 py-5 sm:px-4 sm:py-6 ${compact ? "py-3" : "max-w-7xl"}`}>{body}</main>
+      {creating && <NewTeamDialog onClose={() => setCreating(false)} onCreated={(id) => { setTeamId(id); setCreating(false); }} />}
+    </div>
+  );
+}
+
+const NEW_TEAM = "__new_team";
+/** Other components (settings, account menu) open the "new team" dialog through this event. */
+export const openNewTeam = () => window.dispatchEvent(new Event("courtside:new-team"));
+
+/** Create another team (another age group, the women's team, next season…) without leaving the page. */
+function NewTeamDialog({ onClose, onCreated }: { onClose: () => void; onCreated: (id: string) => void }) {
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [onClose]);
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/60 p-4" onClick={onClose} role="dialog" aria-modal="true" aria-label="Nova equipa">
+      <div className="w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+        <CreateTeam onCreated={onCreated} onCancel={onClose} />
+      </div>
     </div>
   );
 }
@@ -223,6 +252,7 @@ function UserMenu({ role }: { role?: string }) {
           {profile?.isAdmin && <div className="text-xs text-brand">Administrador da plataforma</div>}
           <div className="mt-3 grid gap-1">
             <Link href="/conta" className="btn btn-ghost justify-start py-1.5">A minha conta</Link>
+            <button className="btn btn-ghost justify-start py-1.5" onClick={openNewTeam}>+ Criar nova equipa</button>
             <Link href="/convite" className="btn btn-ghost justify-start py-1.5">Entrar noutra equipa (código)</Link>
             <button className="btn btn-ghost justify-start py-1.5 text-bad" onClick={out}>Terminar sessão</button>
           </div>
@@ -250,9 +280,11 @@ function Onboarding({ onCreated }: { onCreated: (id: string) => void }) {
   );
 }
 
-export function CreateTeam({ onCreated }: { onCreated: (id: string) => void }) {
+export function CreateTeam({ onCreated, onCancel }: { onCreated: (id: string) => void; onCancel?: () => void }) {
   const { mode, markOwned } = useAuth();
-  const [f, setF] = useState({ name: "ABC", category: "Sub-16", gender: "M" as "M" | "F", season: "2026/27" });
+  const { team } = useTeam();
+  // another team of the same club: keep the club name and season, the age group changes
+  const [f, setF] = useState({ name: team?.name ?? "ABC", category: team ? "" : "Sub-16", gender: (team?.gender ?? "M") as "M" | "F", season: team?.season ?? "2026/27" });
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const id = uid();
@@ -261,10 +293,18 @@ export function CreateTeam({ onCreated }: { onCreated: (id: string) => void }) {
     onCreated(id);
   };
   return (
-    <div className="mx-auto mt-10 w-full max-w-md">
-      <h1 className="text-2xl font-semibold">Bem-vindo 👋</h1>
-      <p className="mt-1 text-muted">Cria a tua equipa para começar. Ficas como dono/treinador principal.</p>
-      <form onSubmit={submit} className="card mt-6 grid gap-4 p-5">
+    <div className={`mx-auto w-full max-w-md ${onCancel ? "" : "mt-10"}`}>
+      {onCancel ? null : <>
+        <h1 className="text-2xl font-semibold">Bem-vindo 👋</h1>
+        <p className="mt-1 text-muted">Cria a tua equipa para começar. Ficas como dono/treinador principal.</p>
+      </>}
+      <form onSubmit={submit} className={`card grid gap-4 p-5 ${onCancel ? "" : "mt-6"}`}>
+        {onCancel && (
+          <div>
+            <h2 className="text-lg font-semibold">Nova equipa</h2>
+            <p className="text-sm text-muted">Outro escalão, a equipa feminina ou a próxima época. Cada equipa tem o seu plantel, treinos e jogos; ficas como dono.</p>
+          </div>
+        )}
         <div>
           <label className="label">Clube / equipa</label>
           <input className="input" required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
@@ -272,7 +312,7 @@ export function CreateTeam({ onCreated }: { onCreated: (id: string) => void }) {
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className="label">Escalão</label>
-            <input className="input" value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })} />
+            <input className="input" required placeholder="Sub-18" autoFocus={!!onCancel} value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })} />
           </div>
           <div>
             <label className="label">Género</label>
@@ -286,9 +326,12 @@ export function CreateTeam({ onCreated }: { onCreated: (id: string) => void }) {
             <input className="input" value={f.season} onChange={(e) => setF({ ...f, season: e.target.value })} />
           </div>
         </div>
-        <button className="btn btn-primary">Criar equipa</button>
+        <div className="flex gap-2">
+          <button className="btn btn-primary flex-1">Criar equipa</button>
+          {onCancel && <button type="button" className="btn" onClick={onCancel}>Cancelar</button>}
+        </div>
       </form>
-      <label className="mt-4 block cursor-pointer text-center text-sm text-muted hover:text-fg">
+      {!onCancel && <label className="mt-4 block cursor-pointer text-center text-sm text-muted hover:text-fg">
         …ou <span className="text-brand underline">importar uma cópia (.json)</span>
         <input type="file" accept="application/json" className="hidden" onChange={async (e) => {
           const file = e.target.files?.[0];
@@ -300,8 +343,8 @@ export function CreateTeam({ onCreated }: { onCreated: (id: string) => void }) {
             if (data.teams?.[0]?.id) onCreated(data.teams[0].id);
           } catch (err) { void notify(`Erro ao importar: ${(err as Error).message}`); }
         }} />
-      </label>
-      {mode === "cloud" && <p className="mt-2 text-center text-xs text-muted">A cópia importada é enviada para a tua conta.</p>}
+      </label>}
+      {mode === "cloud" && !onCancel && <p className="mt-2 text-center text-xs text-muted">A cópia importada é enviada para a tua conta.</p>}
     </div>
   );
 }

@@ -9,7 +9,7 @@ import { useTeamMembers } from "@/lib/members";
 import { deleteTeam, leaveTeam, teamCounts } from "@/lib/teamAdmin";
 import { seenTeamIds, uploadTeam } from "@/lib/sync";
 import { supabase } from "@/lib/supabase";
-import { CreateTeam } from "@/components/Shell";
+import { openNewTeam } from "@/components/Shell";
 import { InviteDialog } from "@/components/InviteDialog";
 import { ask, notify } from "@/components/Dialog";
 
@@ -18,10 +18,7 @@ export default function SettingsPage() {
   const { mode, session, markOwned } = useAuth();
   const access = useAccess(team?.id);
   const [msg, setMsg] = useState("");
-  const [adding, setAdding] = useState(false);
   const file = useRef<HTMLInputElement>(null);
-
-  if (adding) return <CreateTeam onCreated={(id) => { setTeamId(id); setAdding(false); }} />;
 
   const doExport = async () => {
     const data = await exportAll(team?.id);
@@ -72,7 +69,7 @@ export default function SettingsPage() {
       <section className="card p-4">
         <h2 className="font-semibold">Equipas ({teams.length})</h2>
         <p className="mt-1 text-sm text-muted">Cada equipa tem o seu plantel, treinos e jogos separados. Usa o seletor no topo para trocar.</p>
-        <button className="btn mt-3" onClick={() => setAdding(true)}>+ Nova equipa</button>
+        <button className="btn btn-primary mt-3" onClick={openNewTeam}>+ Nova equipa</button>
       </section>
 
       {access.canEdit && (
