@@ -9,32 +9,37 @@ import { db, importIntoTeam, uid } from "@/lib/db";
 import { syncStore, syncNow } from "@/lib/sync";
 import { AuthScreen, JoinWithCode } from "./AuthScreen";
 import { OfflineBar, ServiceWorker } from "./Offline";
+import { LanguagePicker } from "./LanguagePicker";
 import { ask, notify, DialogHost } from "@/components/Dialog";
+import { initLang, L, langStore, locale, t } from "@/lib/i18n";
 
 type NavItem = { href: string; label: string; staff?: boolean };
 const NAV: NavItem[] = [
-  { href: "/", label: "Painel" },
-  { href: "/agenda", label: "Agenda" },
-  { href: "/equipa", label: "Plantel" },
-  { href: "/treinos", label: "Treinos", staff: true },
-  { href: "/carga", label: "Carga", staff: true },
-  { href: "/fisico", label: "Físico", staff: true },
-  { href: "/jogos", label: "Jogos" },
-  { href: "/adversarios", label: "Adversários" },
-  { href: "/estatisticas", label: "Estatísticas" },
-  { href: "/objetivos", label: "Objetivos" },
-  { href: "/definicoes", label: "Definições" },
+  { href: "/", label: L("Painel") },
+  { href: "/agenda", label: L("Agenda") },
+  { href: "/equipa", label: L("Plantel") },
+  { href: "/treinos", label: L("Treinos"), staff: true },
+  { href: "/carga", label: L("Carga"), staff: true },
+  { href: "/fisico", label: L("Físico"), staff: true },
+  { href: "/jogos", label: L("Jogos") },
+  { href: "/adversarios", label: L("Adversários") },
+  { href: "/estatisticas", label: L("Estatísticas") },
+  { href: "/objetivos", label: L("Objetivos") },
+  { href: "/definicoes", label: L("Definições") },
 ];
 
 // pages that work without a selected team
 const TEAMLESS = ["/admin", "/convite", "/conta"];
 
 export function Shell({ children }: { children: ReactNode }) {
+  // changing the language re-mounts the app, so every t() reads the new language
+  const lang = useSyncExternalStore(langStore.subscribe, langStore.get, langStore.server);
+  useEffect(() => { initLang(); }, []);
   return (
     <AuthProvider>
       <TeamProvider>
-        <Inner>{children}</Inner>
-        <DialogHost />
+        <Inner key={lang}>{children}</Inner>
+        <DialogHost key={`d-${lang}`} />
         <ServiceWorker />
       </TeamProvider>
     </AuthProvider>
@@ -66,14 +71,14 @@ function Inner({ children }: { children: ReactNode }) {
     return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
   }, [menu]);
 
-  if (mode === "cloud" && !ready) return <Splash text="A iniciar…" />;
+  if (mode === "cloud" && !ready) return <Splash text={t("A iniciar…")} />;
   if (mode === "cloud" && !session && !path.startsWith("/conta")) return <AuthScreen />;
 
   const firstLoad = mode === "cloud" && !sync.lastSync && sync.state === "syncing" && teams.length === 0;
   const nav = NAV.filter((n) => !n.staff || access.canEdit);
 
   let body: ReactNode;
-  if (loading || firstLoad) body = <Splash text="A carregar os teus dados…" inline />;
+  if (loading || firstLoad) body = <Splash text={t("A carregar os teus dados…")} inline />;
   else if (team || teamless) body = children;
   else body = <Onboarding onCreated={setTeamId} />;
 
@@ -84,12 +89,12 @@ function Inner({ children }: { children: ReactNode }) {
   const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
   const teamSelect = (cls: string) =>
     teams.length > 0 && (
-      <select className={`input py-1.5 ${cls}`} value={team?.id} aria-label="Equipa"
+      <select className={`input py-1.5 ${cls}`} value={team?.id} aria-label={t("Equipa")}
         onChange={(e) => { if (e.target.value === NEW_TEAM) { setMenu(false); setCreating(true); } else setTeamId(e.target.value); }}>
-        {teams.map((t) => (
-          <option key={t.id} value={t.id}>{t.name} {t.category} {t.gender} · {t.season}</option>
+        {teams.map((tm) => (
+          <option key={tm.id} value={tm.id}>{tm.name} {tm.category} {tm.gender} · {tm.season}</option>
         ))}
-        <option value={NEW_TEAM}>+ Nova equipa…</option>
+        <option value={NEW_TEAM}>{t("+ Nova equipa…")}</option>
       </select>
     );
 
@@ -99,7 +104,7 @@ function Inner({ children }: { children: ReactNode }) {
         <div className={`mx-auto flex h-14 items-center gap-2 px-3 sm:gap-3 sm:px-4 ${compact ? "" : "max-w-7xl"}`}>
           {links.length > 0 && (
             <button className="-ml-1 grid h-9 w-9 shrink-0 place-items-center rounded-md text-muted hover:bg-panel-2 hover:text-fg lg:hidden"
-              onClick={() => setMenu(true)} aria-label="Abrir menu">
+              onClick={() => setMenu(true)} aria-label={t("Abrir menu")}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
             </button>
           )}
@@ -111,29 +116,29 @@ function Inner({ children }: { children: ReactNode }) {
             {links.map((n) => (
               <Link key={n.href} href={n.href}
                 className={`whitespace-nowrap rounded-md px-3 py-1.5 text-sm ${isActive(n.href) ? "bg-panel-2 text-fg" : n.href === "/admin" ? "text-brand hover:text-brand-2" : "text-muted hover:text-fg"}`}>
-                {n.label}
+                {t(n.label)}
               </Link>
             ))}
           </nav>
           {!team && <span className="flex-1" />}
           {teamSelect("hidden w-auto max-w-64 lg:block")}
           {mode === "cloud" && <SyncBadge />}
-          {mode === "cloud" && <UserMenu role={team ? ROLE_LABEL[access.role] : undefined} />}
+          {mode === "cloud" && <UserMenu role={team ? t(ROLE_LABEL[access.role]) : undefined} />}
         </div>
         <OfflineBar />
       </header>
 
       {menu && (
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
-          <button className="absolute inset-0 bg-black/60" onClick={() => setMenu(false)} aria-label="Fechar menu" />
+          <button className="absolute inset-0 bg-black/60" onClick={() => setMenu(false)} aria-label={t("Fechar menu")} />
           <aside className="absolute inset-y-0 left-0 flex w-[82%] max-w-xs flex-col gap-4 overflow-y-auto border-r border-line bg-bg p-4 shadow-2xl">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 font-semibold"><Ball /> Courtside</span>
-              <button className="grid h-9 w-9 place-items-center rounded-md text-muted hover:bg-panel-2" onClick={() => setMenu(false)} aria-label="Fechar">✕</button>
+              <button className="grid h-9 w-9 place-items-center rounded-md text-muted hover:bg-panel-2" onClick={() => setMenu(false)} aria-label={t("Fechar")}>✕</button>
             </div>
             {teams.length > 0 && (
               <div>
-                <label className="label">Equipa</label>
+                <label className="label">{t("Equipa")}</label>
                 {teamSelect("w-full")}
               </div>
             )}
@@ -141,11 +146,11 @@ function Inner({ children }: { children: ReactNode }) {
               {links.map((n) => (
                 <Link key={n.href} href={n.href} onClick={() => setMenu(false)}
                   className={`rounded-lg px-3 py-3 text-base ${isActive(n.href) ? "bg-panel-2 font-medium text-fg" : n.href === "/admin" ? "text-brand" : "text-muted hover:bg-panel-2 hover:text-fg"}`}>
-                  {n.label}
+                  {t(n.label)}
                 </Link>
               ))}
             </nav>
-            {team && mode === "cloud" && <p className="mt-auto text-xs text-muted">O teu papel: {ROLE_LABEL[access.role]}</p>}
+            {team && mode === "cloud" && <p className="mt-auto text-xs text-muted">{t("O teu papel: {role}", { role: t(ROLE_LABEL[access.role]) })}</p>}
           </aside>
         </div>
       )}
@@ -168,7 +173,7 @@ function NewTeamDialog({ onClose, onCreated }: { onClose: () => void; onCreated:
     return () => window.removeEventListener("keydown", h);
   }, [onClose]);
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/60 p-4" onClick={onClose} role="dialog" aria-modal="true" aria-label="Nova equipa">
+    <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/60 p-4" onClick={onClose} role="dialog" aria-modal="true" aria-label={t("Nova equipa")}>
       <div className="w-full max-w-md" onClick={(e) => e.stopPropagation()}>
         <CreateTeam onCreated={onCreated} onCancel={onClose} />
       </div>
@@ -203,24 +208,24 @@ function SyncBadge() {
   const close = useCallback(() => setOpen(false), []);
   useDismiss(open, close, ref);
   const dot = s.state === "error" ? "bg-bad" : s.state === "offline" ? "bg-brand" : s.pending > 0 || s.state === "syncing" ? "bg-opp animate-pulse" : "bg-good";
-  const label = s.state === "offline" ? "Sem internet — guardado neste dispositivo"
-    : s.state === "error" ? "Erro de sincronização"
-    : s.state === "syncing" ? "A sincronizar…"
-    : s.pending > 0 ? `${s.pending} alterações por enviar`
-    : "Tudo guardado na cloud";
+  const label = s.state === "offline" ? t("Sem internet — guardado neste dispositivo")
+    : s.state === "error" ? t("Erro de sincronização")
+    : s.state === "syncing" ? t("A sincronizar…")
+    : s.pending > 0 ? t("{n} alterações por enviar", { n: s.pending })
+    : t("Tudo guardado na cloud");
   return (
     <div className="relative" ref={ref}>
       <button className="flex h-9 min-w-9 items-center justify-center gap-2 rounded-md px-2 text-xs text-muted hover:bg-panel-2" onClick={() => setOpen(!open)} title={label}>
         <span className={`h-2 w-2 rounded-full ${dot}`} />
-        <span className="hidden lg:inline">{s.state === "offline" ? "Offline" : s.pending ? `${s.pending} por enviar` : "Sincronizado"}</span>
+        <span className="hidden lg:inline">{s.state === "offline" ? t("Offline") : s.pending ? t("{n} por enviar", { n: s.pending }) : t("Sincronizado")}</span>
       </button>
       {open && (
         <div className="card absolute right-0 top-11 z-40 w-[min(18rem,calc(100vw-1.5rem))] p-3 text-sm shadow-xl">
           <div className="font-medium">{label}</div>
-          {s.lastSync && <div className="mt-1 text-xs text-muted">Última sincronização: {new Date(s.lastSync).toLocaleTimeString("pt-PT")}</div>}
+          {s.lastSync && <div className="mt-1 text-xs text-muted">{t("Última sincronização: {time}", { time: new Date(s.lastSync).toLocaleTimeString(locale()) })}</div>}
           {s.error && <div className="mt-2 text-xs text-bad">{s.error}</div>}
-          <p className="mt-2 text-xs text-muted">Podes registar sem internet: as alterações ficam guardadas aqui e são enviadas quando voltar a ligação.</p>
-          <button className="btn mt-2 w-full py-1 text-xs" onClick={() => void syncNow()}>Sincronizar agora</button>
+          <p className="mt-2 text-xs text-muted">{t("Podes registar sem internet: as alterações ficam guardadas aqui e são enviadas quando voltar a ligação.")}</p>
+          <button className="btn mt-2 w-full py-1 text-xs" onClick={() => void syncNow()}>{t("Sincronizar agora")}</button>
         </div>
       )}
     </div>
@@ -236,26 +241,27 @@ function UserMenu({ role }: { role?: string }) {
   const s = useSyncExternalStore(syncStore.subscribe, syncStore.get, syncStore.get);
   const initials = (profile?.fullName || profile?.email || "?").split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
   const out = async () => {
-    if (s.pending > 0 && !(await ask(`Há ${s.pending} alterações ainda não enviadas. Se saíres agora perdem-se. Sair mesmo assim?`, { confirmText: "Sair", danger: true }))) return;
+    if (s.pending > 0 && !(await ask(t("Há {n} alterações ainda não enviadas. Se saíres agora perdem-se. Sair mesmo assim?", { n: s.pending }), { confirmText: t("Sair"), danger: true }))) return;
     await signOut();
   };
   return (
     <div className="relative" ref={ref}>
-      <button onClick={() => setOpen(!open)} className="grid h-9 w-9 place-items-center rounded-full bg-panel-2 text-xs font-semibold hover:bg-line" aria-label="Conta">
+      <button onClick={() => setOpen(!open)} className="grid h-9 w-9 place-items-center rounded-full bg-panel-2 text-xs font-semibold hover:bg-line" aria-label={t("Conta")}>
         {initials}
       </button>
       {open && (
         <div className="card absolute right-0 top-11 z-40 w-[min(16rem,calc(100vw-1.5rem))] p-3 text-sm shadow-xl" onClick={() => setOpen(false)}>
-          <div className="font-medium">{profile?.fullName || "Sem nome"}</div>
+          <div className="font-medium">{profile?.fullName || t("Sem nome")}</div>
           <div className="truncate text-xs text-muted">{profile?.email}</div>
           {role && <div className="mt-1 text-xs text-brand">{role}</div>}
-          {profile?.isAdmin && <div className="text-xs text-brand">Administrador da plataforma</div>}
+          {profile?.isAdmin && <div className="text-xs text-brand">{t("Administrador da plataforma")}</div>}
           <div className="mt-3 grid gap-1">
-            <Link href="/conta" className="btn btn-ghost justify-start py-1.5">A minha conta</Link>
-            <button className="btn btn-ghost justify-start py-1.5" onClick={openNewTeam}>+ Criar nova equipa</button>
-            <Link href="/convite" className="btn btn-ghost justify-start py-1.5">Entrar noutra equipa (código)</Link>
-            <button className="btn btn-ghost justify-start py-1.5 text-bad" onClick={out}>Terminar sessão</button>
+            <Link href="/conta" className="btn btn-ghost justify-start py-1.5">{t("A minha conta")}</Link>
+            <button className="btn btn-ghost justify-start py-1.5" onClick={openNewTeam}>{t("+ Criar nova equipa")}</button>
+            <Link href="/convite" className="btn btn-ghost justify-start py-1.5">{t("Entrar noutra equipa (código)")}</Link>
+            <button className="btn btn-ghost justify-start py-1.5 text-bad" onClick={out}>{t("Terminar sessão")}</button>
           </div>
+          <div className="mt-2 border-t border-line pt-2" onClick={(e) => e.stopPropagation()}><LanguagePicker compact /></div>
         </div>
       )}
     </div>
@@ -270,8 +276,8 @@ function Onboarding({ onCreated }: { onCreated: (id: string) => void }) {
       {mode === "cloud" && (
         <div className="mt-10 md:mt-[4.5rem]">
           <div className="card p-5">
-            <h2 className="font-semibold">Tens um código?</h2>
-            <p className="mt-1 text-sm text-muted">Se és jogador ou treinador adjunto, pede o código ao dono da equipa e escreve-o aqui.</p>
+            <h2 className="font-semibold">{t("Tens um código?")}</h2>
+            <p className="mt-1 text-sm text-muted">{t("Se és jogador ou treinador adjunto, pede o código ao dono da equipa e escreve-o aqui.")}</p>
             <JoinWithCode />
           </div>
         </div>
@@ -295,44 +301,44 @@ export function CreateTeam({ onCreated, onCancel }: { onCreated: (id: string) =>
   return (
     <div className={`mx-auto w-full max-w-md ${onCancel ? "" : "mt-10"}`}>
       {onCancel ? null : <>
-        <h1 className="text-2xl font-semibold">Bem-vindo 👋</h1>
-        <p className="mt-1 text-muted">Cria a tua equipa para começar. Ficas como dono/treinador principal.</p>
+        <h1 className="text-2xl font-semibold">{t("Bem-vindo 👋")}</h1>
+        <p className="mt-1 text-muted">{t("Cria a tua equipa para começar. Ficas como dono/treinador principal.")}</p>
       </>}
       <form onSubmit={submit} className={`card grid gap-4 p-5 ${onCancel ? "" : "mt-6"}`}>
         {onCancel && (
           <div>
-            <h2 className="text-lg font-semibold">Nova equipa</h2>
-            <p className="text-sm text-muted">Outro escalão, a equipa feminina ou a próxima época. Cada equipa tem o seu plantel, treinos e jogos; ficas como dono.</p>
+            <h2 className="text-lg font-semibold">{t("Nova equipa")}</h2>
+            <p className="text-sm text-muted">{t("Outro escalão, a equipa feminina ou a próxima época. Cada equipa tem o seu plantel, treinos e jogos; ficas como dono.")}</p>
           </div>
         )}
         <div>
-          <label className="label">Clube / equipa</label>
+          <label className="label">{t("Clube / equipa")}</label>
           <input className="input" required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
         </div>
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="label">Escalão</label>
+            <label className="label">{t("Escalão")}</label>
             <input className="input" required placeholder="Sub-18" autoFocus={!!onCancel} value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })} />
           </div>
           <div>
-            <label className="label">Género</label>
+            <label className="label">{t("Género")}</label>
             <select className="input" value={f.gender} onChange={(e) => setF({ ...f, gender: e.target.value as "M" | "F" })}>
-              <option value="M">Masculino</option>
-              <option value="F">Feminino</option>
+              <option value="M">{t("Masculino")}</option>
+              <option value="F">{t("Feminino")}</option>
             </select>
           </div>
           <div>
-            <label className="label">Época</label>
+            <label className="label">{t("Época")}</label>
             <input className="input" value={f.season} onChange={(e) => setF({ ...f, season: e.target.value })} />
           </div>
         </div>
         <div className="flex gap-2">
-          <button className="btn btn-primary flex-1">Criar equipa</button>
-          {onCancel && <button type="button" className="btn" onClick={onCancel}>Cancelar</button>}
+          <button className="btn btn-primary flex-1">{t("Criar equipa")}</button>
+          {onCancel && <button type="button" className="btn" onClick={onCancel}>{t("Cancelar")}</button>}
         </div>
       </form>
       {!onCancel && <label className="mt-4 block cursor-pointer text-center text-sm text-muted hover:text-fg">
-        …ou <span className="text-brand underline">importar uma cópia (.json)</span>
+        {t("…ou")} <span className="text-brand underline">{t("importar uma cópia (.json)")}</span>
         <input type="file" accept="application/json" className="hidden" onChange={async (e) => {
           const file = e.target.files?.[0];
           if (!file) return;
@@ -342,10 +348,10 @@ export function CreateTeam({ onCreated, onCancel }: { onCreated: (id: string) =>
             const { teamId } = await importIntoTeam(data, team ?? null);
             markOwned(teamId);
             onCreated(teamId);
-          } catch (err) { void notify(`Erro ao importar: ${(err as Error).message}`); }
+          } catch (err) { void notify(t("Erro ao importar: {msg}", { msg: (err as Error).message })); }
         }} />
       </label>}
-      {mode === "cloud" && !onCancel && <p className="mt-2 text-center text-xs text-muted">A cópia importada é enviada para a tua conta.</p>}
+      {mode === "cloud" && !onCancel && <p className="mt-2 text-center text-xs text-muted">{t("A cópia importada é enviada para a tua conta.")}</p>}
     </div>
   );
 }

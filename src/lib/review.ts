@@ -1,5 +1,6 @@
 import type { Possession } from "./possessions";
 import type { GameEvent, ID, Player } from "./types";
+import { t } from "./i18n";
 
 /* "What should I watch?" — the few moments of a game worth reviewing, found in the possessions:
    turnover streaks, runs, scoring droughts, second chances conceded, a five on court that sank,
@@ -35,7 +36,7 @@ export function reviewItems(poss: Possession[], events: GameEvent[], players: Pl
     if (tov.length >= 3 || two) {
       const span = tov.length >= 3 ? w.slice(0, w.lastIndexOf(tov[tov.length - 1]) + 1) : [ours[i], ours[i + 1]];
       const n = span.filter((p) => p.result === "tov").length;
-      items.push({ tone: "bad", title: `${n} perdas em ${span.length} ataques`, detail: "Rever as decisões e a pressão do adversário.", ...win(span), weight: (n >= 3 ? n * 2.2 : 3) * lateness(span[0].period) });
+      items.push({ tone: "bad", title: t("{n} perdas em {total} ataques", { n, total: span.length }), detail: t("Rever as decisões e a pressão do adversário."), ...win(span), weight: (n >= 3 ? n * 2.2 : 3) * lateness(span[0].period) });
       i += span.length - 1;
     }
   }
@@ -44,8 +45,8 @@ export function reviewItems(poss: Possession[], events: GameEvent[], players: Pl
   let run: { side: "us" | "opp"; pts: number; list: Possession[] } | null = null;
   const flush = () => {
     if (!run) return;
-    if (run.side === "opp" && run.pts >= 7) items.push({ tone: "bad", title: `Parcial de ${run.pts}–0 do adversário`, detail: `${run.list.length} posses em que só eles marcaram.`, ...win(run.list), weight: (run.pts / 1.6) * lateness(run.list[0].period) });
-    if (run.side === "us" && run.pts >= 8) items.push({ tone: "good", title: `Parcial de ${run.pts}–0 a nosso favor`, detail: "O que funcionou — bom para mostrar à equipa.", ...win(run.list), weight: (run.pts / 2.4) * lateness(run.list[0].period) });
+    if (run.side === "opp" && run.pts >= 7) items.push({ tone: "bad", title: t("Parcial de {n}–0 do adversário", { n: run.pts }), detail: t("{n} posses em que só eles marcaram.", { n: run.list.length }), ...win(run.list), weight: (run.pts / 1.6) * lateness(run.list[0].period) });
+    if (run.side === "us" && run.pts >= 8) items.push({ tone: "good", title: t("Parcial de {n}–0 a nosso favor", { n: run.pts }), detail: t("O que funcionou — bom para mostrar à equipa."), ...win(run.list), weight: (run.pts / 2.4) * lateness(run.list[0].period) });
     run = null;
   };
   for (const p of poss) {
@@ -60,7 +61,7 @@ export function reviewItems(poss: Possession[], events: GameEvent[], players: Pl
   // 3. scoring droughts: ≥6 of our possessions in a row without points
   let dry: Possession[] = [];
   const dryFlush = () => {
-    if (dry.length >= 6) items.push({ tone: "bad", title: `${dry.length} ataques seguidos sem marcar`, detail: `${dry.filter((p) => p.result === "tov").length} perdas e ${dry.filter((p) => p.result === "miss").length} lançamentos falhados.`, ...win(dry), weight: dry.length * 0.9 * lateness(dry[0].period) });
+    if (dry.length >= 6) items.push({ tone: "bad", title: t("{n} ataques seguidos sem marcar", { n: dry.length }), detail: t("{tov} perdas e {miss} lançamentos falhados.", { tov: dry.filter((p) => p.result === "tov").length, miss: dry.filter((p) => p.result === "miss").length }), ...win(dry), weight: dry.length * 0.9 * lateness(dry[0].period) });
     dry = [];
   };
   for (const p of ours) {
@@ -75,7 +76,7 @@ export function reviewItems(poss: Possession[], events: GameEvent[], players: Pl
     const group = [sc[i]];
     while (i + 1 < sc.length && sc[i + 1].period === sc[i].period && theirs.indexOf(sc[i + 1]) - theirs.indexOf(group[group.length - 1]) <= 5) group.push(sc[++i]);
     const pts = group.reduce((a, p) => a + p.secondChancePts, 0);
-    if (pts >= 4) items.push({ tone: "bad", title: `${pts} pontos de 2.ª oportunidade sofridos`, detail: `${group.length} ressalto${group.length > 1 ? "s" : ""} ofensivo${group.length > 1 ? "s" : ""} do adversário — rever o bloqueio de ressalto.`, ...win(group), weight: pts * 0.8 * lateness(group[0].period) });
+    if (pts >= 4) items.push({ tone: "bad", title: t("{n} pontos de 2.ª oportunidade sofridos", { n: pts }), detail: group.length > 1 ? t("{n} ressaltos ofensivos do adversário — rever o bloqueio de ressalto.", { n: group.length }) : t("{n} ressalto ofensivo do adversário — rever o bloqueio de ressalto.", { n: group.length }), ...win(group), weight: pts * 0.8 * lateness(group[0].period) });
   }
 
   // 5. a five on court that sank (−6 or worse in one stint)
@@ -85,7 +86,7 @@ export function reviewItems(poss: Possession[], events: GameEvent[], players: Pl
     if (stint.length >= 3 && stint[0].lineup.length === 5) {
       const pf = stint.filter((p) => p.side === "us").reduce((a, p) => a + p.pts, 0);
       const pa = stint.filter((p) => p.side === "opp").reduce((a, p) => a + p.pts, 0);
-      if (pf - pa <= -6) items.push({ tone: "bad", title: `Quinteto ${five(stint[0].lineup)}: ${pf}–${pa}`, detail: `${stint.length} posses com este cinco em campo.`, ...win(stint), weight: (pa - pf) * 0.7 * lateness(stint[0].period) });
+      if (pf - pa <= -6) items.push({ tone: "bad", title: t("Quinteto {five}: {score}", { five: five(stint[0].lineup), score: `${pf}–${pa}` }), detail: t("{n} posses com este cinco em campo.", { n: stint.length }), ...win(stint), weight: (pa - pf) * 0.7 * lateness(stint[0].period) });
     }
     stint = [];
   };
@@ -99,7 +100,7 @@ export function reviewItems(poss: Possession[], events: GameEvent[], players: Pl
   const lastPeriod = Math.max(...events.map((e) => e.period), 0);
   const missedFt = events.filter((e) => e.side === "us" && e.type === "FT" && !e.meta?.made && e.period === lastPeriod && lastPeriod >= regulation);
   if (missedFt.length >= 3) {
-    items.push({ tone: "bad", title: `${missedFt.length} lances livres falhados no fim`, detail: "Pontos que ficaram na linha no último período.", period: lastPeriod, from: Math.max(0, missedFt[0].videoTs - PAD_BEFORE), to: missedFt[missedFt.length - 1].videoTs + PAD_AFTER, weight: missedFt.length * 1.2 });
+    items.push({ tone: "bad", title: t("{n} lances livres falhados no fim", { n: missedFt.length }), detail: t("Pontos que ficaram na linha no último período."), period: lastPeriod, from: Math.max(0, missedFt[0].videoTs - PAD_BEFORE), to: missedFt[missedFt.length - 1].videoTs + PAD_AFTER, weight: missedFt.length * 1.2 });
   }
 
   // strongest first, drop overlapping windows, then back to game order

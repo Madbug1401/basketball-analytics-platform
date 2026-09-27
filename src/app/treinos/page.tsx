@@ -8,6 +8,7 @@ import { useTeam } from "@/lib/team";
 import { StaffOnly } from "@/components/Guard";
 import { timeByFocus } from "@/lib/planner";
 import { FOCUS_LABEL } from "@/lib/types";
+import { locale, t } from "@/lib/i18n";
 
 export default function PracticesPageGuarded() {
   return <StaffOnly><PracticesPage /></StaffOnly>;
@@ -57,10 +58,10 @@ function PracticesPage() {
     <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
       <section>
         <div className="mb-4 flex items-end justify-between">
-          <h1 className="text-2xl font-semibold">Treinos</h1>
+          <h1 className="text-2xl font-semibold">{t("Treinos")}</h1>
           <div className="flex gap-2">
-            <Link href="/treinos/exercicios" className="btn">Exercícios</Link>
-            <button className="btn btn-primary" onClick={create}>+ Novo treino</button>
+            <Link href="/treinos/exercicios" className="btn">{t("Exercícios")}</Link>
+            <button className="btn btn-primary" onClick={create}>{t("+ Novo treino")}</button>
           </div>
         </div>
         <div className="card divide-y divide-line">
@@ -69,25 +70,25 @@ function PracticesPage() {
             return (
               <Link key={p.id} href={`/treinos/${p.id}`} className="flex items-center justify-between px-4 py-3 hover:bg-panel-2">
                 <div>
-                  <div className="font-medium">{p.title || "Treino"}</div>
-                  <div className="text-xs text-muted">{new Date(p.date + "T12:00").toLocaleDateString("pt-PT", { weekday: "short", day: "numeric", month: "short" })}</div>
+                  <div className="font-medium">{p.title || t("Treino")}</div>
+                  <div className="text-xs text-muted">{new Date(p.date + "T12:00").toLocaleDateString(locale(), { weekday: "short", day: "numeric", month: "short" })}</div>
                 </div>
                 <div className="text-right text-sm tabular-nums">
-                  {s ? <>{s.present}/{s.total}</> : <span className="text-muted">sem registo</span>}
+                  {s ? <>{s.present}/{s.total}</> : <span className="text-muted">{t("sem registo")}</span>}
                 </div>
               </Link>
             );
           })}
-          {practices.length === 0 && <p className="p-6 text-center text-sm text-muted">Nenhum treino registado.</p>}
+          {practices.length === 0 && <p className="p-6 text-center text-sm text-muted">{t("Nenhum treino registado.")}</p>}
         </div>
       </section>
 
       <section>
-        <h2 className="mb-4 text-lg font-semibold">Assiduidade da época</h2>
+        <h2 className="mb-4 text-lg font-semibold">{t("Assiduidade da época")}</h2>
         <div className="card overflow-x-auto">
           <table className="tbl">
             <thead>
-              <tr><th>Jogador</th><th>Presente</th><th>Atrasado</th><th>Falta</th><th>Justif.</th><th>%</th></tr>
+              <tr><th>{t("Jogador")}</th><th>{t("Presente")}</th><th>{t("Atrasado")}</th><th>{t("Falta|presença")}</th><th>{t("Justif.")}</th><th>%</th></tr>
             </thead>
             <tbody>
               {rows.sort((a, b) => (b.pct ?? -1) - (a.pct ?? -1)).map((r) => (
@@ -109,22 +110,22 @@ function PracticesPage() {
             </tbody>
           </table>
         </div>
-        <p className="mt-2 text-xs text-muted">Atrasos contam como presença; faltas justificadas não contam para a percentagem.</p>
+        <p className="mt-2 text-xs text-muted">{t("Atrasos contam como presença; faltas justificadas não contam para a percentagem.")}</p>
 
-        <h2 className="mb-3 mt-6 text-lg font-semibold">Tempo por área</h2>
+        <h2 className="mb-3 mt-6 text-lg font-semibold">{t("Tempo por área")}</h2>
         <div className="card p-4">
           {tbf.total ? (
             <ul className="grid gap-2">
               {tbf.byFocus.map(([f, m]) => (
                 <li key={f} className="grid grid-cols-[8rem_1fr_3.5rem] items-center gap-2 text-sm">
-                  <span className="truncate text-muted">{FOCUS_LABEL[f]}</span>
+                  <span className="truncate text-muted">{t(FOCUS_LABEL[f])}</span>
                   <div className="h-2 overflow-hidden rounded bg-bg"><div className="h-full rounded bg-brand" style={{ width: `${Math.round((m / tbf.byFocus[0][1]) * 100)}%` }} /></div>
                   <span className="text-right font-mono text-xs">{Math.round(m)}′</span>
                 </li>
               ))}
             </ul>
-          ) : <p className="text-sm text-muted">Monta o plano dos treinos (com exercícios da biblioteca) para ver onde vai o tempo.</p>}
-          {tbf.total > 0 && <p className="mt-3 text-xs text-muted">{Math.round(tbf.total)} minutos planeados em {agenda.filter((a) => a.plan?.length).length} treinos.</p>}
+          ) : <p className="text-sm text-muted">{t("Monta o plano dos treinos (com exercícios da biblioteca) para ver onde vai o tempo.")}</p>}
+          {tbf.total > 0 && <p className="mt-3 text-xs text-muted">{t("{min} minutos planeados em {n} treinos.", { min: Math.round(tbf.total), n: agenda.filter((a) => a.plan?.length).length })}</p>}
         </div>
       </section>
     </div>

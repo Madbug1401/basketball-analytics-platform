@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useSyncExternalStore } from "react";
+import { t } from "@/lib/i18n";
 
 /** Registers the service worker that makes the app open without internet. */
 export function ServiceWorker() {
@@ -30,7 +31,7 @@ export function OfflineBar() {
   if (online) return null;
   return (
     <div className="border-b border-brand/40 bg-brand/15 px-3 py-1.5 text-center text-xs text-brand print:hidden" role="status">
-      Sem internet — podes continuar a usar a app. Tudo fica guardado neste dispositivo e é enviado quando voltar a ligação.
+      {t("Sem internet — podes continuar a usar a app. Tudo fica guardado neste dispositivo e é enviado quando voltar a ligação.")}
     </div>
   );
 }

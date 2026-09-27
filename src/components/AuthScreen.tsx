@@ -4,6 +4,8 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { PENDING_INVITE_KEY, useAuth } from "@/lib/auth";
 import { useTeam } from "@/lib/team";
+import { t } from "@/lib/i18n";
+import { LanguagePicker } from "@/components/LanguagePicker";
 
 function inviteFromUrl() {
   if (typeof window === "undefined") return null;
@@ -35,11 +37,11 @@ export function AuthScreen() {
           options: { data: { full_name: f.name.trim() }, emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
-        if (!data.session) setMsg({ ok: true, text: "Conta criada! Abre o email que te enviámos para confirmar e depois entra aqui." });
+        if (!data.session) setMsg({ ok: true, text: t("Conta criada! Abre o email que te enviámos para confirmar e depois entra aqui.") });
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(f.email.trim(), { redirectTo: `${window.location.origin}/conta?nova=1` });
         if (error) throw error;
-        setMsg({ ok: true, text: "Se o email existir, recebes um link para definir uma nova password." });
+        setMsg({ ok: true, text: t("Se o email existir, recebes um link para definir uma nova password.") });
       }
     } catch (err) {
       setMsg({ ok: false, text: translate((err as Error).message) });
@@ -53,51 +55,54 @@ export function AuthScreen() {
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
           <div className="text-3xl font-semibold tracking-tight">Courtside</div>
-          <p className="mt-1 text-sm text-muted">Gestão e análise de basquetebol</p>
+          <p className="mt-1 text-sm text-muted">{t("Gestão e análise de basquetebol")}</p>
         </div>
         {invite && (
           <div className="mb-4 rounded-lg border border-brand bg-brand/10 px-3 py-2 text-sm">
-            Foste convidado para uma equipa (código <b className="font-mono">{invite}</b>). Cria conta ou entra para aceitar.
+            {t("Foste convidado para uma equipa.")} {t("Código:")} <b className="font-mono">{invite}</b>. {t("Cria conta ou entra para aceitar.")}
           </div>
         )}
         <div className="card p-5">
           {tab !== "forgot" && (
             <div className="mb-4 grid grid-cols-2 gap-1 rounded-lg bg-bg p-1">
-              <button className={`rounded-md py-1.5 text-sm ${tab === "login" ? "bg-panel-2" : "text-muted"}`} onClick={() => setTab("login")}>Entrar</button>
-              <button className={`rounded-md py-1.5 text-sm ${tab === "signup" ? "bg-panel-2" : "text-muted"}`} onClick={() => setTab("signup")}>Criar conta</button>
+              <button className={`rounded-md py-1.5 text-sm ${tab === "login" ? "bg-panel-2" : "text-muted"}`} onClick={() => setTab("login")}>{t("Entrar")}</button>
+              <button className={`rounded-md py-1.5 text-sm ${tab === "signup" ? "bg-panel-2" : "text-muted"}`} onClick={() => setTab("signup")}>{t("Criar conta")}</button>
             </div>
           )}
           <form onSubmit={submit} className="grid gap-3">
             {tab === "signup" && (
               <div>
-                <label className="label">Nome</label>
+                <label className="label">{t("Nome")}</label>
                 <input className="input" required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} autoComplete="name" />
               </div>
             )}
             <div>
-              <label className="label">Email</label>
+              <label className="label">{t("Email")}</label>
               <input className="input" type="email" required value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} autoComplete="email" />
             </div>
             {tab !== "forgot" && (
               <div>
-                <label className="label">Password</label>
+                <label className="label">{t("Password")}</label>
                 <input className="input" type="password" required minLength={6} value={f.password}
                   onChange={(e) => setF({ ...f, password: e.target.value })} autoComplete={tab === "login" ? "current-password" : "new-password"} />
               </div>
             )}
             {msg && <p className={`text-sm ${msg.ok ? "text-good" : "text-bad"}`}>{msg.text}</p>}
             <button className="btn btn-primary" disabled={busy}>
-              {busy ? "…" : tab === "login" ? "Entrar" : tab === "signup" ? "Criar conta" : "Enviar link"}
+              {busy ? "…" : tab === "login" ? t("Entrar") : tab === "signup" ? t("Criar conta") : t("Enviar link")}
             </button>
           </form>
           <div className="mt-3 text-center text-xs text-muted">
             {tab === "forgot"
-              ? <button className="tap hover:text-fg" onClick={() => setTab("login")}>← Voltar</button>
-              : <button className="hover:text-fg" onClick={() => setTab("forgot")}>Esqueci-me da password</button>}
+              ? <button className="tap hover:text-fg" onClick={() => setTab("login")}>← {t("Voltar")}</button>
+              : <button className="hover:text-fg" onClick={() => setTab("forgot")}>{t("Esqueci-me da password")}</button>}
+          </div>
+          <div className="mt-4 border-t border-line pt-3">
+            <LanguagePicker compact />
           </div>
         </div>
         <p className="mt-4 text-center text-xs text-muted">
-          Jogadores: criem conta e usem o código que o treinador vos deu.
+          {t("Jogadores: criem conta e usem o código que o treinador vos deu.")}
         </p>
       </div>
     </div>
@@ -105,11 +110,16 @@ export function AuthScreen() {
 }
 
 function translate(m: string) {
-  if (/Invalid login credentials/i.test(m)) return "Email ou password errados.";
-  if (/Email not confirmed/i.test(m)) return "Ainda não confirmaste o email. Vê a tua caixa de correio.";
-  if (/already registered/i.test(m)) return "Já existe uma conta com este email. Usa \"Entrar\".";
-  if (/Password should be/i.test(m)) return "A password tem de ter pelo menos 6 caracteres.";
-  if (/rate limit/i.test(m)) return "Demasiadas tentativas. Espera um pouco e tenta de novo.";
+  if (/Invalid login credentials/i.test(m)) return t("Email ou password errados.");
+  if (/Email not confirmed/i.test(m)) return t("Ainda não confirmaste o email. Vê a tua caixa de correio.");
+  if (/already registered/i.test(m)) return t("Já existe uma conta com este email. Usa \"Entrar\".");
+  if (/Password should be/i.test(m)) return t("A password tem de ter pelo menos 6 caracteres.");
+  if (/rate limit/i.test(m)) return t("Demasiadas tentativas. Espera um pouco e tenta de novo.");
+  // messages raised by the server (claim_invite)
+  if (/^Código inválido/i.test(m)) return t("Código inválido");
+  if (/já foi usado/i.test(m)) return t("Este código já foi usado");
+  if (/código expirou/i.test(m)) return t("Este código expirou");
+  if (/Tens de iniciar sessão/i.test(m)) return t("Tens de iniciar sessão");
   return m;
 }
 
@@ -130,10 +140,10 @@ export function JoinWithCode({ onJoined }: { onJoined?: (teamId: string) => void
     try {
       const teamId = await claimInvite(code);
       setTeamId(teamId);
-      setMsg({ ok: true, text: "Entraste na equipa!" });
+      setMsg({ ok: true, text: t("Entraste na equipa!") });
       onJoined?.(teamId);
     } catch (err) {
-      setMsg({ ok: false, text: (err as Error).message });
+      setMsg({ ok: false, text: translate((err as Error).message) });
     } finally {
       setBusy(false);
     }
@@ -141,8 +151,8 @@ export function JoinWithCode({ onJoined }: { onJoined?: (teamId: string) => void
   return (
     <form onSubmit={submit} className="mt-3 grid gap-2">
       <input className="input text-center font-mono text-lg uppercase tracking-[0.4em]" maxLength={6} placeholder="ABC123" required
-        value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} aria-label="Código de convite" />
-      <button className="btn btn-primary" disabled={busy || code.trim().length < 6}>{busy ? "…" : "Entrar na equipa"}</button>
+        value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} aria-label={t("Código de convite")} />
+      <button className="btn btn-primary" disabled={busy || code.trim().length < 6}>{busy ? "…" : t("Entrar na equipa")}</button>
       {msg && <p className={`text-sm ${msg.ok ? "text-good" : "text-bad"}`}>{msg.text}</p>}
     </form>
   );

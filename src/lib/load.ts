@@ -3,13 +3,14 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, today } from "./db";
 import { gameStats } from "./stats";
+import { L, locale, t } from "./i18n";
 import type { Attendance, Availability, Game, GameEvent, ID, Player, Practice, Wellness } from "./types";
 
 /* Training load (session-RPE): effort 1–10 × minutes, reported by each player after a practice or game.
    Acute load = last 7 days; chronic = weekly average of the last 28 days. A week much heavier than
    usual (ratio > 1.5) is the classic warning sign for fatigue/injury risk. */
 
-export const RPE_LABEL = ["", "Muito leve", "Leve", "Moderado", "Algo duro", "Duro", "Duro+", "Muito duro", "Muito duro+", "Quase máximo", "Máximo"];
+export const RPE_LABEL = ["", L("Muito leve"), L("Leve"), L("Moderado"), L("Algo duro"), L("Duro"), L("Duro+"), L("Muito duro"), L("Muito duro+"), L("Quase máximo"), L("Máximo")];
 export const rpeColor = (v: number) => (v <= 3 ? "bg-good/70" : v <= 6 ? "bg-brand/70" : "bg-bad/80");
 
 export const DEFAULT_PRACTICE_MIN = 90;
@@ -18,9 +19,9 @@ export const statusId = (playerId: ID) => `status:${playerId}`;
 export const load = (w: Wellness) => (w.rpe ?? 0) * (w.minutes ?? 0);
 
 const addDays = (d: string, n: number) => {
-  const t = new Date(d + "T12:00");
-  t.setDate(t.getDate() + n);
-  return t.toISOString().slice(0, 10);
+  const dt = new Date(d + "T12:00");
+  dt.setDate(dt.getDate() + n);
+  return dt.toISOString().slice(0, 10);
 };
 
 export interface PlayerLoad {
@@ -96,7 +97,7 @@ export function pendingSessions(opts: {
     if (att && att.status !== "present" && att.status !== "late") continue;
     if (!att && opts.attendance.some((a) => a.practiceId === p.id)) continue; // attendance taken, not there
     if (opts.answered.has(sessionId(p.id, opts.playerId))) continue;
-    out.push({ id: p.id, kind: "practice", date: p.date, title: p.title || "Treino", minutes: p.durationMin ?? DEFAULT_PRACTICE_MIN });
+    out.push({ id: p.id, kind: "practice", date: p.date, title: p.title || t("Treino"), minutes: p.durationMin ?? DEFAULT_PRACTICE_MIN });
   }
   for (const g of opts.games) {
     if (g.date < since || g.date > day) continue;
@@ -105,7 +106,7 @@ export function pendingSessions(opts: {
     const played = evs.length ? gameStats(evs, g.periods, g.periodMinutes).players.get(opts.playerId) : undefined;
     const called = opts.callups.get(g.id)?.includes(opts.playerId);
     if (!played?.gp && !called) continue;
-    out.push({ id: g.id, kind: "game", date: g.date, title: `Jogo ${g.home ? "vs" : "@"} ${g.opponent}`, minutes: Math.max(10, Math.round(played?.min || g.periods * g.periodMinutes * 0.5)) + 20 /* warm-up */ });
+    out.push({ id: g.id, kind: "game", date: g.date, title: g.home ? t("Jogo vs {opp}", { opp: g.opponent }) : t("Jogo @ {opp}", { opp: g.opponent }), minutes: Math.max(10, Math.round(played?.min || g.periods * g.periodMinutes * 0.5)) + 20 /* warm-up */ });
   }
   return out.sort((a, b) => b.date.localeCompare(a.date));
 }
@@ -131,4 +132,4 @@ export function useLoadData(teamId?: string) {
   }, [teamId]);
 }
 
-export const shortDate = (d: string) => new Date(d + "T12:00").toLocaleDateString("pt-PT", { weekday: "short", day: "numeric", month: "short" });
+export const shortDate = (d: string) => new Date(d + "T12:00").toLocaleDateString(locale(), { weekday: "short", day: "numeric", month: "short" });

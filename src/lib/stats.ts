@@ -1,5 +1,6 @@
 import type { GameEvent, ID, Player, PlayTag } from "./types";
 import { zoneOf, type Zone } from "./court";
+import { L, t } from "./i18n";
 
 export interface Line {
   pts: number;
@@ -170,22 +171,28 @@ export function fmtTs(s: number) {
 }
 
 export const EVENT_LABEL: Record<string, string> = {
-  SHOT: "Lançamento", FT: "Lance livre", REB: "Ressalto", AST: "Assistência", STL: "Roubo",
-  BLK: "Desarme", TOV: "Perda de bola", FOUL: "Falta", FOUL_DRAWN: "Falta sofrida",
-  SUB: "Substituição", PERIOD_START: "Início período", PERIOD_END: "Fim do período", TIMEOUT: "Desconto de tempo",
+  SHOT: L("Lançamento"), FT: L("Lance livre"), REB: L("Ressalto"), AST: L("Assistência"), STL: L("Roubo"),
+  BLK: L("Desarme"), TOV: L("Perda de bola"), FOUL: L("Falta"), FOUL_DRAWN: L("Falta sofrida"),
+  SUB: L("Substituição"), PERIOD_START: L("Início período"), PERIOD_END: L("Fim do período"), TIMEOUT: L("Desconto de tempo"),
 };
+
+/** Short period label: "P1" (pt) · "Q1" (en) · "QT1" (fr). */
+export const periodLabel = (n: number) => t("P{n}", { n });
+
+/** Translated event name (EVENT_LABEL holds the Portuguese keys). */
+export const eventLabel = (type: string) => { const label = EVENT_LABEL[type]; return label ? t(label) : type; };
 
 export function describe(e: GameEvent, name: (id?: ID) => string) {
   const m = e.meta ?? {};
   switch (e.type) {
-    case "SHOT": return `${m.pts === 3 ? "3PT" : "2PT"} ${m.made ? "✓ convertido" : "✗ falhado"}`;
-    case "FT": return `LL ${m.made ? "✓" : "✗"}`;
-    case "REB": return `Ressalto ${m.off ? "ofensivo" : "defensivo"}`;
-    case "SUB": return `Entra ${name(m.in)} · Sai ${name(m.out)}`;
-    case "PERIOD_START": return `Início ${e.period}.º período — ${(m.lineup ?? []).map((id) => name(id)).join(", ")}`;
-    case "PERIOD_END": return `Fim do ${e.period}.º período`;
-    case "TIMEOUT": return "Desconto de tempo";
-    default: return EVENT_LABEL[e.type];
+    case "SHOT": return m.pts === 3 ? (m.made ? t("3PT ✓ convertido") : t("3PT ✗ falhado")) : (m.made ? t("2PT ✓ convertido") : t("2PT ✗ falhado"));
+    case "FT": return m.made ? t("LL ✓") : t("LL ✗");
+    case "REB": return m.off ? t("Ressalto ofensivo") : t("Ressalto defensivo");
+    case "SUB": return t("Entra {in} · Sai {out}", { in: name(m.in), out: name(m.out) });
+    case "PERIOD_START": return t("Início {n}.º período — {lineup}", { n: e.period, lineup: (m.lineup ?? []).map((id) => name(id)).join(", ") });
+    case "PERIOD_END": return t("Fim do {n}.º período", { n: e.period });
+    case "TIMEOUT": return t("Desconto de tempo");
+    default: return eventLabel(e.type);
   }
 }
 

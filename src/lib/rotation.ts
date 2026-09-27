@@ -1,5 +1,6 @@
 import { sortEvents } from "./stats";
 import type { Game, GameEvent, ID, Rotation } from "./types";
+import { t } from "./i18n";
 
 /* Rotation: planned minutes per player and period vs what happened.
    Court time comes from the events (PERIOD_START lineups + SUBs). In live mode the timestamps are
@@ -14,7 +15,7 @@ export interface CourtTime {
 }
 
 const OT = 5 * 60;
-const offset = (g: Game, p: number) => { let t = 0; for (let i = 1; i < p; i++) t += i <= g.periods ? g.periodMinutes * 60 : OT; return t; };
+const offset = (g: Game, p: number) => { let secs = 0; for (let i = 1; i < p; i++) secs += i <= g.periods ? g.periodMinutes * 60 : OT; return secs; };
 
 /** Seconds on court per player and period. `nowTs` closes the running period (live mode). */
 export function courtTime(events: GameEvent[], game: Game, nowTs?: number): CourtTime {
@@ -155,21 +156,21 @@ export function liveAlerts(opts: {
     const pl = planned(id);
     const s = inPeriod(id);
     if (pl !== undefined) {
-      if (s >= pl * 60 + 15) out.push({ playerId: id, tone: "bad", text: `passou do previsto neste período (${mmss(s)} / ${pl} min)`, score: 3 + (s - pl * 60) / 60 });
-      else if (pl > 0 && pl * 60 - s <= 30) out.push({ playerId: id, tone: "warn", text: `a chegar ao previsto (${mmss(s)} / ${pl} min)`, score: 2 });
+      if (s >= pl * 60 + 15) out.push({ playerId: id, tone: "bad", text: t("passou do previsto neste período ({time} / {min} min)", { time: mmss(s), min: pl }), score: 3 + (s - pl * 60) / 60 });
+      else if (pl > 0 && pl * 60 - s <= 30) out.push({ playerId: id, tone: "warn", text: t("a chegar ao previsto ({time} / {min} min)", { time: mmss(s), min: pl }), score: 2 });
     }
     const st = ct.stint.get(id) ?? 0;
-    if (st >= limit) out.push({ playerId: id, tone: "warn", text: `${mmss(st)} seguidos em campo`, score: 1.5 + st / 600 });
+    if (st >= limit) out.push({ playerId: id, tone: "warn", text: t("{time} seguidos em campo", { time: mmss(st) }), score: 1.5 + st / 600 });
     const f = fouls.get(id) ?? 0;
     const firstHalf = period <= Math.ceil(game.periods / 2);
-    if ((period === 1 && f >= 2) || (firstHalf && f >= 3) || f >= 4) out.push({ playerId: id, tone: f >= 4 ? "bad" : "warn", text: `${f} faltas${firstHalf ? " cedo no jogo" : ""}`, score: 2 + f / 2 });
+    if ((period === 1 && f >= 2) || (firstHalf && f >= 3) || f >= 4) out.push({ playerId: id, tone: f >= 4 ? "bad" : "warn", text: firstHalf ? t("{n} faltas cedo no jogo", { n: f }) : t("{n} faltas", { n: f }), score: 2 + f / 2 });
   }
   if (rotation && regulation) {
     for (const id of bench) {
       const pl = planned(id);
       if (!pl) continue;
       const owed = pl * 60 - inPeriod(id);
-      if (owed >= 45 && owed >= remaining - 20) out.push({ playerId: id, tone: "info", text: `ainda tem ${Math.round(owed / 60)} min previstos — faltam ${mmss(remaining)}`, score: 1 + owed / 300 });
+      if (owed >= 45 && owed >= remaining - 20) out.push({ playerId: id, tone: "info", text: t("ainda tem {min} min previstos — faltam {time}", { min: Math.round(owed / 60), time: mmss(remaining) }), score: 1 + owed / 300 });
     }
   }
   // one line per player: the worst tone, all the reasons

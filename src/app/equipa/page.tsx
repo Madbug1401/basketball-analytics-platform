@@ -10,6 +10,7 @@ import { useAccess, useAuth } from "@/lib/auth";
 import { useTeamMembers } from "@/lib/members";
 import { InviteDialog } from "@/components/InviteDialog";
 import { POSITIONS, type Player, type Position, type Team } from "@/lib/types";
+import { t } from "@/lib/i18n";
 
 type Draft = { name: string; number: string; position: Position; birthYear: string; heightCm: string; notes: string };
 const blank: Draft = { name: "", number: "", position: "", birthYear: "", heightCm: "", notes: "" };
@@ -30,7 +31,7 @@ export default function RosterPage() {
   const [moving, setMoving] = useState<Player | null>(null);
   const { memberships, profile } = useAuth();
   // teams this user can add players to (staff there)
-  const otherTeams = teams.filter((t) => t.id !== team?.id && (mode === "local" || profile?.isAdmin || memberships.some((m) => m.teamId === t.id && m.role !== "player")));
+  const otherTeams = teams.filter((tm) => tm.id !== team?.id && (mode === "local" || profile?.isAdmin || memberships.some((m) => m.teamId === tm.id && m.role !== "player")));
 
   if (!team || !players) return null;
 
@@ -73,18 +74,18 @@ export default function RosterPage() {
       <section>
         <div className="mb-4 flex items-end justify-between">
           <div>
-            <h1 className="text-2xl font-semibold">Plantel</h1>
-            <p className="text-sm text-muted">{players.filter((p) => p.active).length} jogadores ativos</p>
+            <h1 className="text-2xl font-semibold">{t("Plantel")}</h1>
+            <p className="text-sm text-muted">{t("{n} jogadores ativos", { n: players.filter((p) => p.active).length })}</p>
           </div>
           <label className="flex min-h-10 cursor-pointer items-center gap-2 text-sm text-muted">
-            <input type="checkbox" className="h-4 w-4" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} /> Mostrar inativos
+            <input type="checkbox" className="h-4 w-4" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} /> {t("Mostrar inativos")}
           </label>
         </div>
         <div className="card overflow-x-auto">
           <table className="tbl">
             <thead>
               <tr>
-                <th>Jogador</th><th>Pos</th><th>Ano</th><th>Altura</th><th></th>
+                <th>{t("Jogador")}</th><th>{t("Pos")}</th><th>{t("Ano")}</th><th>{t("Altura")}</th><th></th>
               </tr>
             </thead>
             <tbody>
@@ -103,24 +104,24 @@ export default function RosterPage() {
                     {access.canEdit && mode === "cloud" && (() => {
                       const linked = members.find((m) => m.playerId === p.id);
                       return linked
-                        ? <span className="mr-2 text-xs text-good" title={linked.email}>✓ conta ligada</span>
-                        : <button className="btn btn-ghost py-1 text-brand" onClick={() => setInviting(p)}>Convidar</button>;
+                        ? <span className="mr-2 text-xs text-good" title={linked.email}>{t("✓ conta ligada")}</span>
+                        : <button className="btn btn-ghost py-1 text-brand" onClick={() => setInviting(p)}>{t("Convidar")}</button>;
                     })()}
                     {access.canEdit && (
                       <>
-                        <button className="btn btn-ghost py-1" onClick={() => edit(p)}>Editar</button>
+                        <button className="btn btn-ghost py-1" onClick={() => edit(p)}>{t("Editar")}</button>
                         <button className="btn btn-ghost py-1" onClick={() => db.players.update(p.id, { active: !p.active })}>
-                          {p.active ? "Desativar" : "Ativar"}
+                          {p.active ? t("Desativar") : t("Ativar")}
                         </button>
-                        {otherTeams.length > 0 && <button className="btn btn-ghost py-1" onClick={() => setMoving(p)}>Subir de escalão</button>}
+                        {otherTeams.length > 0 && <button className="btn btn-ghost py-1" onClick={() => setMoving(p)}>{t("Subir de escalão")}</button>}
                       </>
                     )}
-                    {access.isPlayer && access.playerId === p.id && <span className="text-xs text-brand">és tu</span>}
+                    {access.isPlayer && access.playerId === p.id && <span className="text-xs text-brand">{t("és tu")}</span>}
                   </td>
                 </tr>
               ))}
               {list.length === 0 && (
-                <tr><td colSpan={5} className="py-10 text-center! text-muted">Ainda sem jogadores. Adiciona o primeiro →</td></tr>
+                <tr><td colSpan={5} className="py-10 text-center! text-muted">{t("Ainda sem jogadores. Adiciona o primeiro →")}</td></tr>
               )}
             </tbody>
           </table>
@@ -128,45 +129,45 @@ export default function RosterPage() {
       </section>
 
       {access.canEdit && <form onSubmit={save} className="card grid h-fit gap-3 p-4">
-        <h2 className="font-semibold">{editing ? "Editar jogador" : "Adicionar jogador"}</h2>
+        <h2 className="font-semibold">{editing ? t("Editar jogador") : t("Adicionar jogador")}</h2>
         <div className="grid grid-cols-[80px_1fr] gap-3">
           <div>
-            <label className="label">Nº</label>
+            <label className="label">{t("Nº")}</label>
             <input className="input" required inputMode="numeric" pattern="\d{1,2}" value={draft.number}
               onChange={(e) => setDraft({ ...draft, number: e.target.value })} />
           </div>
           <div>
-            <label className="label">Nome</label>
+            <label className="label">{t("Nome")}</label>
             <input className="input" required value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
           </div>
         </div>
-        {taken && <p className="text-xs text-bad">Já existe um jogador ativo com o nº {draft.number}.</p>}
+        {taken && <p className="text-xs text-bad">{t("Já existe um jogador ativo com o nº {n}.", { n: draft.number })}</p>}
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="label">Posição</label>
+            <label className="label">{t("Posição")}</label>
             <select className="input" value={draft.position} onChange={(e) => setDraft({ ...draft, position: e.target.value as Position })}>
               <option value="">–</option>
               {POSITIONS.map((p) => <option key={p}>{p}</option>)}
             </select>
           </div>
           <div>
-            <label className="label">Ano nasc.</label>
+            <label className="label">{t("Ano nasc.")}</label>
             <input className="input" inputMode="numeric" value={draft.birthYear} onChange={(e) => setDraft({ ...draft, birthYear: e.target.value })} />
           </div>
           <div>
-            <label className="label">Altura</label>
+            <label className="label">{t("Altura")}</label>
             <input className="input" inputMode="numeric" placeholder="cm" value={draft.heightCm} onChange={(e) => setDraft({ ...draft, heightCm: e.target.value })} />
           </div>
         </div>
         <div>
-          <label className="label">Notas</label>
+          <label className="label">{t("Notas")}</label>
           <textarea className="input" rows={2} value={draft.notes} onChange={(e) => setDraft({ ...draft, notes: e.target.value })} />
         </div>
         <div className="flex gap-2">
-          <button className="btn btn-primary flex-1" disabled={taken}>{editing ? "Guardar" : "Adicionar"}</button>
-          {editing && <button type="button" className="btn" onClick={() => { setEditing(null); setDraft(blank); }}>Cancelar</button>}
+          <button className="btn btn-primary flex-1" disabled={taken}>{editing ? t("Guardar") : t("Adicionar")}</button>
+          {editing && <button type="button" className="btn" onClick={() => { setEditing(null); setDraft(blank); }}>{t("Cancelar")}</button>}
         </div>
-        <p className="text-xs text-muted">Só guardamos o ano de nascimento (não a data completa) — menos dados pessoais de menores.</p>
+        <p className="text-xs text-muted">{t("Só guardamos o ano de nascimento (não a data completa) — menos dados pessoais de menores.")}</p>
       </form>}
       {inviting && team && (
         <InviteDialog teamId={team.id} teamName={`${team.name} ${team.category}`} role="player" playerId={inviting.id}
@@ -183,7 +184,7 @@ function MoveDialog({ player, from, teams, onClose, onOpen }: { player: Player; 
   const [number, setNumber] = useState(String(player.number));
   const [deactivate, setDeactivate] = useState(true);
   const [done, setDone] = useState<{ copied: number; team: Team } | null>(null);
-  const target = teams.find((t) => t.id === to);
+  const target = teams.find((tm) => tm.id === to);
   const clash = useLiveQuery(async () => (to ? (await db.players.where("teamId").equals(to).filter((p) => p.active && String(p.number) === number).count()) > 0 : false), [to, number]);
   const already = useLiveQuery(async () => (to ? (await db.players.where("teamId").equals(to).filter((p) => p.prevId === player.id).count()) > 0 : false), [to, player.id]);
   const go = async (e: React.FormEvent) => {
@@ -193,39 +194,39 @@ function MoveDialog({ player, from, teams, onClose, onOpen }: { player: Player; 
     setDone({ copied: r.copied, team: target });
   };
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/60 p-4" onClick={onClose} role="dialog" aria-modal="true" aria-label="Subir de escalão">
+    <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/60 p-4" onClick={onClose} role="dialog" aria-modal="true" aria-label={t("Subir de escalão")}>
       <form className="card grid w-full max-w-md gap-3 p-5" onClick={(e) => e.stopPropagation()} onSubmit={go}>
-        <h2 className="font-semibold">Subir {player.name.split(" ")[0]} de escalão</h2>
+        <h2 className="font-semibold">{t("Subir {name} de escalão", { name: player.name.split(" ")[0] })}</h2>
         {done ? (
           <>
-            <p className="text-sm">✓ {player.name} está agora em <b>{teamLabel(done.team)}</b>{done.copied ? `, com ${done.copied} medições do perfil físico.` : "."} As estatísticas desta equipa continuam aqui e ligadas ao novo perfil.</p>
+            <p className="text-sm">✓ {t("{name} está agora em", { name: player.name })} <b>{teamLabel(done.team)}</b>{done.copied ? t(", com {n} medições do perfil físico.", { n: done.copied }) : "."} {t("As estatísticas desta equipa continuam aqui e ligadas ao novo perfil.")}</p>
             <div className="flex gap-2">
-              <button type="button" className="btn btn-primary flex-1" onClick={() => { onOpen(done.team.id); onClose(); }}>Abrir {done.team.category}</button>
-              <button type="button" className="btn" onClick={onClose}>Fechar</button>
+              <button type="button" className="btn btn-primary flex-1" onClick={() => { onOpen(done.team.id); onClose(); }}>{t("Abrir {team}", { team: done.team.category })}</button>
+              <button type="button" className="btn" onClick={onClose}>{t("Fechar")}</button>
             </div>
           </>
         ) : (
           <>
             <div>
-              <label className="label" htmlFor="mv-team">Para a equipa</label>
+              <label className="label" htmlFor="mv-team">{t("Para a equipa")}</label>
               <select id="mv-team" className="input" value={to} onChange={(e) => setTo(e.target.value)}>
-                {teams.map((t) => <option key={t.id} value={t.id}>{teamLabel(t)}</option>)}
+                {teams.map((tm) => <option key={tm.id} value={tm.id}>{teamLabel(tm)}</option>)}
               </select>
             </div>
             <div>
-              <label className="label" htmlFor="mv-num">Número na nova equipa</label>
+              <label className="label" htmlFor="mv-num">{t("Número na nova equipa")}</label>
               <input id="mv-num" className="input w-24" inputMode="numeric" value={number} onChange={(e) => setNumber(e.target.value.replace(/\D/g, ""))} />
-              {clash && <p className="mt-1 text-xs text-bad">Esse número já está ocupado nessa equipa.</p>}
+              {clash && <p className="mt-1 text-xs text-bad">{t("Esse número já está ocupado nessa equipa.")}</p>}
             </div>
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" className="h-4 w-4 accent-[var(--color-brand)]" checked={deactivate} onChange={(e) => setDeactivate(e.target.checked)} />
-              Desativar nesta equipa ({from.category})
+              {t("Desativar nesta equipa ({team})", { team: from.category })}
             </label>
-            {already && <p className="text-xs text-brand">Este atleta já foi passado para essa equipa.</p>}
-            <p className="text-[11px] text-muted">Cria o atleta na outra equipa, ligado a este perfil, e copia o histórico físico (marcado com o escalão de origem).</p>
+            {already && <p className="text-xs text-brand">{t("Este atleta já foi passado para essa equipa.")}</p>}
+            <p className="text-[11px] text-muted">{t("Cria o atleta na outra equipa, ligado a este perfil, e copia o histórico físico (marcado com o escalão de origem).")}</p>
             <div className="flex gap-2">
-              <button className="btn btn-primary flex-1" disabled={!target || !!clash || !!already}>Passar para {target?.category ?? "…"}</button>
-              <button type="button" className="btn" onClick={onClose}>Cancelar</button>
+              <button className="btn btn-primary flex-1" disabled={!target || !!clash || !!already}>{t("Passar para {team}", { team: target?.category ?? "…" })}</button>
+              <button type="button" className="btn" onClick={onClose}>{t("Cancelar")}</button>
             </div>
           </>
         )}

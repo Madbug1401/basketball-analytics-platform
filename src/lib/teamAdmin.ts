@@ -3,6 +3,7 @@
 import { db, purgeTeamLocal } from "./db";
 import { supabase } from "./supabase";
 import { syncNow } from "./sync";
+import { t } from "./i18n";
 
 /**
  * Deletes a team and everything in it (players, practices, games, events).
@@ -15,7 +16,7 @@ export async function deleteTeam(teamId: string) {
     if (!data?.length) {
       // nothing deleted: either it never reached the server, or we are not allowed
       const { data: still } = await supabase.from("teams").select("id").eq("id", teamId);
-      if (still?.length) throw new Error("Sem permissão para eliminar esta equipa (só o dono ou um administrador).");
+      if (still?.length) throw new Error(t("Sem permissão para eliminar esta equipa (só o dono ou um administrador)."));
     }
   }
   await purgeTeamLocal(teamId);

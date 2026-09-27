@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { combos, gameUnits, mergeUnits, minutesRows, onOff, rate, type Rated } from "@/lib/lineups";
 import type { Game, GameEvent, ID, Player } from "@/lib/types";
+import { t } from "@/lib/i18n";
 
 type Tab = "units" | "onoff" | "duos" | "trios" | "minutes";
 
@@ -39,19 +40,19 @@ export function LineupAnalysis({ games, players, season }: {
   }, [tab, games, players]);
 
   const hasUnits = units.size > 0;
-  const TABS: [Tab, string][] = [["units", "Quintetos"], ["onoff", "Com / sem"], ["duos", "Duplas"], ["trios", "Trios"], ...(season ? [["minutes", "Minutos"] as [Tab, string]] : [])];
+  const TABS: [Tab, string][] = [["units", t("Quintetos")], ["onoff", t("Com / sem")], ["duos", t("Duplas")], ["trios", t("Trios")], ...(season ? [["minutes", t("Minutos")] as [Tab, string]] : [])];
 
   return (
     <div className="card h-fit overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-3 py-2">
         <div>
-          <h2 className="font-semibold">Quintetos e minutos</h2>
-          <p className="text-xs text-muted">Saldo por 100 posses (+/- ajustado ao ritmo). Minutos exatos no modo ao vivo; estimados no registo por vídeo.</p>
+          <h2 className="font-semibold">{t("Quintetos e minutos")}</h2>
+          <p className="text-xs text-muted">{t("Saldo por 100 posses (+/- ajustado ao ritmo). Minutos exatos no modo ao vivo; estimados no registo por vídeo.")}</p>
         </div>
         {tab !== "onoff" && tab !== "minutes" && (
           <div className="flex gap-1 text-xs">
-            <button className={`btn px-2 py-1 text-xs ${sort === "min" ? "btn-primary" : ""}`} onClick={() => setSort("min")}>Mais minutos</button>
-            <button className={`btn px-2 py-1 text-xs ${sort === "net" ? "btn-primary" : ""}`} onClick={() => setSort("net")}>Melhor saldo</button>
+            <button className={`btn px-2 py-1 text-xs ${sort === "min" ? "btn-primary" : ""}`} onClick={() => setSort("min")}>{t("Mais minutos")}</button>
+            <button className={`btn px-2 py-1 text-xs ${sort === "net" ? "btn-primary" : ""}`} onClick={() => setSort("net")}>{t("Melhor saldo")}</button>
           </div>
         )}
       </div>
@@ -62,11 +63,11 @@ export function LineupAnalysis({ games, players, season }: {
       </div>
 
       {!hasUnits && tab !== "minutes" ? (
-        <p className="p-6 text-center text-sm text-muted">Regista o 5 inicial e as substituições para ver os quintetos.</p>
+        <p className="p-6 text-center text-sm text-muted">{t("Regista o 5 inicial e as substituições para ver os quintetos.")}</p>
       ) : tab === "onoff" ? (
         <div className="overflow-x-auto">
           <table className="tbl">
-            <thead><tr><th>Jogador</th><th>Min</th><th title="Saldo por 100 posses com o jogador em campo">Em campo</th><th title="Saldo por 100 posses com o jogador no banco">No banco</th><th>Diferença</th></tr></thead>
+            <thead><tr><th>{t("Jogador")}</th><th>{t("Min")}</th><th title={t("Saldo por 100 posses com o jogador em campo")}>{t("Em campo")}</th><th title={t("Saldo por 100 posses com o jogador no banco")}>{t("No banco")}</th><th>{t("Diferença")}</th></tr></thead>
             <tbody>
               {oo.sort((a, b) => (b.diff ?? -999) - (a.diff ?? -999)).map((r) => (
                 <tr key={r.id}>
@@ -79,12 +80,12 @@ export function LineupAnalysis({ games, players, season }: {
               ))}
             </tbody>
           </table>
-          <p className="px-3 py-2 text-[11px] text-muted">Diferença positiva: a equipa rende mais com este jogador em campo. Com poucos minutos, os números oscilam muito.</p>
+          <p className="px-3 py-2 text-[11px] text-muted">{t("Diferença positiva: a equipa rende mais com este jogador em campo. Com poucos minutos, os números oscilam muito.")}</p>
         </div>
       ) : tab === "minutes" ? (
         <div className="overflow-x-auto">
           <table className="tbl">
-            <thead><tr><th>Jogador</th><th>Jogos</th><th>Min/jogo</th><th>Últ. 3</th><th>Máx.</th></tr></thead>
+            <thead><tr><th>{t("Jogador")}</th><th>{t("Jogos")}</th><th>{t("Min/jogo")}</th><th>{t("Últ. 3")}</th><th>{t("Máx.")}</th></tr></thead>
             <tbody>
               {mins.map((r) => (
                 <tr key={r.id}>
@@ -98,14 +99,14 @@ export function LineupAnalysis({ games, players, season }: {
                   <td>{r.max.toFixed(0)}</td>
                 </tr>
               ))}
-              {mins.length === 0 && <tr><td colSpan={5} className="py-6 text-center! text-muted">Sem minutos registados.</td></tr>}
+              {mins.length === 0 && <tr><td colSpan={5} className="py-6 text-center! text-muted">{t("Sem minutos registados.")}</td></tr>}
             </tbody>
           </table>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="tbl">
-            <thead><tr><th>{tab === "units" ? "Quinteto" : tab === "duos" ? "Dupla" : "Trio"}</th><th>Min</th><th>Posses</th><th>+/-</th><th title="Saldo por 100 posses">Por 100</th><th title="Pontos marcados por 100 posses">Ataque</th><th title="Pontos sofridos por 100 posses">Defesa</th><th title="% de posses perdidas">Perdas</th><th title="% dos ressaltos ofensivos disponíveis">R. of.</th></tr></thead>
+            <thead><tr><th>{tab === "units" ? t("Quinteto") : tab === "duos" ? t("Dupla") : t("Trio")}</th><th>{t("Min")}</th><th>{t("Posses")}</th><th>+/-</th><th title={t("Saldo por 100 posses")}>{t("Por 100")}</th><th title={t("Pontos marcados por 100 posses")}>{t("Ataque")}</th><th title={t("Pontos sofridos por 100 posses")}>{t("Defesa")}</th><th title={t("% de posses perdidas")}>{t("Perdas")}</th><th title={t("% dos ressaltos ofensivos disponíveis")}>{t("R. of.")}</th></tr></thead>
             <tbody>
               {rows.filter((r) => r.min >= minMin).sort(sorter).slice(0, 15).map((r) => (
                 <tr key={r.ids.join()}>
@@ -120,7 +121,7 @@ export function LineupAnalysis({ games, players, season }: {
                   <td className="text-muted">{r.orebPct === null ? "–" : `${r.orebPct.toFixed(0)}%`}</td>
                 </tr>
               ))}
-              {rows.filter((r) => r.min >= minMin).length === 0 && <tr><td colSpan={9} className="py-6 text-center! text-muted">Ainda sem minutos suficientes.</td></tr>}
+              {rows.filter((r) => r.min >= minMin).length === 0 && <tr><td colSpan={9} className="py-6 text-center! text-muted">{t("Ainda sem minutos suficientes.")}</td></tr>}
             </tbody>
           </table>
         </div>

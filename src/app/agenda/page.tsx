@@ -6,6 +6,7 @@ import { useTeam } from "@/lib/team";
 import { useAccess } from "@/lib/auth";
 import { isUpcoming, useAgenda } from "@/lib/agenda";
 import { AgendaCard } from "@/components/AgendaCard";
+import { t } from "@/lib/i18n";
 
 export default function AgendaPage() {
   const { team } = useTeam();
@@ -24,21 +25,21 @@ export default function AgendaPage() {
     <div className="mx-auto grid max-w-3xl gap-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Agenda</h1>
+          <h1 className="text-2xl font-semibold">{t("Agenda")}</h1>
           <p className="text-sm text-muted">
             {access.isPlayer
-              ? pending ? `Tens ${pending} ${pending === 1 ? "evento" : "eventos"} por responder.` : "Respondeste a tudo ✓"
-              : "Treinos e jogos, convocatórias e quem vem."}
+              ? pending ? (pending === 1 ? t("Tens {n} evento por responder.", { n: pending }) : t("Tens {n} eventos por responder.", { n: pending })) : t("Respondeste a tudo ✓")
+              : t("Treinos e jogos, convocatórias e quem vem.")}
           </p>
         </div>
-        {access.canEdit && <button className="btn btn-primary" onClick={() => setAdding(!adding)}>{adding ? "Fechar" : "+ Adicionar"}</button>}
+        {access.canEdit && <button className="btn btn-primary" onClick={() => setAdding(!adding)}>{adding ? t("Fechar") : t("+ Adicionar")}</button>}
       </div>
 
       {adding && access.canEdit && <QuickAdd teamId={team.id} onDone={() => setAdding(false)} />}
 
       <div className="flex gap-1">
-        <button className={`btn ${tab === "next" ? "btn-primary" : ""}`} onClick={() => setTab("next")}>Próximos ({upcoming.length})</button>
-        <button className={`btn ${tab === "past" ? "btn-primary" : ""}`} onClick={() => setTab("past")}>Anteriores</button>
+        <button className={`btn ${tab === "next" ? "btn-primary" : ""}`} onClick={() => setTab("next")}>{t("Próximos ({n})", { n: upcoming.length })}</button>
+        <button className={`btn ${tab === "past" ? "btn-primary" : ""}`} onClick={() => setTab("past")}>{t("Anteriores")}</button>
       </div>
 
       <div className="grid gap-3">
@@ -48,7 +49,7 @@ export default function AgendaPage() {
         ))}
         {list.length === 0 && (
           <div className="card p-8 text-center text-sm text-muted">
-            {tab === "next" ? (access.canEdit ? "Nada marcado. Adiciona o próximo treino ou jogo." : "Ainda não há treinos nem jogos marcados.") : "Sem eventos anteriores."}
+            {tab === "next" ? (access.canEdit ? t("Nada marcado. Adiciona o próximo treino ou jogo.") : t("Ainda não há treinos nem jogos marcados.")) : t("Sem eventos anteriores.")}
           </div>
         )}
       </div>
@@ -62,13 +63,13 @@ function QuickAdd({ teamId, onDone }: { teamId: string; onDone: () => void }) {
   const [err, setErr] = useState("");
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (kind === "game" && !f.opponent.trim()) return setErr("Escreve o adversário.");
+    if (kind === "game" && !f.opponent.trim()) return setErr(t("Escreve o adversário."));
     const id = uid();
     if (kind === "game") {
       await db.games.add({ id, teamId, date: f.date, opponent: f.opponent.trim(), home: f.home, competition: f.competition || undefined, periods: 4, periodMinutes: 10, video: { kind: "none" }, createdAt: Date.now() });
     } else {
       const n = await db.practices.where("teamId").equals(teamId).count();
-      await db.practices.add({ id, teamId, date: f.date, title: `Treino #${n + 1}`, durationMin: f.duration, createdAt: Date.now() });
+      await db.practices.add({ id, teamId, date: f.date, title: t("Treino #{n}", { n: n + 1 }), durationMin: f.duration, createdAt: Date.now() });
     }
     await db.agenda.put({ id, teamId, kind, time: f.time || undefined, location: f.location.trim() || undefined });
     onDone();
@@ -76,29 +77,29 @@ function QuickAdd({ teamId, onDone }: { teamId: string; onDone: () => void }) {
   return (
     <form onSubmit={save} className="card grid gap-3 p-4">
       <div className="grid grid-cols-2 gap-1">
-        <button type="button" className={`btn ${kind === "practice" ? "btn-primary" : ""}`} onClick={() => setKind("practice")}>Treino</button>
-        <button type="button" className={`btn ${kind === "game" ? "btn-primary" : ""}`} onClick={() => setKind("game")}>Jogo</button>
+        <button type="button" className={`btn ${kind === "practice" ? "btn-primary" : ""}`} onClick={() => setKind("practice")}>{t("Treino")}</button>
+        <button type="button" className={`btn ${kind === "game" ? "btn-primary" : ""}`} onClick={() => setKind("game")}>{t("Jogo")}</button>
       </div>
       {kind === "game" && (
         <div className="grid grid-cols-[1fr_auto] gap-2">
-          <div><label className="label">Adversário</label><input className="input" value={f.opponent} onChange={(e) => setF({ ...f, opponent: e.target.value })} /></div>
-          <div><label className="label">Local</label>
-            <select className="input" value={f.home ? "1" : "0"} onChange={(e) => setF({ ...f, home: e.target.value === "1" })}><option value="1">Casa</option><option value="0">Fora</option></select>
+          <div><label className="label">{t("Adversário")}</label><input className="input" value={f.opponent} onChange={(e) => setF({ ...f, opponent: e.target.value })} /></div>
+          <div><label className="label">{t("Local")}</label>
+            <select className="input" value={f.home ? "1" : "0"} onChange={(e) => setF({ ...f, home: e.target.value === "1" })}><option value="1">{t("Casa")}</option><option value="0">{t("Fora")}</option></select>
           </div>
         </div>
       )}
       <div className="grid grid-cols-2 gap-2">
-        <div><label className="label">Data</label><input type="date" className="input" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></div>
-        <div><label className="label">Hora</label><input type="time" className="input" value={f.time} onChange={(e) => setF({ ...f, time: e.target.value })} /></div>
+        <div><label className="label">{t("Data")}</label><input type="date" className="input" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></div>
+        <div><label className="label">{t("Hora")}</label><input type="time" className="input" value={f.time} onChange={(e) => setF({ ...f, time: e.target.value })} /></div>
       </div>
       <div className="grid grid-cols-[1fr_auto] gap-2">
-        <div><label className="label">Pavilhão / local</label><input className="input" value={f.location} onChange={(e) => setF({ ...f, location: e.target.value })} /></div>
+        <div><label className="label">{t("Pavilhão / local")}</label><input className="input" value={f.location} onChange={(e) => setF({ ...f, location: e.target.value })} /></div>
         {kind === "practice"
-          ? <div><label className="label">Minutos</label><input className="input w-24" inputMode="numeric" value={f.duration} onChange={(e) => setF({ ...f, duration: Number(e.target.value) || 90 })} /></div>
-          : <div><label className="label">Competição</label><input className="input w-32" value={f.competition} onChange={(e) => setF({ ...f, competition: e.target.value })} /></div>}
+          ? <div><label className="label">{t("Minutos")}</label><input className="input w-24" inputMode="numeric" value={f.duration} onChange={(e) => setF({ ...f, duration: Number(e.target.value) || 90 })} /></div>
+          : <div><label className="label">{t("Competição")}</label><input className="input w-32" value={f.competition} onChange={(e) => setF({ ...f, competition: e.target.value })} /></div>}
       </div>
       {err && <p className="text-sm text-bad">{err}</p>}
-      <button className="btn btn-primary">Adicionar à agenda</button>
+      <button className="btn btn-primary">{t("Adicionar à agenda")}</button>
     </form>
   );
 }

@@ -7,8 +7,9 @@ import { useSeason } from "@/lib/season";
 import { courtTime, equalRotation, minutesByPeriod, sum, weightedRotation } from "@/lib/rotation";
 import type { Agenda, Game, GameEvent, ID, Rotation } from "@/lib/types";
 import { ask } from "./Dialog";
+import { t } from "@/lib/i18n";
 
-const pl = (i: number) => `${i + 1}.º`;
+const pl = (i: number) => t("{p}.º", { p: i + 1 });
 
 /** Planned minutes per player and period; after the game, planned vs real. */
 export function RotationPlanner({ game, events, canEdit }: { game: Game; events: GameEvent[]; canEdit: boolean }) {
@@ -53,31 +54,31 @@ export function RotationPlanner({ game, events, canEdit }: { game: Game; events:
     <section id="rotacao" className="card scroll-mt-20 overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-3 py-2">
         <div>
-          <h2 className="font-semibold">{played ? "Rotação: planeado vs real" : "Rotação planeada"}</h2>
+          <h2 className="font-semibold">{played ? t("Rotação: planeado vs real") : t("Rotação planeada")}</h2>
           <p className="text-xs text-muted">
-            {played ? "Minutos que planeaste e os que cada um jogou." : hasPlan ? "No modo ao vivo, a app avisa quando alguém passa do previsto." : `Minutos por período para ${callup ? "os convocados" : "o plantel ativo"}. Cada período soma ${target} min.`}
+            {played ? t("Minutos que planeaste e os que cada um jogou.") : hasPlan ? t("No modo ao vivo, a app avisa quando alguém passa do previsto.") : callup ? t("Minutos por período para os convocados. Cada período soma {n} min.", { n: target }) : t("Minutos por período para o plantel ativo. Cada período soma {n} min.", { n: target })}
           </p>
         </div>
         {editable && (
           <div className="flex flex-wrap gap-1.5">
-            <button className="btn px-2.5 py-1 text-xs" onClick={() => save(equalRotation(roster, P, pm))}>Tempo igual</button>
-            <button className="btn px-2.5 py-1 text-xs" onClick={bySeason} disabled={!season?.games.length}>Pela época</button>
-            {hasPlan && <button className="btn px-2.5 py-1 text-xs" onClick={async () => { if (await ask("Apagar a rotação planeada?", { confirmText: "Apagar", danger: true })) void save({}); }}>Limpar</button>}
+            <button className="btn px-2.5 py-1 text-xs" onClick={() => save(equalRotation(roster, P, pm))}>{t("Tempo igual")}</button>
+            <button className="btn px-2.5 py-1 text-xs" onClick={bySeason} disabled={!season?.games.length}>{t("Pela época")}</button>
+            {hasPlan && <button className="btn px-2.5 py-1 text-xs" onClick={async () => { if (await ask(t("Apagar a rotação planeada?"), { confirmText: t("Apagar"), danger: true })) void save({}); }}>{t("Limpar")}</button>}
           </div>
         )}
       </div>
 
       {!hasPlan && editable ? (
-        <p className="px-3 py-4 text-sm text-muted">Começa com <b>Tempo igual</b> (todos jogam o mesmo) ou <b>Pela época</b> (proporcional aos minutos de cada um) e depois ajusta.</p>
+        <p className="px-3 py-4 text-sm text-muted">{t("Começa com")} <b>{t("Tempo igual")}</b> {t("(todos jogam o mesmo) ou")} <b>{t("Pela época")}</b> {t("(proporcional aos minutos de cada um) e depois ajusta.")}</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="tbl">
             <thead>
               <tr>
-                <th>Jogador</th>
+                <th>{t("Jogador")}</th>
                 {Array.from({ length: P }, (_, i) => <th key={i} className="text-center">{pl(i)}</th>)}
-                <th className="text-center">Plano</th>
-                {real && <><th className="text-center">Real</th><th className="text-center">Dif.</th></>}
+                <th className="text-center">{t("Plano")}</th>
+                {real && <><th className="text-center">{t("Real")}</th><th className="text-center">{t("Dif.")}</th></>}
               </tr>
             </thead>
             <tbody>
@@ -94,7 +95,7 @@ export function RotationPlanner({ game, events, canEdit }: { game: Game; events:
                       <td key={i} className="text-center">
                         {editable ? (
                           <input className="input w-12 px-1 py-1 text-center font-mono pointer-coarse:w-14" inputMode="numeric" value={v || ""} placeholder="0"
-                            aria-label={`${p?.name ?? ""} ${pl(i)} período`}
+                            aria-label={t("{name} {p}.º período", { name: p?.name ?? "", p: i + 1 })}
                             onChange={(e) => setCell(id, i, Number(e.target.value.replace(/\D/g, "") || 0))} />
                         ) : (
                           <span className="font-mono">{v || "–"}{real && <span className="block text-[10px] text-muted">{Math.round(real.get(id)?.[i] ?? 0)}</span>}</span>
@@ -112,17 +113,17 @@ export function RotationPlanner({ game, events, canEdit }: { game: Game; events:
             </tbody>
             <tfoot>
               <tr>
-                <td className="text-xs text-muted">Soma</td>
+                <td className="text-xs text-muted">{t("Soma")}</td>
                 {Array.from({ length: P }, (_, i) => {
                   const s = colSum(i);
-                  return <td key={i} className={`text-center font-mono text-xs ${s === target ? "text-good" : "text-bad"}`} title={`Deve somar ${target}`}>{s}</td>;
+                  return <td key={i} className={`text-center font-mono text-xs ${s === target ? "text-good" : "text-bad"}`} title={t("Deve somar {n}", { n: target })}>{s}</td>;
                 })}
                 <td className="text-center font-mono text-xs text-muted">{ids.reduce((a, id) => a + sum(rot[id]), 0)}</td>
                 {real && <><td /><td /></>}
               </tr>
             </tfoot>
           </table>
-          {real && <p className="px-3 pb-2 text-[11px] text-muted">Em cada período: plano por cima, real por baixo. Dif. positiva = jogou mais do que o previsto.{!events.some((e) => e.type === "PERIOD_END") ? " Minutos reais estimados pelo vídeo (±1 min)." : ""}</p>}
+          {real && <p className="px-3 pb-2 text-[11px] text-muted">{t("Em cada período: plano por cima, real por baixo. Dif. positiva = jogou mais do que o previsto.")}{!events.some((e) => e.type === "PERIOD_END") ? ` ${t("Minutos reais estimados pelo vídeo (±1 min).")}` : ""}</p>}
         </div>
       )}
     </section>

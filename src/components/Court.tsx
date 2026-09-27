@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { COURT_H, COURT_W, CORNER_X, CORNER_Y, RIM, THREE_R } from "@/lib/court";
 import { zoneGrid, type QZone } from "@/lib/shotQuality";
+import { t } from "@/lib/i18n";
 
 const GRID = zoneGrid(0.5);
 
@@ -54,7 +55,7 @@ export function Court({
       className={`w-full select-none ${onPick ? "cursor-crosshair" : ""} ${className}`}
       onClick={click}
       role={onPick ? "button" : "img"}
-      aria-label="Campo"
+      aria-label={t("Campo")}
     >
       <rect x={0} y={0} width={COURT_W * S} height={COURT_H * S} rx={4} fill="#1b2230" stroke="#3a4760" strokeWidth={2} />
       {heat && (

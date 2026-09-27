@@ -1,6 +1,7 @@
 import { addLines, apply, emptyLine, possessions as estPossessions, sortEvents, type Line } from "./stats";
 import { possessions } from "./possessions";
 import type { Game, GameEvent, ID } from "./types";
+import { t } from "./i18n";
 
 /* Lineup analysis: time and production for every 5-man unit, on/off per player, duos and trios.
    Time comes from the event clock: exact in live mode (game clock), estimated with video (each
@@ -153,10 +154,10 @@ export function minutesRows(perGame: { min: Map<ID, number> }[], playerIds: ID[]
     const last3 = l3.length === 3 ? l3.reduce((a, b) => a + b, 0) / 3 : null;
     const max = games ? Math.max(...series) : 0;
     let alert: MinutesRow["alert"];
-    if (last3 !== null && last3 >= full * 0.75) alert = { tone: "bad", text: `carga alta: ${last3.toFixed(0)} min nos últimos 3 jogos` };
-    else if (last3 !== null && avg >= 8 && last3 > avg * 1.35) alert = { tone: "info", text: `a subir: ${last3.toFixed(0)} vs ${avg.toFixed(0)} min de média` };
-    else if (last3 !== null && avg >= 8 && last3 < avg * 0.6) alert = { tone: "info", text: `a descer: ${last3.toFixed(0)} vs ${avg.toFixed(0)} min de média` };
-    else if (games >= 3 && avg < full * 0.1) alert = { tone: "info", text: `poucos minutos (${avg.toFixed(1)} por jogo)` };
+    if (last3 !== null && last3 >= full * 0.75) alert = { tone: "bad", text: t("carga alta: {min} min nos últimos 3 jogos", { min: last3.toFixed(0) }) };
+    else if (last3 !== null && avg >= 8 && last3 > avg * 1.35) alert = { tone: "info", text: t("a subir: {last} vs {avg} min de média", { last: last3.toFixed(0), avg: avg.toFixed(0) }) };
+    else if (last3 !== null && avg >= 8 && last3 < avg * 0.6) alert = { tone: "info", text: t("a descer: {last} vs {avg} min de média", { last: last3.toFixed(0), avg: avg.toFixed(0) }) };
+    else if (games >= 3 && avg < full * 0.1) alert = { tone: "info", text: t("poucos minutos ({avg} por jogo)", { avg: avg.toFixed(1) }) };
     return { id, games, avg, last3, max, series, alert };
   }).filter((r) => r.games > 0).sort((a, b) => b.avg - a.avg);
 }

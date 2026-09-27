@@ -2,6 +2,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { db, localOnly, purgeTeamLocal, setEnqueueListener, SYNCED_TABLES, type OutboxEntry, type SyncedTable } from "./db";
+import { t } from "./i18n";
 
 /* ---------- row mapping (local camelCase ↔ server snake_case) ---------- */
 
@@ -234,7 +235,7 @@ async function flush() {
 
   // entries of tables the server doesn't have yet stay queued for after the migration
   await db.outbox.where("seq").belowOrEqual(maxSeq).and((e) => !skipped.has(e.table)).delete();
-  if (rejected.length) setStatus({ error: `Algumas alterações foram recusadas pelo servidor (${rejected[0]})` });
+  if (rejected.length) setStatus({ error: t("Algumas alterações foram recusadas pelo servidor ({detail})", { detail: rejected[0] }) });
 }
 
 /* ---------- pull ---------- */

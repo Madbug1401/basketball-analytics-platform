@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Court } from "./Court";
-import { fmtDiff, fmtPps, shooters, shotProfile, type QZone, type ZoneModel } from "@/lib/shotQuality";
+import { fmtDiff, fmtPps, shooters, shotProfile, zoneLabel, type QZone, type ZoneModel } from "@/lib/shotQuality";
+import { t } from "@/lib/i18n";
 import type { GameEvent, Player } from "@/lib/types";
 
 /** green when good for us: our shooting above expectation, or the opponent's below */
@@ -29,41 +30,41 @@ export function ShotQuality({ shots, model, opp = false, clipsHref }: {
   const p = shotProfile(shots, model);
   const heat = Object.fromEntries(p.zones.map((z) => [z.zone, heatColor(z.pps, z.xpps, z.a)])) as Record<QZone, string>;
   const marks = shots.filter((e) => e.type === "SHOT" && e.x !== undefined).map((e) => ({ id: e.id, x: e.x!, y: e.y!, made: !!e.meta?.made, side: opp ? ("opp" as const) : undefined }));
-  const verdict = p.making === null ? "" : p.making > 0.05 ? (opp ? "acima do esperado — converteram bem" : "acima do esperado — boa finalização") : p.making < -0.05 ? (opp ? "abaixo do esperado — boa defesa ou falharam" : "abaixo do esperado — lançamentos que costumam entrar") : "dentro do esperado";
+  const verdict = p.making === null ? "" : p.making > 0.05 ? (opp ? t("acima do esperado — converteram bem") : t("acima do esperado — boa finalização")) : p.making < -0.05 ? (opp ? t("abaixo do esperado — boa defesa ou falharam") : t("abaixo do esperado — lançamentos que costumam entrar")) : t("dentro do esperado");
 
   return (
     <div className="grid gap-2">
       <div className="flex items-center justify-between gap-2">
-        <div className="inline-flex rounded-lg border border-line p-0.5 text-xs" role="tablist" aria-label="Vista do mapa">
-          <button role="tab" aria-selected={view === "zones"} className={`rounded-md px-2.5 py-1 pointer-coarse:py-1.5 ${view === "zones" ? "bg-panel-2 text-fg" : "text-muted"}`} onClick={() => setView("zones")}>Zonas</button>
-          <button role="tab" aria-selected={view === "dots"} className={`rounded-md px-2.5 py-1 pointer-coarse:py-1.5 ${view === "dots" ? "bg-panel-2 text-fg" : "text-muted"}`} onClick={() => setView("dots")}>Lançamentos</button>
+        <div className="inline-flex rounded-lg border border-line p-0.5 text-xs" role="tablist" aria-label={t("Vista do mapa")}>
+          <button role="tab" aria-selected={view === "zones"} className={`rounded-md px-2.5 py-1 pointer-coarse:py-1.5 ${view === "zones" ? "bg-panel-2 text-fg" : "text-muted"}`} onClick={() => setView("zones")}>{t("Zonas")}</button>
+          <button role="tab" aria-selected={view === "dots"} className={`rounded-md px-2.5 py-1 pointer-coarse:py-1.5 ${view === "dots" ? "bg-panel-2 text-fg" : "text-muted"}`} onClick={() => setView("dots")}>{t("Lançamentos")}</button>
         </div>
         {view === "zones" && (
           <div className="flex gap-2 text-[10px] text-muted">
-            <span><span className="inline-block h-2 w-2 rounded-sm bg-good/60" /> acima</span>
-            <span><span className="inline-block h-2 w-2 rounded-sm bg-bad/60" /> abaixo do esperado</span>
+            <span><span className="inline-block h-2 w-2 rounded-sm bg-good/60" /> {t("acima")}</span>
+            <span><span className="inline-block h-2 w-2 rounded-sm bg-bad/60" /> {t("abaixo do esperado")}</span>
           </div>
         )}
       </div>
       <Court shots={view === "dots" ? marks : []} heat={view === "zones" ? heat : undefined} />
 
       <div className="grid grid-cols-2 gap-1.5 text-center sm:grid-cols-4">
-        <Stat label="Pontos por lançamento" value={fmtPps(p.pps)} />
-        <Stat label="Esperado (seleção)" value={fmtPps(p.xpps)} hint="Quanto valem, em média, lançamentos daquelas zonas" />
-        <Stat label="Acerto vs esperado" value={fmtDiff(p.making)} tone={tone(p.making, opp)} />
-        <Stat label="Cesto + triplos" value={pc(p.rimOr3)} hint="Os lançamentos mais valiosos. Meia distância: " extra={pc(p.mid)} />
+        <Stat label={t("Pontos por lançamento")} value={fmtPps(p.pps)} />
+        <Stat label={t("Esperado (seleção)")} value={fmtPps(p.xpps)} hint={t("Quanto valem, em média, lançamentos daquelas zonas")} />
+        <Stat label={t("Acerto vs esperado")} value={fmtDiff(p.making)} tone={tone(p.making, opp)} />
+        <Stat label={t("Cesto + triplos")} value={pc(p.rimOr3)} hint={t("Os lançamentos mais valiosos. Meia distância: {pct}", { pct: pc(p.mid) })} />
       </div>
-      {verdict && <p className="text-xs text-muted">{opp ? "Adversário" : "Nós"}: {verdict}.</p>}
+      {verdict && <p className="text-xs text-muted">{t("{who}: {verdict}.", { who: opp ? t("Adversário") : t("Nós"), verdict })}</p>}
 
       <div className="overflow-x-auto">
         <table className="tbl">
-          <thead><tr><th>Zona</th><th>C/T</th><th>%</th><th title="Percentagem dos lançamentos">Freq.</th><th title="Pontos por lançamento">Pts/L</th><th title="Pontos por lançamento esperados nesta zona">Esp.</th></tr></thead>
+          <thead><tr><th>{t("Zona")}</th><th>{t("C/T")}</th><th>%</th><th title={t("Percentagem dos lançamentos")}>{t("Freq.")}</th><th title={t("Pontos por lançamento")}>{t("Pts/L")}</th><th title={t("Pontos por lançamento esperados nesta zona")}>{t("Esp.")}</th></tr></thead>
           <tbody>
             {p.zones.map((z) => {
               const d = z.pps === null ? null : z.pps - z.xpps;
               return (
                 <tr key={z.zone}>
-                  <td>{z.zone}</td>
+                  <td>{zoneLabel(z.zone)}</td>
                   <td>{z.m}/{z.a}</td>
                   <td>{z.a ? `${Math.round((z.m / z.a) * 100)}%` : "–"}</td>
                   <td>{z.a ? pc(z.share) : "–"}</td>
@@ -76,8 +77,8 @@ export function ShotQuality({ shots, model, opp = false, clipsHref }: {
         </table>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted">
-        <span>{p.fga - p.located > 0 ? `${p.fga - p.located} lançamentos sem local marcado. ` : ""}Esperado = média de todos os lançamentos registados na época por zona.</span>
-        {clipsHref && p.fga > 0 && <Link className="tap text-brand print:hidden" href={clipsHref}>▶ Ver estes lançamentos</Link>}
+        <span>{p.fga - p.located > 0 ? t("{n} lançamentos sem local marcado.", { n: p.fga - p.located }) + " " : ""}{t("Esperado = média de todos os lançamentos registados na época por zona.")}</span>
+        {clipsHref && p.fga > 0 && <Link className="tap text-brand print:hidden" href={clipsHref}>▶ {t("Ver estes lançamentos")}</Link>}
       </div>
     </div>
   );
@@ -96,17 +97,17 @@ function Stat({ label, value, hint, extra, tone = "" }: { label: string; value: 
 export function ShooterTable({ events, model, players, minShots = 5 }: { events: GameEvent[]; model: ZoneModel; players: Player[]; minShots?: number }) {
   const rows = shooters(events, model, minShots);
   const byId = new Map(players.map((p) => [p.id, p]));
-  if (!rows.length) return <p className="text-sm text-muted">Ainda poucos lançamentos com local marcado (mín. {minShots} por jogador).</p>;
+  if (!rows.length) return <p className="text-sm text-muted">{t("Ainda poucos lançamentos com local marcado (mín. {n} por jogador).", { n: minShots })}</p>;
   return (
     <div className="overflow-x-auto">
       <table className="tbl">
         <thead>
           <tr>
-            <th>Jogador</th><th>Lanç.</th>
-            <th title="Pontos por lançamento">Pts/L</th>
-            <th title="Pontos esperados pelos locais de onde lança (seleção de lançamento)">Seleção</th>
-            <th title="Pontos por lançamento acima/abaixo do esperado">Acerto</th>
-            <th title="Percentagem de lançamentos no cesto ou de 3">Cesto+3</th>
+            <th>{t("Jogador")}</th><th>{t("Lanç.")}</th>
+            <th title={t("Pontos por lançamento")}>{t("Pts/L")}</th>
+            <th title={t("Pontos esperados pelos locais de onde lança (seleção de lançamento)")}>{t("Seleção")}</th>
+            <th title={t("Pontos por lançamento acima/abaixo do esperado")}>{t("Acerto")}</th>
+            <th title={t("Percentagem de lançamentos no cesto ou de 3")}>{t("Cesto+3")}</th>
           </tr>
         </thead>
         <tbody>
@@ -125,7 +126,7 @@ export function ShooterTable({ events, model, players, minShots = 5 }: { events:
           })}
         </tbody>
       </table>
-      <p className="mt-1 text-[11px] text-muted">Seleção alta = escolhe lançamentos que costumam valer mais (cesto e triplos). Acerto positivo = converte mais do que o normal nessas zonas.</p>
+      <p className="mt-1 text-[11px] text-muted">{t("Seleção alta = escolhe lançamentos que costumam valer mais (cesto e triplos). Acerto positivo = converte mais do que o normal nessas zonas.")}</p>
     </div>
   );
 }

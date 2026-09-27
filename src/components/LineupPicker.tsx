@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import type { ID, Player } from "@/lib/types";
+import { t } from "@/lib/i18n";
 
-export function LineupPicker({ players, value, onChange, onConfirm, onCancel, title, confirmLabel = "Confirmar neste momento do vídeo", hint = "A ordem escolhida define as teclas 1–5." }: {
+export function LineupPicker({ players, value, onChange, onConfirm, onCancel, title, confirmLabel, hint }: {
   players: Player[]; value: ID[]; onChange: (v: ID[]) => void; onConfirm: () => void; onCancel?: () => void; title: string; confirmLabel?: string; hint?: string;
 }) {
+  confirmLabel ??= t("Confirmar neste momento do vídeo");
+  hint ??= t("A ordem escolhida define as teclas 1–5.");
   const toggle = (id: ID) => onChange(value.includes(id) ? value.filter((x) => x !== id) : value.length < 5 ? [...value, id] : value);
   return (
     <div className="card p-3">
@@ -25,10 +28,10 @@ export function LineupPicker({ players, value, onChange, onConfirm, onCancel, ti
           );
         })}
       </div>
-      {players.length === 0 && <p className="text-sm text-muted">Sem jogadores ativos — adiciona-os no <Link className="text-brand" href="/equipa">Plantel</Link>.</p>}
+      {players.length === 0 && <p className="text-sm text-muted">{t("Sem jogadores ativos — adiciona-os no")} <Link className="text-brand" href="/equipa">{t("Plantel")}</Link>.</p>}
       <div className="mt-3 flex gap-2">
         <button className="btn btn-primary flex-1" disabled={value.length !== 5} onClick={onConfirm}>{confirmLabel}</button>
-        {onCancel && <button className="btn" onClick={onCancel}>Cancelar</button>}
+        {onCancel && <button className="btn" onClick={onCancel}>{t("Cancelar")}</button>}
       </div>
       {hint && <p className="mt-2 text-[11px] text-muted">{hint}</p>}
     </div>

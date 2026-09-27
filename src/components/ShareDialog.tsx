@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { renderCard, summaryText, type CardData } from "@/lib/shareCard";
+import { t } from "@/lib/i18n";
 
 /** Preview + share an image (WhatsApp, Instagram…) and a text version. */
 export function ImageShareDialog({ title, render, renderKey, text, fileName, options, footnote, onClose }: {
@@ -41,7 +42,7 @@ export function ImageShareDialog({ title, render, renderKey, text, fileName, opt
   const share = async () => {
     if (!file) return;
     try { await navigator.share({ files: [file], text }); }
-    catch (e) { if ((e as Error).name !== "AbortError") setErr("Não foi possível partilhar. Descarrega a imagem."); }
+    catch (e) { if ((e as Error).name !== "AbortError") setErr(t("Não foi possível partilhar. Descarrega a imagem.")); }
   };
   const download = () => {
     if (!img) return;
@@ -49,8 +50,8 @@ export function ImageShareDialog({ title, render, renderKey, text, fileName, opt
     a.href = img.url; a.download = fileName; a.click();
   };
   const copy = async () => {
-    try { await navigator.clipboard.writeText(text); setMsg("Texto copiado ✓"); }
-    catch { setMsg("Não deu para copiar — seleciona o texto abaixo."); }
+    try { await navigator.clipboard.writeText(text); setMsg(t("Texto copiado ✓")); }
+    catch { setMsg(t("Não deu para copiar — seleciona o texto abaixo.")); }
     setTimeout(() => setMsg(""), 2500);
   };
 
@@ -60,22 +61,22 @@ export function ImageShareDialog({ title, render, renderKey, text, fileName, opt
         <div className="min-w-0">
           <div className="grid aspect-[4/5] w-full place-items-center overflow-hidden rounded-lg border border-line bg-bg">
             {/* eslint-disable-next-line @next/next/no-img-element -- local blob preview */}
-            {img ? <img src={img.url} alt={title} className="h-full w-full object-contain" /> : <span className="text-sm text-muted">{err || "A gerar imagem…"}</span>}
+            {img ? <img src={img.url} alt={title} className="h-full w-full object-contain" /> : <span className="text-sm text-muted">{err || t("A gerar imagem…")}</span>}
           </div>
         </div>
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold">{title}</h2>
-            <button className="grid h-9 w-9 place-items-center rounded-md text-muted hover:bg-panel-2" onClick={onClose} aria-label="Fechar">✕</button>
+            <button className="grid h-9 w-9 place-items-center rounded-md text-muted hover:bg-panel-2" onClick={onClose} aria-label={t("Fechar")}>✕</button>
           </div>
           {options}
-          {canShareFile && <button className="btn btn-primary" onClick={share}>Partilhar imagem…</button>}
-          <button className={`btn ${canShareFile ? "" : "btn-primary"}`} onClick={download} disabled={!img}>Descarregar imagem</button>
-          <a className="btn" href={`https://wa.me/?text=${encodeURIComponent(text)}`} target="_blank" rel="noopener noreferrer">Enviar texto no WhatsApp</a>
-          <button className="btn" onClick={copy}>Copiar texto</button>
+          {canShareFile && <button className="btn btn-primary" onClick={share}>{t("Partilhar imagem…")}</button>}
+          <button className={`btn ${canShareFile ? "" : "btn-primary"}`} onClick={download} disabled={!img}>{t("Descarregar imagem")}</button>
+          <a className="btn" href={`https://wa.me/?text=${encodeURIComponent(text)}`} target="_blank" rel="noopener noreferrer">{t("Enviar texto no WhatsApp")}</a>
+          <button className="btn" onClick={copy}>{t("Copiar texto")}</button>
           {msg && <p className="text-xs text-good">{msg}</p>}
           {err && img && <p className="text-xs text-bad">{err}</p>}
-          <textarea readOnly className="input mt-1 min-h-32 flex-1 font-mono text-xs" value={text} aria-label="Texto" />
+          <textarea readOnly className="input mt-1 min-h-32 flex-1 font-mono text-xs" value={text} aria-label={t("Texto")} />
           {footnote && <p className="text-[11px] text-muted">{footnote}</p>}
         </div>
       </div>
@@ -88,14 +89,14 @@ export function ShareDialog({ data, onClose }: { data: Omit<CardData, "includeBo
   const [includeBox, setIncludeBox] = useState(true);
   const d = { ...data, includeBox };
   return (
-    <ImageShareDialog title="Partilhar" onClose={onClose}
+    <ImageShareDialog title={t("Partilhar")} onClose={onClose}
       render={() => renderCard(d)} renderKey={`${data.game.id}-${includeBox}-${data.stats.us.pts}-${data.stats.opp.pts}`}
       text={summaryText(d)}
       fileName={`${data.team.name}-${data.game.opponent}-${data.game.date}.png`.replace(/[^\w.-]+/g, "_")}
-      footnote="São jogadores menores: partilha só em grupos da equipa e com autorização dos pais."
+      footnote={t("São jogadores menores: partilha só em grupos da equipa e com autorização dos pais.")}
       options={(
         <label className="flex min-h-10 cursor-pointer items-center gap-2 text-sm text-muted">
-          <input type="checkbox" className="h-4 w-4" checked={includeBox} onChange={(e) => setIncludeBox(e.target.checked)} /> Incluir box score dos jogadores
+          <input type="checkbox" className="h-4 w-4" checked={includeBox} onChange={(e) => setIncludeBox(e.target.checked)} /> {t("Incluir box score dos jogadores")}
         </label>
       )} />
   );

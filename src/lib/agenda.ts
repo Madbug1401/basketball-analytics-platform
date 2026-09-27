@@ -3,6 +3,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, today } from "./db";
 import type { Agenda, Game, ID, Player, Practice, Rsvp } from "./types";
+import { locale, t } from "./i18n";
 
 export interface AgendaItem {
   id: ID;
@@ -49,7 +50,7 @@ export function useAgenda(teamId?: string): AgendaData | undefined {
       })),
       ...practices.map((p) => ({
         id: p.id, kind: "practice" as const, date: p.date, time: info.get(p.id)?.time,
-        title: p.title || "Treino", practice: p, info: info.get(p.id), rsvps: byRef.get(p.id) ?? new Map(),
+        title: p.title || t("Treino"), practice: p, info: info.get(p.id), rsvps: byRef.get(p.id) ?? new Map(),
       })),
     ];
     items.sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? "99").localeCompare(b.time ?? "99"));
@@ -61,11 +62,11 @@ export const isUpcoming = (it: AgendaItem) => it.date >= today();
 
 export function dayLabel(date: string) {
   const d = new Date(date + "T12:00");
-  const t = today();
-  const diff = Math.round((Date.parse(date + "T12:00") - Date.parse(t + "T12:00")) / 86400000);
-  const base = d.toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "short" });
-  if (diff === 0) return `Hoje · ${base}`;
-  if (diff === 1) return `Amanhã · ${base}`;
+  const now = today();
+  const diff = Math.round((Date.parse(date + "T12:00") - Date.parse(now + "T12:00")) / 86400000);
+  const base = d.toLocaleDateString(locale(), { weekday: "long", day: "numeric", month: "short" });
+  if (diff === 0) return t("Hoje · {date}", { date: base });
+  if (diff === 1) return t("Amanhã · {date}", { date: base });
   return base.charAt(0).toUpperCase() + base.slice(1);
 }
 
@@ -87,15 +88,15 @@ export function rsvpCounts(it: AgendaItem, players: Player[]) {
 
 export function callupText(it: AgendaItem, players: Player[], teamName: string, origin: string) {
   const called = it.kind === "game" && it.info?.callup?.length ? players.filter((p) => it.info!.callup!.includes(p.id)) : [];
-  const when = [dayLabel(it.date), it.info?.time, it.info?.meetTime ? `concentração ${it.info.meetTime}` : ""].filter(Boolean).join(" · ");
+  const when = [dayLabel(it.date), it.info?.time, it.info?.meetTime ? t("concentração {time}", { time: it.info.meetTime }) : ""].filter(Boolean).join(" · ");
   const lines = [
-    it.kind === "game" ? `🏀 *Convocatória — ${teamName}*` : `🏀 *Treino — ${teamName}*`,
+    it.kind === "game" ? t("🏀 *Convocatória — {team}*", { team: teamName }) : t("🏀 *Treino — {team}*", { team: teamName }),
     it.kind === "game" ? `${it.title}${it.game?.competition ? ` (${it.game.competition})` : ""}` : it.title,
     when,
   ];
   if (it.info?.location) lines.push(`📍 ${it.info.location}`);
   if (it.info?.note) lines.push("", it.info.note);
-  if (called.length) lines.push("", "*Convocados:*", ...called.map((p) => `#${p.number} ${p.name}`));
-  lines.push("", `Confirmem na app: ${origin}/agenda`);
+  if (called.length) lines.push("", t("*Convocados:*"), ...called.map((p) => `#${p.number} ${p.name}`));
+  lines.push("", t("Confirmem na app: {url}", { url: `${origin}/agenda` }));
   return lines.join("\n");
 }

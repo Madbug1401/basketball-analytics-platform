@@ -1,6 +1,7 @@
 import type { SeasonData } from "./season";
 import { reb, tagStats } from "./stats";
 import type { Agenda, Drill, DrillFocus, GameEvent } from "./types";
+import { t } from "./i18n";
 
 /** Starter drill library (the coach can edit, delete or add their own). */
 export const BASE_DRILLS: Omit<Drill, "id" | "teamId" | "createdAt">[] = [
@@ -34,24 +35,24 @@ export function suggestions(s: SeasonData): Suggestion[] {
   const events: GameEvent[] = s.games.flatMap((g) => g.events);
   const us = tagStats(events, "us").tags;
   const opp = tagStats(events, "opp").tags;
-  const ppp = (list: typeof us, tag: string) => { const t = list.find((x) => x.tag === tag); return t && t.plays >= 6 ? t.pts / t.plays : null; };
+  const ppp = (list: typeof us, tag: string) => { const ts = list.find((x) => x.tag === tag); return ts && ts.plays >= 6 ? ts.pts / ts.plays : null; };
 
-  if (per(s.team.tov) >= 14) out.push({ focus: "tov", reason: `${per(s.team.tov).toFixed(1)} perdas de bola por jogo` });
+  if (per(s.team.tov) >= 14) out.push({ focus: "tov", reason: t("{n} perdas de bola por jogo", { n: per(s.team.tov).toFixed(1) }) });
   const press = us.find((t) => t.tag === "pressao");
-  if ((press && press.tov >= 5) || (ppp(us, "pressao") ?? 1) < 0.75) out.push({ focus: "pressao", reason: press ? `${press.tov} perdas e ${(press.plays ? press.pts / press.plays : 0).toFixed(2)} pts/jogada contra pressão` : "dificuldades contra pressão" });
+  if ((press && press.tov >= 5) || (ppp(us, "pressao") ?? 1) < 0.75) out.push({ focus: "pressao", reason: press ? t("{tov} perdas e {ppp} pts/jogada contra pressão", { tov: press.tov, ppp: (press.plays ? press.pts / press.plays : 0).toFixed(2) }) : t("dificuldades contra pressão") });
   const ft = pct(s.team.ftm, s.team.fta);
-  if (ft !== null && ft < 60) out.push({ focus: "ll", reason: `${ft.toFixed(0)}% nos lances livres` });
+  if (ft !== null && ft < 60) out.push({ focus: "ll", reason: t("{pct}% nos lances livres", { pct: ft.toFixed(0) }) });
   const fg = pct(s.team.fgm, s.team.fga);
-  if (fg !== null && fg < 38) out.push({ focus: "lancamento", reason: `${fg.toFixed(0)}% de lançamentos de campo` });
-  if (per(s.opp.oreb) >= 10 || per(reb(s.team) - reb(s.opp)) <= -3) out.push({ focus: "ressalto", reason: `o adversário apanha ${per(s.opp.oreb).toFixed(1)} ressaltos ofensivos por jogo` });
+  if (fg !== null && fg < 38) out.push({ focus: "lancamento", reason: t("{pct}% de lançamentos de campo", { pct: fg.toFixed(0) }) });
+  if (per(s.opp.oreb) >= 10 || per(reb(s.team) - reb(s.opp)) <= -3) out.push({ focus: "ressalto", reason: t("o adversário apanha {n} ressaltos ofensivos por jogo", { n: per(s.opp.oreb).toFixed(1) }) });
   const oppFg = pct(s.opp.fgm, s.opp.fga);
-  if (per(s.opp.pts) > per(s.team.pts) || (oppFg ?? 0) > 42) out.push({ focus: "defesa", reason: `sofremos ${per(s.opp.pts).toFixed(1)} pontos por jogo${oppFg ? ` (${oppFg.toFixed(0)}% LC)` : ""}` });
+  if (per(s.opp.pts) > per(s.team.pts) || (oppFg ?? 0) > 42) out.push({ focus: "defesa", reason: oppFg ? t("sofremos {n} pontos por jogo ({pct}% LC)", { n: per(s.opp.pts).toFixed(1), pct: oppFg.toFixed(0) }) : t("sofremos {n} pontos por jogo", { n: per(s.opp.pts).toFixed(1) }) });
   const oppTr = ppp(opp, "transicao");
-  if (oppTr !== null && oppTr >= 1.1) out.push({ focus: "transicao", reason: `o adversário marca ${oppTr.toFixed(2)} pts/jogada em transição` });
+  if (oppTr !== null && oppTr >= 1.1) out.push({ focus: "transicao", reason: t("o adversário marca {ppp} pts/jogada em transição", { ppp: oppTr.toFixed(2) }) });
   const zone = ppp(us, "zona");
-  if (zone !== null && zone < 0.8) out.push({ focus: "zona", reason: `só ${zone.toFixed(2)} pts/jogada contra zona` });
+  if (zone !== null && zone < 0.8) out.push({ focus: "zona", reason: t("só {ppp} pts/jogada contra zona", { ppp: zone.toFixed(2) }) });
   const oppPnr = ppp(opp, "pnr");
-  if (oppPnr !== null && oppPnr >= 1.1) out.push({ focus: "pnr", reason: `o adversário marca ${oppPnr.toFixed(2)} pts/jogada em pick & roll` });
+  if (oppPnr !== null && oppPnr >= 1.1) out.push({ focus: "pnr", reason: t("o adversário marca {ppp} pts/jogada em pick & roll", { ppp: oppPnr.toFixed(2) }) });
   return out;
 }
 

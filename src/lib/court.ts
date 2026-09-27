@@ -1,3 +1,5 @@
+import { L, t } from "./i18n";
+
 // FIBA half court, metres. Origin = left corner of our baseline, y grows toward half court.
 export const COURT_W = 15;
 export const COURT_H = 14;
@@ -22,3 +24,9 @@ export function zoneOf(x: number, y: number): Zone {
 }
 
 export const ZONES: Zone[] = ["Garrafão", "Média distância", "Triplo canto", "Triplo"];
+
+/** Zone names are ids (compared and stored as Portuguese); translate only when showing them. */
+const ZONE_LABEL: Record<Zone, string> = {
+  "Garrafão": L("Garrafão"), "Média distância": L("Média distância"), "Triplo canto": L("Triplo canto"), "Triplo": L("Triplo"),
+};
+export const zoneLabel = (z: Zone) => { const label = ZONE_LABEL[z] ?? z; return t(label); };

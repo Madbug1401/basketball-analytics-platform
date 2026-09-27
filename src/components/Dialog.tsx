@@ -5,6 +5,7 @@
 // (links opened from WhatsApp/Instagram, installed PWA), which made delete buttons look "dead".
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { t } from "@/lib/i18n";
 
 type Req = {
   kind: "confirm" | "prompt";
@@ -32,12 +33,12 @@ function open(r: Omit<Req, "resolve">) {
 }
 
 export async function ask(message: string, opts: { confirmText?: string; danger?: boolean } = {}) {
-  const v = await open({ kind: "confirm", message, confirmText: opts.confirmText ?? "Confirmar", danger: opts.danger ?? false });
+  const v = await open({ kind: "confirm", message, confirmText: opts.confirmText ?? t("Confirmar"), danger: opts.danger ?? false });
   return v !== null;
 }
 
 export function askText(message: string, opts: { confirmText?: string; danger?: boolean; expected?: string } = {}) {
-  return open({ kind: "prompt", message, confirmText: opts.confirmText ?? "Confirmar", danger: opts.danger ?? false, expected: opts.expected });
+  return open({ kind: "prompt", message, confirmText: opts.confirmText ?? t("Confirmar"), danger: opts.danger ?? false, expected: opts.expected });
 }
 
 export function notify(message: string) {
@@ -79,7 +80,7 @@ export function DialogHost() {
             placeholder={req.expected} autoCapitalize="off" autoCorrect="off" spellCheck={false} />
         )}
         <div className="mt-4 flex gap-2">
-          {!isNotice && <button type="button" className="btn flex-1" onClick={() => close(null)}>Cancelar</button>}
+          {!isNotice && <button type="button" className="btn flex-1" onClick={() => close(null)}>{t("Cancelar")}</button>}
           <button type="submit" disabled={blocked}
             className={`btn flex-1 ${req.danger ? "border-bad bg-bad text-black hover:bg-bad/90" : "btn-primary"}`}>
             {req.confirmText}

@@ -1,5 +1,6 @@
 import { COURT_H, COURT_W, RIM, isThree, zoneOf } from "./court";
 import type { GameEvent, ID } from "./types";
+import { t } from "./i18n";
 
 /* Shot quality: where the shots come from and how many points a shot from there is worth.
    Expected points use every located shot recorded this season (ours and opponents'),
@@ -18,6 +19,17 @@ export function qZone(x: number, y: number): QZone {
   if (z === "Triplo") return "Triplo frontal";
   if (Math.hypot(x - RIM.x, y - RIM.y) <= 1.75) return "Cesto";
   return z === "Garrafão" ? "Garrafão" : "Média distância";
+}
+
+/** Display name of a zone in the current language (the QZone value itself stays Portuguese: it's a key). */
+export function zoneLabel(z: QZone): string {
+  switch (z) {
+    case "Cesto": return t("Cesto");
+    case "Garrafão": return t("Garrafão");
+    case "Média distância": return t("Média distância");
+    case "Triplo canto": return t("Triplo canto");
+    case "Triplo frontal": return t("Triplo frontal");
+  }
 }
 
 export const zoneValue = (z: QZone) => (z.startsWith("Triplo") ? 3 : 2);

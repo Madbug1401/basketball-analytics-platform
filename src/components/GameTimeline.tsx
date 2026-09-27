@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { describe, fmtTs, pointsOf, sortEvents } from "@/lib/stats";
 import type { ReviewItem } from "@/lib/review";
 import type { Game, GameEvent, ID, Player, VideoNote } from "@/lib/types";
+import { t } from "@/lib/i18n";
 
 const W = 1000;
 
@@ -50,7 +51,7 @@ export function GameTimeline({ game, events, players, notes = [], review = [] }:
 
   if (!data.periods.length) return null;
   const go = (ts: number) => router.push(`/jogos/${game.id}/logger?${new URLSearchParams({ janela: `${Math.max(0, Math.floor(ts - 6))}-${Math.ceil(ts + 3)}`, play: "1" })}`);
-  const pl = (p: number) => (p <= game.periods ? `${p}.º` : `P${p - game.periods}`);
+  const pl = (p: number) => (p <= game.periods ? t("{n}.º", { n: p }) : t("Pr{n}", { n: p - game.periods }));
   const H = 90, mid = H / 2;
   const my = (m: number) => mid - (m / data.maxAbs) * (mid - 6);
   const path = data.margin.map((pt, i) => `${i ? "L" : "M"}${pt.x.toFixed(1)},${my(pt.m).toFixed(1)}`).join(" ");
@@ -59,21 +60,21 @@ export function GameTimeline({ game, events, players, notes = [], review = [] }:
     <section className="card overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-3 py-2">
         <div>
-          <h2 className="font-semibold">Timeline do jogo</h2>
-          <p className="text-xs text-muted">Toca num momento para o ver no vídeo.</p>
+          <h2 className="font-semibold">{t("Timeline do jogo")}</h2>
+          <p className="text-xs text-muted">{t("Toca num momento para o ver no vídeo.")}</p>
         </div>
         <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted">
-          <span><span className="text-good">●</span> cesto nosso</span>
-          <span><span className="text-opp">●</span> cesto deles</span>
-          <span><span className="text-bad">■</span> perda</span>
-          <span><span className="text-brand">▼</span> nota</span>
+          <span><span className="text-good">●</span> {t("cesto nosso")}</span>
+          <span><span className="text-opp">●</span> {t("cesto deles")}</span>
+          <span><span className="text-bad">■</span> {t("perda")}</span>
+          <span><span className="text-brand">▼</span> {t("nota")}</span>
         </div>
       </div>
 
       {/* score margin */}
       <div className="px-3 pt-3">
-        <div className="mb-1 flex justify-between text-[11px] text-muted"><span>Diferença no marcador</span><span>máx. ±{data.maxAbs}</span></div>
-        <svg viewBox={`0 0 ${W} ${H}`} className="h-20 w-full" preserveAspectRatio="none" role="img" aria-label="Diferença no marcador ao longo do jogo">
+        <div className="mb-1 flex justify-between text-[11px] text-muted"><span>{t("Diferença no marcador")}</span><span>{t("máx. ±{n}", { n: data.maxAbs })}</span></div>
+        <svg viewBox={`0 0 ${W} ${H}`} className="h-20 w-full" preserveAspectRatio="none" role="img" aria-label={t("Diferença no marcador ao longo do jogo")}>
           {data.periods.map((_, i) => i > 0 && <line key={i} x1={(i / data.periods.length) * W} x2={(i / data.periods.length) * W} y1={0} y2={H} stroke="var(--color-line)" strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />)}
           <line x1={0} x2={W} y1={mid} y2={mid} stroke="var(--color-muted)" strokeOpacity={0.5} vectorEffect="non-scaling-stroke" />
           <clipPath id="above"><rect x={0} y={0} width={W} height={mid} /></clipPath>
@@ -109,7 +110,7 @@ export function GameTimeline({ game, events, players, notes = [], review = [] }:
                   const prev = evs.slice(0, i).reverse().find((o) => o.type !== "FT" && o.type !== "SUB" && o.side === e.side && ((o.type === "TOV") === (e.type === "TOV")));
                   return !prev || e.type === "SUB" || x(e.videoTs) - x(prev.videoTs) > W * 0.012;
                 }).map((e) => {
-                  const label = `${fmtTs(e.videoTs)} · ${e.side === "opp" ? "Adversário" : name(e.playerId)} — ${describe(e, name)}`;
+                  const label = `${fmtTs(e.videoTs)} · ${e.side === "opp" ? t("Adversário") : name(e.playerId)} — ${describe(e, name)}`;
                   if (e.type === "SUB") return <span key={e.id} title={label} className="absolute top-1/2 h-3 w-px -translate-y-1/2 bg-muted/60" style={{ left: pct(e.videoTs) }} />;
                   const made = (e.type === "SHOT" || e.type === "FT") && e.meta?.made;
                   const tov = e.type === "TOV" && e.side === "us";
@@ -125,7 +126,7 @@ export function GameTimeline({ game, events, players, notes = [], review = [] }:
                   );
                 })}
                 {nts.map((n) => (
-                  <button key={n.id} title={`${fmtTs(n.videoTs)} · ${n.text}`} aria-label={`Nota: ${n.text}`} onClick={() => go(n.videoTs)}
+                  <button key={n.id} title={`${fmtTs(n.videoTs)} · ${n.text}`} aria-label={t("Nota: {text}", { text: n.text })} onClick={() => go(n.videoTs)}
                     className="absolute -top-1 grid h-6 w-6 -translate-x-1/2 place-items-center text-[10px] text-brand" style={{ left: pct(n.videoTs) }}>▼</button>
                 ))}
               </div>

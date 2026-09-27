@@ -24,10 +24,11 @@ Precisas do Node 20 ou mais recente.
 
 Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/outra.json 42 2026-10-15` (seed e "hoje").
 
-## O que já faz (v0.9)
+## O que já faz (v0.10)
 
 | Área | Funcionalidades |
 |---|---|
+| **Idiomas** | Toda a aplicação em **português, inglês ou francês**: escolhe-se em Definições → Idioma, no menu da conta ou no ecrã de entrada, e fica guardado no dispositivo · datas no formato da língua · os dados (nomes, notas, mensagens) ficam como foram escritos · como traduzir: [docs/I18N.md](docs/I18N.md) |
 | **Plantel** | Jogadores com nº, posição, ano, altura e notas; ativar/desativar; várias equipas |
 | **Treinos** | Criar treino, presenças (presente / atrasado / falta / justificada), intensidade, exercícios, assiduidade da época |
 | **Game Logger** | Vídeo do YouTube, MP4 local, link direto ou sem vídeo (cronómetro) · 5 inicial e substituições · atalhos de teclado · mapa de lançamentos (2/3 pontos detetado pela posição) · adversário · anular · "▶ ver jogada" em cada evento · contexto da jogada |
@@ -97,7 +98,8 @@ src/
   lib/            db (Dexie + fila), sync, auth (sessão/papéis), members, teamAdmin, stats, insights, court, season, possessions, shotQuality, rotation, report, load, physical, push
 supabase/         schema.sql (tabelas, RLS, triggers, RPCs) · migrations/ (uma por versão)
 src/app/api/push/ única rota de servidor (envio das notificações)
-docs/             DEPLOY.md, ROADMAP.md
+docs/             DEPLOY.md, ROADMAP.md, I18N.md (traduções)
+src/i18n/         dicionários en/fr por área (a chave é o texto em português) · src/lib/i18n.ts (t(), língua atual)
 ```
 
 ## Privacidade

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "./supabase";
 import type { Role } from "./auth";
+import { t } from "./i18n";
 
 export interface Member { userId: string; role: Role; playerId?: string; email: string; fullName: string }
 export interface Invite { code: string; role: string; playerId?: string; createdAt: string; expiresAt: string; usedAt?: string }
@@ -34,15 +35,15 @@ export function useTeamMembers(teamId?: string, withInvites = false) {
   useEffect(() => {
     let alive = true;
     // defer so the effect body itself doesn't set state synchronously
-    const t = setTimeout(() => { if (alive) void load(); }, 0);
-    return () => { alive = false; clearTimeout(t); };
+    const tm = setTimeout(() => { if (alive) void load(); }, 0);
+    return () => { alive = false; clearTimeout(tm); };
   }, [load]);
 
   return { members, invites, error, reload: load };
 }
 
 export async function createInvite(teamId: string, role: "player" | "coach" | "analyst", playerId?: string) {
-  if (!supabase) throw new Error("Sem ligação ao servidor");
+  if (!supabase) throw new Error(t("Sem ligação ao servidor"));
   const { data, error } = await supabase.rpc("create_invite", { p_team: teamId, p_role: role, p_player: playerId ?? null });
   if (error) throw new Error(error.message);
   return data as string;

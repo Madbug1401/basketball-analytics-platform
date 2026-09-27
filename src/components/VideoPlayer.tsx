@@ -1,10 +1,11 @@
 "use client";
 
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { t } from "@/lib/i18n";
 
 export interface PlayerHandle {
   getTime: () => number;
-  seek: (t: number) => void;
+  seek: (sec: number) => void;
   toggle: () => void;
   play: () => void;
   pause: () => void;
@@ -90,7 +91,7 @@ export const YouTubePlayer = forwardRef<PlayerHandle, { videoId: string }>(funct
 
   useImperativeHandle(ref, () => ({
     getTime: () => player.current?.getCurrentTime?.() ?? 0,
-    seek: (t) => player.current?.seekTo?.(Math.max(0, t), true),
+    seek: (sec) => player.current?.seekTo?.(Math.max(0, sec), true),
     play: () => player.current?.playVideo?.(),
     pause: () => player.current?.pauseVideo?.(),
     toggle: () => {
@@ -119,7 +120,7 @@ export const Html5Player = forwardRef<PlayerHandle, { src: string }>(function Ht
   const v = useRef<HTMLVideoElement>(null);
   useImperativeHandle(ref, () => ({
     getTime: () => v.current?.currentTime ?? 0,
-    seek: (t) => { if (v.current) v.current.currentTime = Math.max(0, t); },
+    seek: (sec) => { if (v.current) v.current.currentTime = Math.max(0, sec); },
     play: () => { v.current?.play(); },
     pause: () => v.current?.pause(),
     toggle: () => { const el = v.current; if (!el) return; if (el.paused) el.play(); else el.pause(); },
@@ -147,7 +148,7 @@ export const StopwatchPlayer = forwardRef<PlayerHandle, object>(function Stopwat
   const now = () => base.current + (started.current ? (Date.now() - started.current) / 1000 : 0);
   const api: PlayerHandle = {
     getTime: now,
-    seek: (t) => { base.current = Math.max(0, t); if (started.current) started.current = Date.now(); force((n) => n + 1); },
+    seek: (sec) => { base.current = Math.max(0, sec); if (started.current) started.current = Date.now(); force((n) => n + 1); },
     play: () => { if (!started.current) { started.current = Date.now(); setRunning(true); } },
     pause: () => { base.current = now(); started.current = null; setRunning(false); },
     toggle: () => (started.current ? api.pause() : api.play()),
@@ -157,18 +158,18 @@ export const StopwatchPlayer = forwardRef<PlayerHandle, object>(function Stopwat
   };
   useImperativeHandle(ref, () => api);
 
-  const t = now();
+  const time = now();
   return (
     <div className="flex aspect-video w-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-line bg-panel">
       <div className="font-mono text-5xl tabular-nums">
-        {Math.floor(t / 60)}:{String(Math.floor(t % 60)).padStart(2, "0")}
+        {Math.floor(time / 60)}:{String(Math.floor(time % 60)).padStart(2, "0")}
       </div>
       <div className="flex items-center gap-2">
-        <button type="button" className="btn" onClick={() => api.nudge(-5)} aria-label="Recuar 5 segundos">−5s</button>
-        <button type="button" className={`btn min-w-28 ${running ? "" : "btn-primary"}`} onClick={() => api.toggle()}>{running ? "❚❚ Parar" : "▶ Iniciar"}</button>
-        <button type="button" className="btn" onClick={() => api.nudge(5)} aria-label="Avançar 5 segundos">+5s</button>
+        <button type="button" className="btn" onClick={() => api.nudge(-5)} aria-label={t("Recuar 5 segundos")}>−5s</button>
+        <button type="button" className={`btn min-w-28 ${running ? "" : "btn-primary"}`} onClick={() => api.toggle()}>{running ? t("❚❚ Parar") : t("▶ Iniciar")}</button>
+        <button type="button" className="btn" onClick={() => api.nudge(5)} aria-label={t("Avançar 5 segundos")}>+5s</button>
       </div>
-      <p className="px-3 text-center text-xs text-muted">Sem vídeo — cronómetro interno<span className="pointer-coarse:hidden"> · Espaço para iniciar/parar</span></p>
+      <p className="px-3 text-center text-xs text-muted">{t("Sem vídeo — cronómetro interno")}<span className="pointer-coarse:hidden"> · {t("Espaço para iniciar/parar")}</span></p>
     </div>
   );
 });

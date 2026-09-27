@@ -9,6 +9,7 @@ import { useSeason } from "@/lib/season";
 import { goalProgress } from "@/lib/goals";
 import { GoalCard, GoalForm } from "@/components/Goals";
 import type { Goal } from "@/lib/types";
+import { t } from "@/lib/i18n";
 
 export default function GoalsPage() {
   const { team } = useTeam();
@@ -41,23 +42,23 @@ export default function GoalsPage() {
       <section className="grid h-fit gap-5">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-semibold">Objetivos</h1>
+            <h1 className="text-2xl font-semibold">{t("Objetivos")}</h1>
             <p className="text-sm text-muted">
-              {visible.length ? `${reached} de ${visible.length} atingidos · o progresso é calculado a partir dos jogos e treinos registados.` : "Metas para a equipa e para cada jogador, com o progresso calculado automaticamente."}
+              {visible.length ? t("{n} de {total} atingidos · o progresso é calculado a partir dos jogos e treinos registados.", { n: reached, total: visible.length }) : t("Metas para a equipa e para cada jogador, com o progresso calculado automaticamente.")}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {!access.isPlayer && (
-              <select className="input w-auto py-1.5" value={who} onChange={(e) => setWho(e.target.value)} aria-label="Filtrar">
-                <option value="all">Todos</option>
-                <option value="team">Só equipa</option>
+              <select className="input w-auto py-1.5" value={who} onChange={(e) => setWho(e.target.value)} aria-label={t("Filtrar")}>
+                <option value="all">{t("Todos")}</option>
+                <option value="team">{t("Só equipa")}</option>
                 {active.map((p) => <option key={p.id} value={p.id}>#{p.number} {p.name}</option>)}
               </select>
             )}
             <label className="flex min-h-10 cursor-pointer items-center gap-2 text-sm text-muted">
-              <input type="checkbox" className="h-4 w-4" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} /> Arquivados
+              <input type="checkbox" className="h-4 w-4" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} /> {t("Arquivados")}
             </label>
-            {access.canEdit && <button className="btn btn-primary lg:hidden" onClick={() => setEditing("new")}>+ Novo</button>}
+            {access.canEdit && <button className="btn btn-primary lg:hidden" onClick={() => setEditing("new")}>{t("+ Novo")}</button>}
           </div>
         </div>
 
@@ -69,7 +70,7 @@ export default function GoalsPage() {
 
         {teamGoals.length > 0 && (
           <div>
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted">Equipa</h2>
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted">{t("Equipa")}</h2>
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {teamGoals.map((g) => <GoalCard key={g.id} goal={g} season={s} players={players} canEdit={access.canEdit} onEdit={edit} />)}
             </div>
@@ -77,7 +78,7 @@ export default function GoalsPage() {
         )}
         {playerGoals.length > 0 && (
           <div>
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted">{access.isPlayer ? "Os teus objetivos" : "Jogadores"}</h2>
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted">{access.isPlayer ? t("Os teus objetivos") : t("Jogadores")}</h2>
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {playerGoals.map((g) => <GoalCard key={g.id} goal={g} season={s} players={players} canEdit={access.canEdit} onEdit={edit} />)}
             </div>
@@ -86,8 +87,8 @@ export default function GoalsPage() {
         {visible.length === 0 && (
           <div className="card p-8 text-center text-sm text-muted">
             {access.canEdit
-              ? <>Ainda sem objetivos. Exemplos: <i>equipa com menos de 15 perdas por jogo</i>, <i>#7 com 65% nos lances livres</i>.</>
-              : "O treinador ainda não definiu objetivos."}
+              ? <>{t("Ainda sem objetivos. Exemplos:")} <i>{t("equipa com menos de 15 perdas por jogo")}</i>, <i>{t("#7 com 65% nos lances livres")}</i>.</>
+              : t("O treinador ainda não definiu objetivos.")}
           </div>
         )}
       </section>

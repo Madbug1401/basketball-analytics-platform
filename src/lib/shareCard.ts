@@ -2,6 +2,7 @@ import type { GameStats, Line } from "./stats";
 import { reb } from "./stats";
 import type { Insight } from "./insights";
 import type { Game, Player, Team } from "./types";
+import { locale, t } from "./i18n";
 
 /* Builds a 1080×1350 PNG (good for WhatsApp / Instagram) and a plain-text summary of a game. */
 
@@ -21,7 +22,7 @@ export interface CardData {
   includeBox: boolean;
 }
 
-const dateLabel = (d: string) => new Date(d + "T12:00").toLocaleDateString("pt-PT", { day: "numeric", month: "long", year: "numeric" });
+const dateLabel = (d: string) => new Date(d + "T12:00").toLocaleDateString(locale(), { day: "numeric", month: "long", year: "numeric" });
 const first = (p: Player) => p.name.split(" ")[0];
 
 function rows(d: CardData) {
@@ -49,9 +50,9 @@ export function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w
 
 export function fit(ctx: CanvasRenderingContext2D, text: string, max: number) {
   if (ctx.measureText(text).width <= max) return text;
-  let t = text;
-  while (t.length > 1 && ctx.measureText(t + "…").width > max) t = t.slice(0, -1);
-  return t + "…";
+  let s = text;
+  while (s.length > 1 && ctx.measureText(s + "…").width > max) s = s.slice(0, -1);
+  return s + "…";
 }
 
 export async function renderCard(d: CardData): Promise<Blob> {
@@ -74,10 +75,10 @@ export async function renderCard(d: CardData): Promise<Blob> {
   ctx.fillStyle = C.brand; ctx.font = `700 30px ${FONT}`;
   ctx.fillText(`${d.team.name} ${d.team.category}`.toUpperCase(), P, 92);
   ctx.fillStyle = C.muted; ctx.font = `400 26px ${FONT}`;
-  ctx.fillText(fit(ctx, [dateLabel(d.game.date), d.game.competition, d.game.home ? "Casa" : "Fora"].filter(Boolean).join(" · "), W - 2 * P), P, 134);
+  ctx.fillText(fit(ctx, [dateLabel(d.game.date), d.game.competition, d.game.home ? t("Casa") : t("Fora")].filter(Boolean).join(" · "), W - 2 * P), P, 134);
 
   // result pill
-  const pill = win ? "VITÓRIA" : tie ? "EMPATE" : "DERROTA";
+  const pill = win ? t("VITÓRIA") : tie ? t("EMPATE") : t("DERROTA");
   ctx.font = `800 26px ${FONT}`;
   const pw = ctx.measureText(pill).width + 40;
   roundRect(ctx, W - P - pw, 62, pw, 46, 23);
@@ -102,12 +103,12 @@ export async function renderCard(d: CardData): Promise<Blob> {
   const cellW = Math.min(120, (W - 2 * P - 200) / (periods.length + 1));
   roundRect(ctx, P, y, W - 2 * P, 132, 20); ctx.fillStyle = C.panel; ctx.fill();
   ctx.font = `600 22px ${FONT}`; ctx.fillStyle = C.muted;
-  ctx.textAlign = "left"; ctx.fillText("PARCIAIS", P + 28, y + 40);
+  ctx.textAlign = "left"; ctx.fillText(t("PARCIAIS"), P + 28, y + 40);
   ctx.textAlign = "center";
   periods.forEach((p, i) => {
     const x = P + 230 + i * cellW + cellW / 2;
     ctx.fillStyle = C.muted; ctx.font = `600 22px ${FONT}`;
-    ctx.fillText(i < d.game.periods ? `${i + 1}º` : `P${i - d.game.periods + 1}`, x, y + 40);
+    ctx.fillText(i < d.game.periods ? t("{n}º", { n: i + 1 }) : t("Pr{n}", { n: i - d.game.periods + 1 }), x, y + 40);
     ctx.font = `700 34px ${MONO}`;
     ctx.fillStyle = p.us > p.opp ? C.good : C.fg; ctx.fillText(String(p.us), x, y + 82);
     ctx.fillStyle = p.opp > p.us ? C.opp : C.muted; ctx.fillText(String(p.opp), x, y + 118);
@@ -119,9 +120,9 @@ export async function renderCard(d: CardData): Promise<Blob> {
 
   // leaders
   const leaders = [
-    { label: "PONTOS", r: leader(d, (l) => l.pts) },
-    { label: "RESSALTOS", r: leader(d, (l) => reb(l)) },
-    { label: "ASSISTÊNCIAS", r: leader(d, (l) => l.ast) },
+    { label: t("PONTOS"), r: leader(d, (l) => l.pts) },
+    { label: t("RESSALTOS"), r: leader(d, (l) => reb(l)) },
+    { label: t("ASSISTÊNCIAS"), r: leader(d, (l) => l.ast) },
   ];
   const lw = (W - 2 * P - 2 * 20) / 3;
   leaders.forEach((ld, i) => {
@@ -144,10 +145,10 @@ export async function renderCard(d: CardData): Promise<Blob> {
   if (d.includeBox && r.length) {
     const cols = [
       { h: "", w: 350, a: "left" as const, v: (x: { p: Player; l: Line }) => `#${x.p.number} ${x.p.name}` },
-      { h: "PTS", w: 110, a: "right" as const, v: (x: { p: Player; l: Line }) => String(x.l.pts) },
-      { h: "RES", w: 110, a: "right" as const, v: (x: { p: Player; l: Line }) => String(reb(x.l)) },
-      { h: "AST", w: 110, a: "right" as const, v: (x: { p: Player; l: Line }) => String(x.l.ast) },
-      { h: "LC", w: 150, a: "right" as const, v: (x: { p: Player; l: Line }) => `${x.l.fgm}/${x.l.fga}` },
+      { h: t("PTS"), w: 110, a: "right" as const, v: (x: { p: Player; l: Line }) => String(x.l.pts) },
+      { h: t("RES"), w: 110, a: "right" as const, v: (x: { p: Player; l: Line }) => String(reb(x.l)) },
+      { h: t("AST"), w: 110, a: "right" as const, v: (x: { p: Player; l: Line }) => String(x.l.ast) },
+      { h: t("LC"), w: 150, a: "right" as const, v: (x: { p: Player; l: Line }) => `${x.l.fgm}/${x.l.fga}` },
       { h: "+/-", w: 88, a: "right" as const, v: (x: { p: Player; l: Line }) => (x.l.pm > 0 ? `+${x.l.pm}` : String(x.l.pm)) },
     ];
     const rowH = Math.min(44, (H - y - 170) / (r.length + 1));
@@ -172,11 +173,11 @@ export async function renderCard(d: CardData): Promise<Blob> {
     const stat = (label: string, a: string, b: string) => ({ label, a, b });
     const pctS = (m: number, a: number) => (a ? `${Math.round((m / a) * 100)}%` : "–");
     const list = [
-      stat("Lançamentos", `${us.fgm}/${us.fga} ${pctS(us.fgm, us.fga)}`, `${opp.fgm}/${opp.fga} ${pctS(opp.fgm, opp.fga)}`),
-      stat("Triplos", `${us.p3m}/${us.p3a}`, `${opp.p3m}/${opp.p3a}`),
-      stat("Lances livres", `${us.ftm}/${us.fta}`, `${opp.ftm}/${opp.fta}`),
-      stat("Ressaltos", String(reb(us)), String(reb(opp))),
-      stat("Perdas de bola", String(us.tov), String(opp.tov)),
+      stat(t("Lançamentos"), `${us.fgm}/${us.fga} ${pctS(us.fgm, us.fga)}`, `${opp.fgm}/${opp.fga} ${pctS(opp.fgm, opp.fga)}`),
+      stat(t("Triplos"), `${us.p3m}/${us.p3a}`, `${opp.p3m}/${opp.p3a}`),
+      stat(t("Lances livres"), `${us.ftm}/${us.fta}`, `${opp.ftm}/${opp.fta}`),
+      stat(t("Ressaltos"), String(reb(us)), String(reb(opp))),
+      stat(t("Perdas de bola"), String(us.tov), String(opp.tov)),
     ];
     roundRect(ctx, P, y, W - 2 * P, 56 * list.length + 30, 20); ctx.fillStyle = C.panel; ctx.fill();
     list.forEach((s, i) => {
@@ -203,23 +204,23 @@ export async function renderCard(d: CardData): Promise<Blob> {
   // footer
   ctx.fillStyle = C.line; ctx.fillRect(P, H - 86, W - 2 * P, 1);
   ctx.fillStyle = C.muted; ctx.font = `500 22px ${FONT}`; ctx.textAlign = "left";
-  ctx.fillText(`Época ${d.team.season}`, P, H - 44);
+  ctx.fillText(t("Época {season}", { season: d.team.season }), P, H - 44);
   ctx.textAlign = "right"; ctx.fillStyle = C.brand; ctx.font = `700 24px ${FONT}`;
   ctx.fillText("Courtside", W - P, H - 44);
 
-  return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Não foi possível gerar a imagem"))), "image/png"));
+  return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error(t("Não foi possível gerar a imagem")))), "image/png"));
 }
 
 export function summaryText(d: CardData) {
   const { us, opp } = d.stats;
-  const res = us.pts > opp.pts ? "Vitória" : us.pts < opp.pts ? "Derrota" : "Empate";
+  const res = us.pts > opp.pts ? t("Vitória") : us.pts < opp.pts ? t("Derrota") : t("Empate");
   const lines = [
     `🏀 *${d.team.name} ${d.team.category} ${us.pts}–${opp.pts} ${d.game.opponent}* (${res})`,
     `${dateLabel(d.game.date)}${d.game.competition ? ` · ${d.game.competition}` : ""}`,
-    `Parciais: ${d.stats.byPeriod.map((p) => `${p.us}-${p.opp}`).join(" | ")}`,
+    t("Parciais: {list}", { list: d.stats.byPeriod.map((p) => `${p.us}-${p.opp}`).join(" | ") }),
   ];
   const top = rows(d).filter((r) => r.l.pts > 0).slice(0, 3);
-  if (top.length) lines.push("", "*Destaques*", ...top.map((r) => `#${r.p.number} ${r.p.name}: ${r.l.pts} pts, ${reb(r.l)} ress., ${r.l.ast} ast.`));
+  if (top.length) lines.push("", `*${t("Destaques")}*`, ...top.map((r) => `#${r.p.number} ${r.p.name}: ${t("{pts} pts, {reb} ress., {ast} ast.", { pts: r.l.pts, reb: reb(r.l), ast: r.l.ast })}`));
   const hi = d.insights.filter((x) => x.tone !== "info").slice(0, 2);
   if (hi.length) lines.push("", ...hi.map((x) => `• ${x.title}`));
   return lines.join("\n");

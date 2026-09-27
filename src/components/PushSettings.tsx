@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { disablePush, enablePush, pushState, type PushState } from "@/lib/push";
 import { cloudConfigured } from "@/lib/supabase";
+import { L, t } from "@/lib/i18n";
 
-const TEXT: Record<PushState, string> = {
-  unsupported: "Este browser não suporta notificações.",
-  "ios-install": "No iPhone, primeiro adiciona a app ao ecrã principal (Partilhar → Adicionar ao ecrã principal) e abre-a a partir daí.",
-  denied: "As notificações estão bloqueadas. Ativa-as nas definições do browser/telemóvel para este site.",
-  off: "Recebe um aviso quando há convocatória, mensagem do treinador ou game plan.",
-  on: "Ativas neste dispositivo.",
+const text: Record<PushState, string> = {
+  unsupported: L("Este browser não suporta notificações."),
+  "ios-install": L("No iPhone, primeiro adiciona a app ao ecrã principal (Partilhar → Adicionar ao ecrã principal) e abre-a a partir daí."),
+  denied: L("As notificações estão bloqueadas. Ativa-as nas definições do browser/telemóvel para este site."),
+  off: L("Recebe um aviso quando há convocatória, mensagem do treinador ou game plan."),
+  on: L("Ativas neste dispositivo."),
 };
 
 function usePush() {
@@ -35,12 +36,12 @@ export function PushSettings() {
     <div className="card grid gap-2 p-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <div className="font-semibold">Notificações</div>
-          <p className="text-sm text-muted">{TEXT[state]}</p>
+          <div className="font-semibold">{t("Notificações")}</div>
+          <p className="text-sm text-muted">{t(text[state])}</p>
         </div>
         {(state === "on" || state === "off") && (
           <button className={`btn shrink-0 ${state === "on" ? "" : "btn-primary"}`} onClick={toggle} disabled={busy}>
-            {busy ? "…" : state === "on" ? "Desativar" : "Ativar"}
+            {busy ? "…" : state === "on" ? t("Desativar") : t("Ativar")}
           </button>
         )}
       </div>
@@ -61,16 +62,16 @@ export function PushPrompt() {
   return (
     <div className="card flex flex-wrap items-center gap-3 border-brand/50 p-3 text-sm">
       <span className="text-xl" aria-hidden>🔔</span>
-      <p className="min-w-0 flex-1">{state === "off" ? "Ativa as notificações para saberes logo das convocatórias e mensagens." : TEXT["ios-install"]}</p>
+      <p className="min-w-0 flex-1">{state === "off" ? t("Ativa as notificações para saberes logo das convocatórias e mensagens.") : t(text["ios-install"])}</p>
       <div className="flex gap-2">
         {state === "off" && (
           <button className="btn btn-primary" disabled={busy}
             onClick={async () => { setBusy(true); try { setState(await enablePush()); } catch { /* shown on the account page */ } finally { setBusy(false); } }}>
-            Ativar
+            {t("Ativar")}
           </button>
         )}
-        <Link href="/conta" className="btn hidden sm:inline-flex">Mais</Link>
-        <button className="btn px-2" onClick={close} aria-label="Agora não">✕</button>
+        <Link href="/conta" className="btn hidden sm:inline-flex">{t("Mais")}</Link>
+        <button className="btn px-2" onClick={close} aria-label={t("Agora não")}>✕</button>
       </div>
     </div>
   );

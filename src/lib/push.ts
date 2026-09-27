@@ -3,6 +3,7 @@
 import { db, type PushJob } from "./db";
 import { cloudConfigured, supabase } from "./supabase";
 import { VAPID_PUBLIC_KEY } from "./pushKey";
+import { t } from "./i18n";
 
 /* Push notifications (call-ups, messages, game plan…).
    The phone subscribes once (push_subs table); notifications are queued on this device and
@@ -79,7 +80,7 @@ export async function enablePush(): Promise<PushState> {
   const perm = await Notification.requestPermission();
   if (perm !== "granted") return perm === "denied" ? "denied" : "off";
   const reg = await registration();
-  if (!reg) throw new Error("A app ainda não está instalada neste dispositivo. Recarrega a página e tenta outra vez.");
+  if (!reg) throw new Error(t("A app ainda não está instalada neste dispositivo. Recarrega a página e tenta outra vez."));
   const sub = await currentSubscription(reg, true);
   if (sub) await saveSubscription(sub);
   return "on";

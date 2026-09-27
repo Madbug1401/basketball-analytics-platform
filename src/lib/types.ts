@@ -1,6 +1,8 @@
 // Domain model. Everything is keyed by teamId so the app is multi-team from day one.
 // The source of truth for games is the event log (GameEvent); all stats are derived.
 
+import { L } from "./i18n";
+
 export type ID = string;
 
 export interface Team {
@@ -116,16 +118,16 @@ export interface GameEvent {
 export type PlayTag = "transicao" | "pnr" | "iso" | "poste" | "segunda" | "bloqueio" | "zona" | "pressao";
 
 export const PLAY_TAGS: { id: PlayTag; label: string; short: string }[] = [
-  { id: "transicao", label: "Contra-ataque / transição", short: "Transição" },
-  { id: "pnr", label: "Pick & roll", short: "Pick & roll" },
-  { id: "iso", label: "Isolamento / 1x1", short: "1x1" },
-  { id: "poste", label: "Jogo de poste", short: "Poste" },
-  { id: "segunda", label: "2.ª oportunidade (após ressalto of.)", short: "2.ª oport." },
-  { id: "bloqueio", label: "Saída de bloqueio / sem bola", short: "Sem bola" },
-  { id: "zona", label: "Contra defesa à zona", short: "Vs zona" },
-  { id: "pressao", label: "Contra pressão", short: "Vs pressão" },
+  { id: "transicao", label: L("Contra-ataque / transição"), short: L("Transição") },
+  { id: "pnr", label: L("Pick & roll"), short: L("Pick & roll") },
+  { id: "iso", label: L("Isolamento / 1x1"), short: L("1x1") },
+  { id: "poste", label: L("Jogo de poste"), short: L("Poste") },
+  { id: "segunda", label: L("2.ª oportunidade (após ressalto of.)"), short: L("2.ª oport.") },
+  { id: "bloqueio", label: L("Saída de bloqueio / sem bola"), short: L("Sem bola") },
+  { id: "zona", label: L("Contra defesa à zona"), short: L("Vs zona") },
+  { id: "pressao", label: L("Contra pressão"), short: L("Vs pressão") },
 ];
-export const TAG_LABEL = Object.fromEntries(PLAY_TAGS.map((t) => [t.id, t.short])) as Record<PlayTag, string>;
+export const TAG_LABEL = Object.fromEntries(PLAY_TAGS.map((tg) => [tg.id, tg.short])) as Record<PlayTag, string>;
 
 /* ---------- goals ---------- */
 
@@ -180,7 +182,7 @@ export interface Rsvp {
   answeredAt: number;
 }
 
-export const RSVP_LABEL: Record<RsvpStatus, string> = { yes: "Vou", maybe: "Talvez", no: "Não posso" };
+export const RSVP_LABEL: Record<RsvpStatus, string> = { yes: L("Vou"), maybe: L("Talvez"), no: L("Não posso") };
 
 /* ---------- feedback ---------- */
 
@@ -239,7 +241,7 @@ export interface Measurement {
 /* ---------- training load & availability ---------- */
 
 export type Availability = "ok" | "limited" | "out";
-export const AVAILABILITY_LABEL: Record<Availability, string> = { ok: "Disponível", limited: "Condicionado", out: "Indisponível" };
+export const AVAILABILITY_LABEL: Record<Availability, string> = { ok: L("Disponível"), limited: L("Condicionado"), out: L("Indisponível") };
 
 /** Player self-report. kind "session": effort (RPE) after a practice/game, id = `${refId}:${playerId}`.
     kind "status": current availability, id = `status:${playerId}`. Players write their own; staff read all. */
@@ -270,9 +272,9 @@ export interface Seen {
 export type DrillFocus = "lancamento" | "ll" | "passe" | "tov" | "ressalto" | "defesa" | "transicao" | "pressao" | "zona" | "pnr" | "fisico" | "tatica";
 
 export const FOCUS_LABEL: Record<DrillFocus, string> = {
-  lancamento: "Lançamento", ll: "Lances livres", passe: "Passe", tov: "Perdas de bola", ressalto: "Ressalto",
-  defesa: "Defesa", transicao: "Transição", pressao: "Contra pressão", zona: "Contra zona", pnr: "Pick & roll",
-  fisico: "Físico", tatica: "Tática / sistemas",
+  lancamento: L("Lançamento|área"), ll: L("Lances livres"), passe: L("Passe"), tov: L("Perdas de bola"), ressalto: L("Ressalto|área"),
+  defesa: L("Defesa"), transicao: L("Transição"), pressao: L("Contra pressão"), zona: L("Contra zona"), pnr: L("Pick & roll"),
+  fisico: L("Físico"), tatica: L("Tática / sistemas"),
 };
 
 export interface Drill {
@@ -318,10 +320,10 @@ export interface VideoNote {
 }
 
 export const ATTENDANCE_LABEL: Record<AttendanceStatus, string> = {
-  present: "Presente",
-  late: "Atrasado",
-  absent: "Falta",
-  excused: "Justificada",
+  present: L("Presente"),
+  late: L("Atrasado"),
+  absent: L("Falta|presença"),
+  excused: L("Justificada"),
 };
 
 export const POSITIONS: Position[] = ["PG", "SG", "SF", "PF", "C"];

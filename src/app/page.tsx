@@ -14,6 +14,7 @@ import { isUpcoming, useAgenda } from "@/lib/agenda";
 import { useUnseenFeedback } from "@/components/Feedback";
 import { PushPrompt } from "@/components/PushSettings";
 import { WellnessCheck } from "@/components/Wellness";
+import { L, t } from "@/lib/i18n";
 
 export default function Dashboard() {
   const { team } = useTeam();
@@ -42,16 +43,16 @@ export default function Dashboard() {
       .slice(0, 3);
 
   const steps = [
-    { done: active.length >= 5, label: "Adicionar jogadores ao plantel", href: "/equipa" },
-    { done: (practices ?? 0) > 0, label: "Registar a presença num treino", href: "/treinos" },
-    { done: gp > 0, label: "Criar um jogo e registar eventos a partir do vídeo", href: "/jogos" },
+    { done: active.length >= 5, label: t("Adicionar jogadores ao plantel"), href: "/equipa" },
+    { done: (practices ?? 0) > 0, label: t("Registar a presença num treino"), href: "/treinos" },
+    { done: gp > 0, label: t("Criar um jogo e registar eventos a partir do vídeo"), href: "/jogos" },
   ];
 
   return (
     <div className="grid gap-6">
       <div>
-        <h1 className="text-2xl font-semibold">{team.name} {team.category} {team.gender === "M" ? "Masculino" : "Feminino"}</h1>
-        <p className="text-sm text-muted">Época {team.season}</p>
+        <h1 className="text-2xl font-semibold">{team.name} {team.category} {team.gender === "M" ? t("Masculino") : t("Feminino")}</h1>
+        <p className="text-sm text-muted">{t("Época {season}", { season: team.season })}</p>
       </div>
 
       {access.isPlayer && (() => {
@@ -62,10 +63,10 @@ export default function Dashboard() {
           <Link href={me ? `/jogadores/${me.id}` : "/equipa"} className="card flex flex-wrap items-center gap-4 border-brand/60 p-4 hover:bg-panel-2">
             <span className="grid h-12 w-12 place-items-center rounded-full bg-brand font-mono text-xl font-bold text-black">{me?.number ?? "?"}</span>
             <div className="flex-1">
-              <div className="font-semibold">Olá{me ? `, ${me.name.split(" ")[0]}` : ""}! Vê a tua evolução →</div>
+              <div className="font-semibold">{me ? t("Olá, {name}! Vê a tua evolução →", { name: me.name.split(" ")[0] }) : t("Olá! Vê a tua evolução →")}</div>
               <div className="text-sm text-muted">
-                {l?.gp ? `${l.gp} jogos · ${(l.pts / l.gp).toFixed(1)} pts · ${(reb(l) / l.gp).toFixed(1)} ress. · ${(l.ast / l.gp).toFixed(1)} ast.` : "Ainda sem jogos registados."}
-                {att !== null && att !== undefined ? ` · assiduidade ${att}%` : ""}
+                {l?.gp ? t("{gp} jogos · {pts} pts · {reb} ress. · {ast} ast.", { gp: l.gp, pts: (l.pts / l.gp).toFixed(1), reb: (reb(l) / l.gp).toFixed(1), ast: (l.ast / l.gp).toFixed(1) }) : t("Ainda sem jogos registados.")}
+                {att !== null && att !== undefined ? ` · ${t("assiduidade {v}%", { v: att })}` : ""}
               </div>
             </div>
           </Link>
@@ -79,14 +80,14 @@ export default function Dashboard() {
       {access.isPlayer && unseen > 0 && (
         <Link href={`/jogadores/${access.playerId}#feedback`} className="card flex items-center gap-3 border-brand bg-brand/10 p-4 hover:bg-brand/15">
           <span className="grid h-10 w-10 place-items-center rounded-full bg-brand text-lg text-black">✉</span>
-          <span className="flex-1 font-semibold">{unseen === 1 ? "Tens 1 mensagem nova do treinador" : `Tens ${unseen} mensagens novas do treinador`}</span>
+          <span className="flex-1 font-semibold">{unseen === 1 ? t("Tens 1 mensagem nova do treinador") : t("Tens {n} mensagens novas do treinador", { n: unseen })}</span>
           <span className="text-brand">→</span>
         </Link>
       )}
 
       {access.canEdit && steps.some((x) => !x.done) && (
         <div className="card p-4">
-          <h2 className="mb-2 font-semibold">Primeiros passos</h2>
+          <h2 className="mb-2 font-semibold">{t("Primeiros passos")}</h2>
           <ol className="grid gap-1.5 text-sm">
             {steps.map((x, i) => (
               <li key={i} className="flex items-center gap-2">
@@ -101,8 +102,8 @@ export default function Dashboard() {
       {agenda && agenda.items.some(isUpcoming) && (
         <section>
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="font-semibold">Próximos</h2>
-            <Link href="/agenda" className="tap text-sm text-brand">Agenda</Link>
+            <h2 className="font-semibold">{t("Próximos")}</h2>
+            <Link href="/agenda" className="tap text-sm text-brand">{t("Agenda")}</Link>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
             {agenda.items.filter(isUpcoming).slice(0, access.isPlayer ? 3 : 2).map((it) => (
@@ -116,8 +117,8 @@ export default function Dashboard() {
       {shownGoals.length > 0 && (
         <section>
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="font-semibold">{access.isPlayer ? "Os teus objetivos" : "Objetivos da equipa"}</h2>
-            <Link href="/objetivos" className="tap text-sm text-brand">Ver todos</Link>
+            <h2 className="font-semibold">{access.isPlayer ? t("Os teus objetivos") : t("Objetivos da equipa")}</h2>
+            <Link href="/objetivos" className="tap text-sm text-brand">{t("Ver todos")}</Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {shownGoals.map((g) => <GoalCard key={g.id} goal={g} season={s} players={byId} />)}
@@ -126,43 +127,43 @@ export default function Dashboard() {
       )}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-        <Kpi label="Registo" value={`${s.record.w}–${s.record.l}`} sub={`${gp} jogos registados`} />
-        <Kpi label="Pontos / jogo" value={gp ? (s.team.pts / gp).toFixed(1) : "–"} sub={gp ? `sofridos ${(s.opp.pts / gp).toFixed(1)}` : undefined} />
-        <Kpi label="Ressaltos / jogo" value={gp ? (reb(s.team) / gp).toFixed(1) : "–"} />
-        <Kpi label="Treinos" value={String(practices ?? 0)} />
-        <Kpi label="Jogadores ativos" value={String(active.length)} />
+        <Kpi label={t("Registo|vitórias")} value={`${s.record.w}–${s.record.l}`} sub={gp === 1 ? t("{n} jogo registado", { n: gp }) : t("{n} jogos registados", { n: gp })} />
+        <Kpi label={t("Pontos / jogo")} value={gp ? (s.team.pts / gp).toFixed(1) : "–"} sub={gp ? t("sofridos {v}", { v: (s.opp.pts / gp).toFixed(1) }) : undefined} />
+        <Kpi label={t("Ressaltos / jogo")} value={gp ? (reb(s.team) / gp).toFixed(1) : "–"} />
+        <Kpi label={t("Treinos")} value={String(practices ?? 0)} />
+        <Kpi label={t("Jogadores ativos")} value={String(active.length)} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        {([["Pontos", (l: Line) => l.pts], ["Ressaltos", (l: Line) => reb(l)], ["Assistências", (l: Line) => l.ast]] as const).map(([label, f]) => (
+        {([[L("Pontos"), (l: Line) => l.pts], [L("Ressaltos"), (l: Line) => reb(l)], [L("Assistências"), (l: Line) => l.ast]] as const).map(([label, f]) => (
           <div key={label} className="card p-4">
-            <h3 className="mb-2 text-sm font-semibold text-muted">Líderes — {label} / jogo</h3>
+            <h3 className="mb-2 text-sm font-semibold text-muted">{t("Líderes — {stat} / jogo", { stat: t(label) })}</h3>
             {leaders(f).map((r, i) => (
               <Link key={r.p.id} href={`/jogadores/${r.p.id}`} className="flex items-center justify-between py-1 hover:text-brand">
                 <span><span className="mr-2 text-muted">{i + 1}.</span>#{r.p.number} {r.p.name}</span>
                 <span className="font-mono font-semibold">{r.v.toFixed(1)}</span>
               </Link>
             ))}
-            {leaders(f).length === 0 && <p className="text-sm text-muted">Sem jogos registados.</p>}
+            {leaders(f).length === 0 && <p className="text-sm text-muted">{t("Sem jogos registados.")}</p>}
           </div>
         ))}
       </div>
 
       <div className="card">
         <div className="flex items-center justify-between border-b border-line px-4 py-2">
-          <h3 className="font-semibold">Últimos jogos</h3>
-          <Link href="/jogos" className="tap text-sm text-brand">Ver todos</Link>
+          <h3 className="font-semibold">{t("Últimos jogos")}</h3>
+          <Link href="/jogos" className="tap text-sm text-brand">{t("Ver todos")}</Link>
         </div>
         {[...s.games].reverse().slice(0, 5).map(({ game, stats }) => {
           const w = stats.us.pts > stats.opp.pts;
           return (
             <Link key={game.id} href={`/jogos/${game.id}`} className="flex items-center justify-between px-4 py-2.5 hover:bg-panel-2">
-              <span><span className={`mr-3 font-bold ${w ? "text-good" : "text-bad"}`}>{w ? "V" : "D"}</span>{game.home ? "vs" : "@"} {game.opponent}</span>
+              <span><span className={`mr-3 font-bold ${w ? "text-good" : "text-bad"}`}>{w ? t("V") : t("D")}</span>{game.home ? "vs" : "@"} {game.opponent}</span>
               <span className="font-mono">{stats.us.pts}–{stats.opp.pts}</span>
             </Link>
           );
         })}
-        {gp === 0 && <p className="p-4 text-sm text-muted">Ainda sem jogos.</p>}
+        {gp === 0 && <p className="p-4 text-sm text-muted">{t("Ainda sem jogos.")}</p>}
       </div>
     </div>
   );

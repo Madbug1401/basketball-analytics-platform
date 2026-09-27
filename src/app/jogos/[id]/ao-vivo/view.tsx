@@ -7,7 +7,8 @@ import { db, uid } from "@/lib/db";
 import { useRouteId } from "@/lib/route";
 import { useAccess } from "@/lib/auth";
 import { ACTIONS, timeoutBucket, timeoutsAllowed, type ActionDef } from "@/lib/actions";
-import { describe, pointsOf, sortEvents, walk } from "@/lib/stats";
+import { describe, periodLabel, pointsOf, sortEvents, walk } from "@/lib/stats";
+import { t } from "@/lib/i18n";
 import type { EventType, Game, GameEvent, ID, Player, Side } from "@/lib/types";
 import { LineupPicker } from "@/components/LineupPicker";
 import { Court } from "@/components/Court";
@@ -22,7 +23,7 @@ interface Clock { period: number; remaining: number; running: boolean; since: nu
 const OT_SECONDS = 5 * 60;
 const periodLength = (g: Game, p: number) => (p <= g.periods ? g.periodMinutes * 60 : OT_SECONDS);
 /** game seconds elapsed before period p starts */
-const periodOffset = (g: Game, p: number) => { let t = 0; for (let i = 1; i < p; i++) t += periodLength(g, i); return t; };
+const periodOffset = (g: Game, p: number) => { let total = 0; for (let i = 1; i < p; i++) total += periodLength(g, i); return total; };
 const clockKey = (gameId: string) => `bap.live.${gameId}`;
 /** wall clock, kept outside components (only ever called from event handlers / timers) */
 const nowMs = () => Date.now();
@@ -59,8 +60,8 @@ export function LivePage() {
   const access = useAccess(game?.teamId);
 
   if (game === undefined || !players || !events) return null;
-  if (!game) return <p className="text-muted">Jogo não encontrado.</p>;
-  if (!access.canEdit) return <p className="text-muted">Só a equipa técnica pode registar jogos. <Link className="text-brand" href={`/jogos/${game.id}`}>Ver estatísticas →</Link></p>;
+  if (!game) return <p className="text-muted">{t("Jogo não encontrado.")}</p>;
+  if (!access.canEdit) return <p className="text-muted">{t("Só a equipa técnica pode registar jogos.")} <Link className="text-brand" href={`/jogos/${game.id}`}>{t("Ver estatísticas →")}</Link></p>;
   return <Live key={game.id} game={game} players={players} events={events} />;
 }
 
@@ -87,10 +88,10 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
   useEffect(() => {
     if (!clock?.running) return;
     const i = setInterval(() => {
-      const t = nowMs();
-      setTick(t);
+      const ms = nowMs();
+      setTick(ms);
       // buzzer: stop at 0:00
-      if (remainingNow(clock, t) <= 0) {
+      if (remainingNow(clock, ms) <= 0) {
         setClock({ ...clock, remaining: 0, running: false, since: null });
         try { navigator.vibrate?.([200, 100, 200]); } catch {}
       }
@@ -110,7 +111,7 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
   useEffect(() => {
     if (!clock?.running) return;
     let lock: { release: () => Promise<void> } | null = null;
-    const nav = navigator as Navigator & { wakeLock?: { request: (t: "screen") => Promise<{ release: () => Promise<void> }> } };
+    const nav = navigator as Navigator & { wakeLock?: { request: (type: "screen") => Promise<{ release: () => Promise<void> }> } };
     nav.wakeLock?.request("screen").then((l) => { lock = l; }).catch(() => {});
     return () => { void lock?.release().catch(() => {}); };
   }, [clock?.running]);
@@ -127,7 +128,7 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
   };
   const setExact = async () => {
     if (!clock) return;
-    const v = await askText("Tempo que falta no período (mm:ss):", { confirmText: "Acertar" });
+    const v = await askText(t("Tempo que falta no período (mm:ss):"), { confirmText: t("Acertar") });
     const m = v?.trim().match(/^(\d{1,2})(?::(\d{1,2}))?$/);
     if (!m) return;
     const sec = Number(m[1]) * 60 + Number(m[2] ?? 0);
@@ -155,9 +156,9 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
       }
       if (e.type === "TIMEOUT") {
         const k = timeoutBucket(e.period, game.periods);
-        const t = timeouts.get(k) ?? { us: 0, opp: 0 };
-        t[e.side]++;
-        timeouts.set(k, t);
+        const to = timeouts.get(k) ?? { us: 0, opp: 0 };
+        to[e.side]++;
+        timeouts.set(k, to);
       }
     }
     return { onCourt, period, us, opp, teamFouls, fouls, pts, timeouts, periodEnded: period > 0 && ended.has(period) };
@@ -197,11 +198,11 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
   };
 
   const doAction = async (def: ActionDef) => {
-    if (!selected) return toast("Toca primeiro num jogador (ou ADV)");
+    if (!selected) return toast(t("Toca primeiro num jogador (ou ADV)"));
     const side: Side = selected === "opp" ? "opp" : "us";
     const pid = selected === "opp" ? undefined : selected;
     const e = await log(def.type, side, pid, def.meta ? { ...def.meta } : undefined);
-    toast(`${side === "opp" ? "Adversário" : name(pid)} — ${def.label}`);
+    toast(`${side === "opp" ? t("Adversário") : name(pid)} — ${t(def.label)}`);
     setFollow(null);
     setLastPlay(def.type === "SHOT" || def.type === "TOV" || def.type === "FOUL_DRAWN" ? e.id : null);
     if (def.type === "SHOT" && def.meta?.made && side === "us" && pid) setFollow({ kind: "assist", shotId: e.id, shooter: pid });
@@ -209,11 +210,11 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
     if (def.type === "FOUL" && pid) {
       const n = (state.fouls.get(pid) ?? 0) + 1;
       if (n >= 5) {
-        toast(`${name(pid)} excluído (5 faltas) — escolhe quem entra`);
+        toast(t("{name} excluído (5 faltas) — escolhe quem entra", { name: name(pid) }));
         try { navigator.vibrate?.(300); } catch {}
         setSub({ out: pid });
         setSelected(null);
-      } else if (n === 4) toast(`Atenção: 4.ª falta de ${name(pid)}`);
+      } else if (n === 4) toast(t("Atenção: 4.ª falta de {name}", { name: name(pid) }));
     }
   };
 
@@ -227,7 +228,7 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
     if (follow?.kind === "assist") {
       if (pid !== "opp" && pid !== follow.shooter) {
         await log("AST", "us", pid, { linkedTo: follow.shotId });
-        toast(`${name(pid)} — Assistência`);
+        toast(`${name(pid)} — ${t("Assistência")}`);
         setFollow(null);
         return;
       }
@@ -235,10 +236,10 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
     } else if (follow?.kind === "rebound") {
       if (pid === "opp") {
         await log("REB", "opp", undefined, { off: follow.shotSide === "opp" });
-        toast(`Adversário — Ressalto ${follow.shotSide === "opp" ? "of." : "def."}`);
+        toast(`${t("Adversário")} — ${follow.shotSide === "opp" ? t("Ressalto of.") : t("Ressalto def.")}`);
       } else {
         await log("REB", "us", pid, { off: follow.shotSide === "us" });
-        toast(`${name(pid)} — Ressalto ${follow.shotSide === "us" ? "of." : "def."}`);
+        toast(`${name(pid)} — ${follow.shotSide === "us" ? t("Ressalto of.") : t("Ressalto def.")}`);
       }
       setFollow(null);
       return;
@@ -248,7 +249,7 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
 
   const doSub = async (outId: ID, inId: ID) => {
     await log("SUB", "us", undefined, { in: inId, out: outId });
-    toast(`Entra ${name(inId)} · Sai ${name(outId)}`);
+    toast(t("Entra {in} · Sai {out}", { in: name(inId), out: name(outId) }));
     if (selected === outId) setSelected(inId);
     setSub(null);
   };
@@ -258,10 +259,10 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
   };
 
   const timeout = async (side: Side) => {
-    if (toUsed[side] >= toMax && !(await ask(`${side === "us" ? "Já usámos" : "O adversário já usou"} os ${toMax} descontos desta parte. Registar mesmo assim?`))) return;
+    if (toUsed[side] >= toMax && !(await ask(side === "us" ? t("Já usámos os {n} descontos desta parte. Registar mesmo assim?", { n: toMax }) : t("O adversário já usou os {n} descontos desta parte. Registar mesmo assim?", { n: toMax })))) return;
     if (clock?.running) setClock({ ...clock, remaining: remainingNow(clock, nowMs()), running: false, since: null });
     await log("TIMEOUT", side);
-    toast(`Desconto de tempo — ${side === "us" ? "nós" : game.opponent}`);
+    toast(`${t("Desconto de tempo")} — ${side === "us" ? t("nós") : game.opponent}`);
   };
 
   const undo = async () => {
@@ -272,7 +273,7 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
     if (last.type === "PERIOD_END") setClock(clockFromEvents(game, sorted.filter((e) => e.id !== last.id)));
     setFollow(null);
     setLastPlay(null);
-    toast(`Anulado: ${describe(last, name)}`);
+    toast(t("Anulado: {what}", { what: describe(last, name) }));
   };
 
   const startPeriod = async (ids: ID[]) => {
@@ -285,12 +286,12 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
     setLineup(null);
     setSelected(null);
     setFollow(null);
-    toast(`${next <= game.periods ? `${next}.º período` : "Prolongamento"} — carrega no relógio para começar`);
+    toast(next <= game.periods ? t("{n}.º período — carrega no relógio para começar", { n: next }) : t("Prolongamento — carrega no relógio para começar"));
   };
 
   const endPeriod = async () => {
     if (!clock) return;
-    if (remaining > 0 && !(await ask(`Ainda faltam ${fmtClock(remaining)}. Terminar o ${state.period}.º período?`, { confirmText: "Terminar" }))) return;
+    if (remaining > 0 && !(await ask(t("Ainda faltam {time}. Terminar o {n}.º período?", { time: fmtClock(remaining), n: state.period }), { confirmText: t("Terminar") }))) return;
     setClock({ ...clock, remaining: 0, running: false, since: null });
     await log("PERIOD_END", "us", undefined, undefined, periodOffset(game, state.period) + periodLength(game, state.period));
     setFollow(null);
@@ -299,33 +300,36 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
 
   const tagLast = lastPlay ? events.find((e) => e.id === lastPlay) : undefined;
   const recent = [...sorted].reverse().filter((e) => e.type !== "PERIOD_START").slice(0, 8);
-  const periodLabel = state.period > game.periods ? `P${state.period - game.periods}` : `${state.period || 1}.º`;
+  // regulation: "2.º período"; overtime: "P1 período" (1st overtime)
+  const isOT = state.period > game.periods;
+  const otN = state.period - game.periods;
+  const periodName = isOT ? t("P{n} período", { n: otN }) : t("{n}.º período", { n: state.period || 1 });
 
   /* ---------- UI ---------- */
 
   const scoreboard = (
     <div className="card sticky top-[3.75rem] z-20 grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 py-2 shadow-lg sm:px-4">
       <div className="min-w-0 text-center">
-        <div className="truncate text-[11px] font-medium text-muted">NÓS</div>
+        <div className="truncate text-[11px] font-medium text-muted">{t("NÓS")}</div>
         <div className="font-mono text-4xl font-bold tabular-nums leading-none">{state.us}</div>
         <div className={`mt-1 text-[11px] ${state.teamFouls.us >= 4 ? "font-semibold text-bad" : "text-muted"}`}>
-          F {state.teamFouls.us}{state.teamFouls.us >= 4 ? " · bónus" : ""} · DT {toMax - toUsed.us}
+          F {state.teamFouls.us}{state.teamFouls.us >= 4 ? ` · ${t("bónus")}` : ""} · {t("DT {n}", { n: toMax - toUsed.us })}
         </div>
       </div>
       <div className="text-center">
-        <div className="text-[11px] text-muted">{started ? `${periodLabel} período` : "—"}</div>
+        <div className="text-[11px] text-muted">{started ? periodName : "—"}</div>
         <button onClick={toggleClock} disabled={!clock || state.periodEnded}
           className={`mt-0.5 rounded-lg px-3 py-1 font-mono text-3xl font-bold tabular-nums sm:text-4xl ${clock?.running ? "bg-good/15 text-good" : remaining === 0 && started ? "bg-bad/15 text-bad" : "bg-panel-2"}`}
-          aria-label={clock?.running ? "Parar relógio" : "Iniciar relógio"}>
+          aria-label={clock?.running ? t("Parar relógio") : t("Iniciar relógio")}>
           {fmtClock(remaining)}
         </button>
-        <div className="mt-1 text-[11px] text-muted">{clock?.running ? "a correr · toca para parar" : started && !state.periodEnded ? "parado · toca para iniciar" : ""}</div>
+        <div className="mt-1 text-[11px] text-muted">{clock?.running ? t("a correr · toca para parar") : started && !state.periodEnded ? t("parado · toca para iniciar") : ""}</div>
       </div>
       <div className="min-w-0 text-center">
         <div className="truncate text-[11px] font-medium text-muted">{game.opponent.toUpperCase()}</div>
         <div className="font-mono text-4xl font-bold tabular-nums leading-none text-opp">{state.opp}</div>
         <div className={`mt-1 text-[11px] ${state.teamFouls.opp >= 4 ? "font-semibold text-good" : "text-muted"}`}>
-          F {state.teamFouls.opp}{state.teamFouls.opp >= 4 ? " · bónus" : ""} · DT {toMax - toUsed.opp}
+          F {state.teamFouls.opp}{state.teamFouls.opp >= 4 ? ` · ${t("bónus")}` : ""} · {t("DT {n}", { n: toMax - toUsed.opp })}
         </div>
       </div>
     </div>
@@ -335,8 +339,8 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
     <div className="mx-auto grid max-w-5xl gap-3 lg:grid-cols-[1fr_320px] lg:items-start">
       <div className="grid min-w-0 gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <Link href={`/jogos/${game.id}`} className="tap text-sm text-muted hover:text-fg">← Estatísticas</Link>
-          <span className="rounded-full bg-bad/15 px-2 py-0.5 text-xs font-semibold text-bad">● AO VIVO</span>
+          <Link href={`/jogos/${game.id}`} className="tap text-sm text-muted hover:text-fg">{t("← Estatísticas")}</Link>
+          <span className="rounded-full bg-bad/15 px-2 py-0.5 text-xs font-semibold text-bad">{t("● AO VIVO")}</span>
         </div>
 
         {scoreboard}
@@ -344,30 +348,30 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
         {/* before the game / between periods */}
         {!started && !lineup && (
           <div className="card p-4 text-sm">
-            <p><b>Modo ao vivo</b> — para registar no banco, sem vídeo. O relógio de jogo dá os minutos exatos de cada jogador.</p>
-            <button className="btn btn-primary mt-3 w-full" onClick={() => setLineup([])}>Definir 5 inicial</button>
+            <p><b>{t("Modo ao vivo")}</b> — {t("para registar no banco, sem vídeo. O relógio de jogo dá os minutos exatos de cada jogador.")}</p>
+            <button className="btn btn-primary mt-3 w-full" onClick={() => setLineup([])}>{t("Definir 5 inicial")}</button>
           </div>
         )}
         {lineup && (
           <LineupPicker players={players} value={lineup} onChange={setLineup} onCancel={() => setLineup(null)}
-            title={started ? `5 em campo no ${state.period + 1 <= game.periods ? `${state.period + 1}.º período` : "prolongamento"}` : "5 inicial"}
-            confirmLabel={started ? "Começar período" : "Começar jogo"} hint="" onConfirm={() => startPeriod(lineup)} />
+            title={started ? (state.period + 1 <= game.periods ? t("5 em campo no {n}.º período", { n: state.period + 1 }) : t("5 em campo no prolongamento")) : t("5 inicial")}
+            confirmLabel={started ? t("Começar período") : t("Começar jogo")} hint="" onConfirm={() => startPeriod(lineup)} />
         )}
         {started && state.periodEnded && !lineup && (
           <div className="card border-brand/60 p-4 text-sm">
             {finished ? (
               <>
-                <p className="text-base font-semibold">Fim do jogo: {state.us}–{state.opp} {state.us > state.opp ? "🏆" : ""}</p>
+                <p className="text-base font-semibold">{t("Fim do jogo:")} {state.us}–{state.opp} {state.us > state.opp ? "🏆" : ""}</p>
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                  <Link href={`/jogos/${game.id}`} className="btn btn-primary">Ver estatísticas e partilhar</Link>
-                  <button className="btn" onClick={() => setLineup([...state.onCourt])}>Afinal há prolongamento</button>
+                  <Link href={`/jogos/${game.id}`} className="btn btn-primary">{t("Ver estatísticas e partilhar")}</Link>
+                  <button className="btn" onClick={() => setLineup([...state.onCourt])}>{t("Afinal há prolongamento")}</button>
                 </div>
               </>
             ) : (
               <>
-                <p>Fim do {periodLabel} período{state.period >= game.periods && state.us === state.opp ? " — empate, vamos a prolongamento" : ""}.</p>
+                <p>{isOT ? t("Fim do P{n} período", { n: otN }) : t("Fim do {n}.º período", { n: state.period || 1 })}{state.period >= game.periods && state.us === state.opp ? ` — ${t("empate, vamos a prolongamento")}` : ""}.</p>
                 <button className="btn btn-primary mt-3 w-full" onClick={() => setLineup([...state.onCourt])}>
-                  {state.period >= game.periods ? "Começar prolongamento" : `Começar ${state.period + 1}.º período`}
+                  {state.period >= game.periods ? t("Começar prolongamento") : t("Começar {n}.º período", { n: state.period + 1 })}
                 </button>
               </>
             )}
@@ -380,7 +384,7 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
             <div className="grid grid-cols-5 gap-1.5">
               <button className="btn px-1 text-xs" onClick={() => adjust(-10)}>−10s</button>
               <button className="btn px-1 text-xs" onClick={() => adjust(-1)}>−1s</button>
-              <button className="btn px-1 text-xs" onClick={setExact}>Acertar</button>
+              <button className="btn px-1 text-xs" onClick={setExact}>{t("Acertar")}</button>
               <button className="btn px-1 text-xs" onClick={() => adjust(1)}>+1s</button>
               <button className="btn px-1 text-xs" onClick={() => adjust(10)}>+10s</button>
             </div>
@@ -388,17 +392,17 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
             {/* status */}
             <div className={`rounded-lg border px-3 py-2 text-sm ${follow || sub ? "border-brand bg-brand/10" : "border-line bg-panel"}`} aria-live="polite">
               {sub ? (
-                sub.out ? <>Sai <b>{name(sub.out)}</b> — toca em quem entra (banco)</>
-                  : sub.in ? <>Entra <b>{name(sub.in)}</b> — toca em quem sai (em campo)</>
-                  : <>Substituição: toca em quem sai</>
+                sub.out ? <>{t("Sai")} <b>{name(sub.out)}</b> — {t("toca em quem entra (banco)")}</>
+                  : sub.in ? <>{t("Entra")} <b>{name(sub.in)}</b> — {t("toca em quem sai (em campo)")}</>
+                  : <>{t("Substituição: toca em quem sai")}</>
               ) : follow?.kind === "assist" ? (
-                <>Assistência? Toca no jogador · <button className="tap -my-2 font-medium text-brand underline" onClick={() => setFollow(null)}>sem assistência</button></>
+                <>{t("Assistência? Toca no jogador")} · <button className="tap -my-2 font-medium text-brand underline" onClick={() => setFollow(null)}>{t("sem assistência")}</button></>
               ) : follow?.kind === "rebound" ? (
-                <>Ressalto? Toca no jogador ou em ADV · <button className="tap -my-2 font-medium text-brand underline" onClick={() => setFollow(null)}>ignorar</button></>
+                <>{t("Ressalto? Toca no jogador ou em ADV")} · <button className="tap -my-2 font-medium text-brand underline" onClick={() => setFollow(null)}>{t("ignorar")}</button></>
               ) : selected ? (
-                <>A registar para <b className={selected === "opp" ? "text-opp" : "text-brand"}>{selected === "opp" ? "Adversário" : name(selected)}</b></>
+                <>{t("A registar para")} <b className={selected === "opp" ? "text-opp" : "text-brand"}>{selected === "opp" ? t("Adversário") : name(selected)}</b></>
               ) : (
-                <>Toca num jogador e depois na ação.</>
+                <>{t("Toca num jogador e depois na ação.")}</>
               )}
               {flash && <div className="mt-0.5 text-xs text-muted">✓ {flash}</div>}
             </div>
@@ -406,7 +410,7 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
             {alerts.length > 0 && (
               <div className="rounded-lg border border-line bg-panel px-3 py-2 text-sm" aria-live="polite">
                 <div className="mb-1 flex items-center justify-between text-xs text-muted">
-                  <span>ROTAÇÃO{rotation ? "" : " · sem plano (define-o na página do jogo)"}</span>
+                  <span>{t("ROTAÇÃO")}{rotation ? "" : ` · ${t("sem plano (define-o na página do jogo)")}`}</span>
                 </div>
                 <ul className="grid gap-1">
                   {alerts.map((a, i) => (
@@ -422,8 +426,8 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
             {/* on court */}
             <div>
               <div className="mb-1 flex items-center justify-between text-xs text-muted">
-                <span>EM CAMPO</span>
-                <button className={`btn px-3 py-1 text-xs ${sub ? "btn-primary" : ""}`} onClick={() => setSub(sub ? null : {})}>{sub ? "Cancelar troca" : "Substituição"}</button>
+                <span>{t("EM CAMPO")}</span>
+                <button className={`btn px-3 py-1 text-xs ${sub ? "btn-primary" : ""}`} onClick={() => setSub(sub ? null : {})}>{sub ? t("Cancelar troca") : t("Substituição")}</button>
               </div>
               <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-6">
                 {[0, 1, 2, 3, 4].map((i) => {
@@ -438,13 +442,13 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
                       <div className="font-mono text-2xl font-bold leading-none">{p?.number ?? "–"}</div>
                       <div className="mt-1 truncate text-xs text-muted">{p?.name.split(" ")[0] ?? ""}</div>
                       <div className="mt-0.5 text-[11px] text-muted">{pid ? `${state.pts.get(pid) ?? 0} pts · ${Math.floor(gameSecs(pid) / 60)}'` : ""}</div>
-                      {f > 0 && <div className={`absolute right-1.5 top-1 text-[10px] tracking-tighter ${f >= 4 ? "text-bad" : "text-muted"}`} aria-label={`${f} faltas`}>{"●".repeat(Math.min(f, 5))}</div>}
+                      {f > 0 && <div className={`absolute right-1.5 top-1 text-[10px] tracking-tighter ${f >= 4 ? "text-bad" : "text-muted"}`} aria-label={t("{n} faltas", { n: f })}>{"●".repeat(Math.min(f, 5))}</div>}
                     </button>
                   );
                 })}
                 <button onClick={() => tapCourt("opp")}
                   className={`min-h-[4.5rem] rounded-xl border px-1 py-2 text-center ${selected === "opp" ? "border-opp bg-opp/15" : "border-line bg-panel active:bg-panel-2"}`}>
-                  <div className="font-mono text-2xl font-bold leading-none text-opp">ADV</div>
+                  <div className="font-mono text-2xl font-bold leading-none text-opp">{t("ADV")}</div>
                   <div className="mt-1 truncate text-xs text-muted">{game.opponent}</div>
                 </button>
               </div>
@@ -455,23 +459,23 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
               {ACTIONS.map((a) => (
                 <button key={a.key} onClick={() => doAction(a)}
                   className={`min-h-12 rounded-xl border border-line bg-panel px-1 text-sm font-semibold active:scale-95 active:bg-panel-2 ${a.tone === "good" ? "text-good" : a.tone === "bad" ? "text-bad" : ""}`}>
-                  {a.label}
+                  {t(a.label)}
                 </button>
               ))}
-              <button onClick={undo} className="col-span-2 min-h-12 rounded-xl border border-line bg-panel px-1 text-sm text-muted active:bg-panel-2">↶ Anular último</button>
+              <button onClick={undo} className="col-span-2 min-h-12 rounded-xl border border-line bg-panel px-1 text-sm text-muted active:bg-panel-2">{t("↶ Anular último")}</button>
             </div>
 
             {tagLast && (
               <div className="rounded-lg border border-line bg-panel px-3 py-2">
                 <div className="mb-1.5 flex items-center justify-between text-xs text-muted">
-                  <span>Contexto da jogada <span className="opacity-70">(opcional)</span></span>
-                  <button className="tap -my-2 px-1 hover:text-fg" onClick={() => setLastPlay(null)} aria-label="Fechar contexto">✕</button>
+                  <span>{t("Contexto da jogada")} <span className="opacity-70">{t("(opcional)")}</span></span>
+                  <button className="tap -my-2 px-1 hover:text-fg" onClick={() => setLastPlay(null)} aria-label={t("Fechar contexto")}>✕</button>
                 </div>
                 <TagPicker compact value={tagLast.meta?.tags ?? []}
-                  onToggle={(t) => db.events.update(tagLast.id, { meta: { ...(tagLast.meta ?? {}), tags: toggleTag(tagLast.meta?.tags, t) } })} />
+                  onToggle={(tag) => db.events.update(tagLast.id, { meta: { ...(tagLast.meta ?? {}), tags: toggleTag(tagLast.meta?.tags, tag) } })} />
                 {tagLast.type === "SHOT" && (
                   <div className="mt-2">
-                    <div className="mb-1 text-xs text-muted">{tagLast.x === undefined ? "Onde foi o lançamento? Toca no campo (opcional)" : "Local marcado ✓ — toca para corrigir"}</div>
+                    <div className="mb-1 text-xs text-muted">{tagLast.x === undefined ? t("Onde foi o lançamento? Toca no campo (opcional)") : t("Local marcado ✓ — toca para corrigir")}</div>
                     <div className="mx-auto max-w-[260px]">
                       <Court onPick={(x, y) => db.events.update(tagLast.id, { x, y })}
                         shots={tagLast.x !== undefined ? [{ id: tagLast.id, x: tagLast.x, y: tagLast.y!, made: !!tagLast.meta?.made, side: tagLast.side }] : []} />
@@ -483,7 +487,7 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
 
             {/* bench */}
             <div>
-              <div className="mb-1 text-xs text-muted">BANCO <span className="opacity-70">— toca para fazer entrar</span></div>
+              <div className="mb-1 text-xs text-muted">{t("BANCO")} <span className="opacity-70">— {t("toca para fazer entrar")}</span></div>
               <div className="flex flex-wrap gap-1.5">
                 {bench.map((p) => {
                   const f = state.fouls.get(p.id) ?? 0;
@@ -495,14 +499,14 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
                     </button>
                   );
                 })}
-                {bench.length === 0 && <span className="text-sm text-muted">Sem suplentes.</span>}
+                {bench.length === 0 && <span className="text-sm text-muted">{t("Sem suplentes.")}</span>}
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
-              <button className="btn" onClick={() => timeout("us")}>Desconto nós</button>
-              <button className="btn" onClick={() => timeout("opp")}>Desconto adv.</button>
-              <button className="btn col-span-2 border-bad/50 text-bad sm:col-span-1" onClick={endPeriod}>Terminar período</button>
+              <button className="btn" onClick={() => timeout("us")}>{t("Desconto nós")}</button>
+              <button className="btn" onClick={() => timeout("opp")}>{t("Desconto adv.")}</button>
+              <button className="btn col-span-2 border-bad/50 text-bad sm:col-span-1" onClick={endPeriod}>{t("Terminar período")}</button>
             </div>
           </>
         )}
@@ -511,22 +515,22 @@ function Live({ game, players, events }: { game: Game; players: Player[]; events
       {/* recent events */}
       <aside className="card lg:sticky lg:top-20">
         <div className="flex items-center justify-between border-b border-line px-3 py-2">
-          <h2 className="text-sm font-semibold">Últimos registos</h2>
-          <Link href={`/jogos/${game.id}/logger`} className="tap text-xs text-brand">Completar com vídeo</Link>
+          <h2 className="text-sm font-semibold">{t("Últimos registos")}</h2>
+          <Link href={`/jogos/${game.id}/logger`} className="tap text-xs text-brand">{t("Completar com vídeo")}</Link>
         </div>
         <ul className="divide-y divide-line/50">
           {recent.map((e) => (
             <li key={e.id} className="flex items-center gap-2 px-3 py-1.5 text-sm">
-              <span className="w-8 shrink-0 font-mono text-xs text-muted">P{e.period}</span>
+              <span className="w-8 shrink-0 font-mono text-xs text-muted">{periodLabel(e.period)}</span>
               <span className={`min-w-0 flex-1 truncate ${e.side === "opp" ? "text-opp" : ""}`}>
-                {e.type === "SUB" || e.type === "PERIOD_END" || e.type === "TIMEOUT" ? "" : e.side === "opp" ? "Adv. " : `${name(e.playerId)} `}
-                <span className="text-muted">{describe(e, name)}{e.type === "TIMEOUT" ? ` (${e.side === "us" ? "nós" : "adv."})` : ""}</span>
+                {e.type === "SUB" || e.type === "PERIOD_END" || e.type === "TIMEOUT" ? "" : e.side === "opp" ? `${t("Adv.")} ` : `${name(e.playerId)} `}
+                <span className="text-muted">{describe(e, name)}{e.type === "TIMEOUT" ? ` (${e.side === "us" ? t("nós") : t("adv.")})` : ""}</span>
               </span>
-              <button className="-my-1.5 grid h-8 w-8 shrink-0 place-items-center text-muted hover:text-bad" aria-label="Apagar"
-                onClick={async () => { if (await ask(`Apagar "${describe(e, name)}"?`, { confirmText: "Apagar", danger: true })) await db.events.delete(e.id); }}>✕</button>
+              <button className="-my-1.5 grid h-8 w-8 shrink-0 place-items-center text-muted hover:text-bad" aria-label={t("Apagar")}
+                onClick={async () => { if (await ask(t("Apagar \"{what}\"?", { what: describe(e, name) }), { confirmText: t("Apagar"), danger: true })) await db.events.delete(e.id); }}>✕</button>
             </li>
           ))}
-          {recent.length === 0 && <li className="px-3 py-6 text-center text-sm text-muted">Ainda sem registos.</li>}
+          {recent.length === 0 && <li className="px-3 py-6 text-center text-sm text-muted">{t("Ainda sem registos.")}</li>}
         </ul>
       </aside>
     </div>

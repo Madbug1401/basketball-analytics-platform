@@ -1,6 +1,7 @@
 import Dexie, { type EntityTable, type Transaction } from "dexie";
 import type { Agenda, Attendance, Drill, Feedback, Game, GameEvent, Goal, Player, Practice, Rsvp, Scouting, Seen, Measurement, Team, VideoNote, Wellness } from "./types";
 import { cloudConfigured } from "./supabase";
+import { t } from "./i18n";
 
 // Local-first storage (IndexedDB). In cloud mode every local write is also queued
 // in `outbox` and pushed to Supabase by src/lib/sync.ts.
@@ -220,7 +221,7 @@ export async function exportAll(teamId?: string) {
 type Export = Awaited<ReturnType<typeof exportAll>>;
 type Optional = "goals" | "agenda" | "rsvps" | "feedback" | "seen" | "drills" | "scouting" | "notes" | "wellness" | "measurements";
 export async function importAll(data: Omit<Export, Optional> & Partial<Pick<Export, Optional>>) {
-  if (data?.app !== "basketball-analytics") throw new Error("Ficheiro inválido");
+  if (data?.app !== "basketball-analytics") throw new Error(t("Ficheiro inválido"));
   await db.transaction("rw", [db.teams, db.players, db.practices, db.attendance, db.games, db.events, db.goals, db.agenda, db.rsvps, db.feedback, db.seen, db.drills, db.scouting, db.notes, db.wellness, db.measurements], async () => {
     await db.teams.bulkPut(data.teams);
     await db.players.bulkPut(data.players);
@@ -255,7 +256,7 @@ export interface ImportSummary { players: number; games: number; events: number;
  * Without a target team, a new team is created from the file's team info.
  */
 export async function importIntoTeam(data: Record<string, unknown>, target: Team | null): Promise<{ teamId: string; summary: ImportSummary }> {
-  if (data?.app !== "basketball-analytics") throw new Error("Este ficheiro não é uma cópia do Courtside.");
+  if (data?.app !== "basketball-analytics") throw new Error(t("Este ficheiro não é uma cópia do Courtside."));
   const srcTeams = (data.teams as Team[] | undefined) ?? [];
   const src = srcTeams[0];
   const teamId = target?.id ?? uid();

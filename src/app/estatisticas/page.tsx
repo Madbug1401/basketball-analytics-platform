@@ -12,6 +12,7 @@ import { PossessionTable } from "@/components/PossessionTable";
 import { fmtPct, possessions, reb } from "@/lib/stats";
 import { ShooterTable, ShotQuality } from "@/components/ShotQuality";
 import { zoneModel } from "@/lib/shotQuality";
+import { t } from "@/lib/i18n";
 
 export default function SeasonStats() {
   const { team } = useTeam();
@@ -33,56 +34,56 @@ export default function SeasonStats() {
     <div className="grid gap-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Estatísticas da época</h1>
-          <p className="text-sm text-muted">{team.name} {team.category} · {team.season} · {gp} jogos registados</p>
+          <h1 className="text-2xl font-semibold">{t("Estatísticas da época")}</h1>
+          <p className="text-sm text-muted">{team.name} {team.category} · {team.season} · {gp === 1 ? t("{n} jogo registado", { n: gp }) : t("{n} jogos registados", { n: gp })}</p>
         </div>
         <div className="flex gap-1">
-          <button className={`btn ${mode === "avg" ? "btn-primary" : ""}`} onClick={() => setMode("avg")}>Médias</button>
-          <button className={`btn ${mode === "tot" ? "btn-primary" : ""}`} onClick={() => setMode("tot")}>Totais</button>
+          <button className={`btn ${mode === "avg" ? "btn-primary" : ""}`} onClick={() => setMode("avg")}>{t("Médias")}</button>
+          <button className={`btn ${mode === "tot" ? "btn-primary" : ""}`} onClick={() => setMode("tot")}>{t("Totais")}</button>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
-        <Kpi label="Registo" value={`${s.record.w}–${s.record.l}`} />
-        <Kpi label="Pontos / jogo" value={avg(s.team.pts)} sub={`sofridos ${avg(s.opp.pts)}`} />
-        <Kpi label="LC %" value={fmtPct(s.team.fgm, s.team.fga)} sub={`adv. ${fmtPct(s.opp.fgm, s.opp.fga)}`} />
-        <Kpi label="3P %" value={fmtPct(s.team.p3m, s.team.p3a)} sub={`${avg(s.team.p3a)} tent./jogo`} />
-        <Kpi label="LL %" value={fmtPct(s.team.ftm, s.team.fta)} sub={`${avg(s.team.fta)} tent./jogo`} />
-        <Kpi label="Ressaltos / jogo" value={avg(reb(s.team))} sub={`adv. ${avg(reb(s.opp))}`} />
-        <Kpi label="Perdas / jogo" value={avg(s.team.tov)} sub={`adv. ${avg(s.opp.tov)}`} />
+        <Kpi label={t("Registo|vitórias")} value={`${s.record.w}–${s.record.l}`} />
+        <Kpi label={t("Pontos / jogo")} value={avg(s.team.pts)} sub={t("sofridos {v}", { v: avg(s.opp.pts) })} />
+        <Kpi label={t("LC %")} value={fmtPct(s.team.fgm, s.team.fga)} sub={t("adv. {v}", { v: fmtPct(s.opp.fgm, s.opp.fga) })} />
+        <Kpi label="3P %" value={fmtPct(s.team.p3m, s.team.p3a)} sub={t("{v} tent./jogo", { v: avg(s.team.p3a) })} />
+        <Kpi label={t("LL %")} value={fmtPct(s.team.ftm, s.team.fta)} sub={t("{v} tent./jogo", { v: avg(s.team.fta) })} />
+        <Kpi label={t("Ressaltos / jogo")} value={avg(reb(s.team))} sub={t("adv. {v}", { v: avg(reb(s.opp)) })} />
+        <Kpi label={t("Perdas / jogo")} value={avg(s.team.tov)} sub={t("adv. {v}", { v: avg(s.opp.tov) })} />
       </div>
 
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="card p-4">
-          <h2 className="mb-2 font-semibold">Pontos por jogo</h2>
+          <h2 className="mb-2 font-semibold">{t("Pontos por jogo")}</h2>
           <Trend
-            labels={s.games.map((g, i) => `J${i + 1}`)}
+            labels={s.games.map((g, i) => t("J{n}", { n: i + 1 }))}
             series={[
-              { label: "Marcados", color: "#ff7a1a", values: s.games.map((g) => g.stats.us.pts) },
-              { label: "Sofridos", color: "#60a5fa", values: s.games.map((g) => g.stats.opp.pts) },
+              { label: t("Marcados"), color: "#ff7a1a", values: s.games.map((g) => g.stats.us.pts) },
+              { label: t("Sofridos"), color: "#60a5fa", values: s.games.map((g) => g.stats.opp.pts) },
             ]}
           />
         </div>
         <div className="card p-4">
-          <h2 className="mb-3 font-semibold">Vitórias vs derrotas</h2>
+          <h2 className="mb-3 font-semibold">{t("Vitórias vs derrotas")}</h2>
           <table className="tbl">
-            <thead><tr><th>Média por jogo</th><th>Vitórias ({wins.length})</th><th>Derrotas ({losses.length})</th></tr></thead>
+            <thead><tr><th>{t("Média por jogo")}</th><th>{t("Vitórias ({n})", { n: wins.length })}</th><th>{t("Derrotas ({n})", { n: losses.length })}</th></tr></thead>
             <tbody>
-              <tr><td>Pontos marcados</td><td>{split(wins, (g) => g.stats.us.pts)}</td><td>{split(losses, (g) => g.stats.us.pts)}</td></tr>
-              <tr><td>Pontos sofridos</td><td>{split(wins, (g) => g.stats.opp.pts)}</td><td>{split(losses, (g) => g.stats.opp.pts)}</td></tr>
-              <tr><td>Perdas de bola</td><td>{split(wins, (g) => g.stats.us.tov)}</td><td>{split(losses, (g) => g.stats.us.tov)}</td></tr>
-              <tr><td>Ressaltos (dif.)</td><td>{split(wins, (g) => reb(g.stats.us) - reb(g.stats.opp))}</td><td>{split(losses, (g) => reb(g.stats.us) - reb(g.stats.opp))}</td></tr>
-              <tr><td>Ressaltos ofensivos</td><td>{split(wins, (g) => g.stats.us.oreb)}</td><td>{split(losses, (g) => g.stats.us.oreb)}</td></tr>
-              <tr><td>Lances livres tentados</td><td>{split(wins, (g) => g.stats.us.fta)}</td><td>{split(losses, (g) => g.stats.us.fta)}</td></tr>
-              <tr><td>Posses (est.)</td><td>{split(wins, (g) => possessions(g.stats.us))}</td><td>{split(losses, (g) => possessions(g.stats.us))}</td></tr>
+              <tr><td>{t("Pontos marcados")}</td><td>{split(wins, (g) => g.stats.us.pts)}</td><td>{split(losses, (g) => g.stats.us.pts)}</td></tr>
+              <tr><td>{t("Pontos sofridos")}</td><td>{split(wins, (g) => g.stats.opp.pts)}</td><td>{split(losses, (g) => g.stats.opp.pts)}</td></tr>
+              <tr><td>{t("Perdas de bola")}</td><td>{split(wins, (g) => g.stats.us.tov)}</td><td>{split(losses, (g) => g.stats.us.tov)}</td></tr>
+              <tr><td>{t("Ressaltos (dif.)")}</td><td>{split(wins, (g) => reb(g.stats.us) - reb(g.stats.opp))}</td><td>{split(losses, (g) => reb(g.stats.us) - reb(g.stats.opp))}</td></tr>
+              <tr><td>{t("Ressaltos ofensivos")}</td><td>{split(wins, (g) => g.stats.us.oreb)}</td><td>{split(losses, (g) => g.stats.us.oreb)}</td></tr>
+              <tr><td>{t("Lances livres tentados")}</td><td>{split(wins, (g) => g.stats.us.fta)}</td><td>{split(losses, (g) => g.stats.us.fta)}</td></tr>
+              <tr><td>{t("Posses (est.)")}</td><td>{split(wins, (g) => possessions(g.stats.us))}</td><td>{split(losses, (g) => possessions(g.stats.us))}</td></tr>
             </tbody>
           </table>
-          <p className="mt-2 text-[11px] text-muted">Com poucos jogos, as diferenças podem ser acaso — olha para tendências ao longo da época.</p>
+          <p className="mt-2 text-[11px] text-muted">{t("Com poucos jogos, as diferenças podem ser acaso — olha para tendências ao longo da época.")}</p>
         </div>
       </section>
 
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Jogadores</h2>
+        <h2 className="mb-3 text-lg font-semibold">{t("Jogadores")}</h2>
         <BoxTable rows={rows} total={s.team} perGame={mode === "avg"} />
       </section>
 
@@ -92,14 +93,14 @@ export default function SeasonStats() {
       <SeasonShots s={s} />
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <PossessionTable games={s.games} opponent="Adversários" />
-        <ContextTable events={s.games.flatMap((g) => g.events)} opponent="Adversários" />
+        <PossessionTable games={s.games} opponent={t("Adversários")} />
+        <ContextTable events={s.games.flatMap((g) => g.events)} opponent={t("Adversários")} />
       </div>
 
       <section className="card overflow-x-auto">
-        <div className="border-b border-line px-3 py-2"><h2 className="font-semibold">Assiduidade × produção</h2></div>
+        <div className="border-b border-line px-3 py-2"><h2 className="font-semibold">{t("Assiduidade × produção")}</h2></div>
         <table className="tbl">
-          <thead><tr><th>Jogador</th><th>Assiduidade</th><th>Jogos</th><th>PTS/J</th><th>+/- total</th></tr></thead>
+          <thead><tr><th>{t("Jogador")}</th><th>{t("Assiduidade")}</th><th>{t("Jogos")}</th><th>{t("PTS/J")}</th><th>{t("+/- total")}</th></tr></thead>
           <tbody>
             {s.players.filter((p) => p.active).map((p) => {
               const l = s.totals.get(p.id);
@@ -129,16 +130,16 @@ function SeasonShots({ s }: { s: SeasonData }) {
     <section className="grid gap-4 lg:grid-cols-[420px_1fr]">
       <div className="card p-3">
         <div className="mb-2 flex items-center justify-between gap-2">
-          <h2 className="font-semibold">Qualidade de lançamento</h2>
-          <select className="input w-auto py-1" value={side} onChange={(e) => setSide(e.target.value as "us" | "opp")} aria-label="Equipa">
-            <option value="us">Nós</option>
-            <option value="opp">Adversários</option>
+          <h2 className="font-semibold">{t("Qualidade de lançamento")}</h2>
+          <select className="input w-auto py-1" value={side} onChange={(e) => setSide(e.target.value as "us" | "opp")} aria-label={t("Equipa")}>
+            <option value="us">{t("Nós")}</option>
+            <option value="opp">{t("Adversários")}</option>
           </select>
         </div>
         <ShotQuality shots={all.filter((e) => e.type === "SHOT" && e.side === side)} model={model} opp={side === "opp"} />
       </div>
       <div className="card h-fit p-3">
-        <h2 className="mb-2 font-semibold">Quem lança bem</h2>
+        <h2 className="mb-2 font-semibold">{t("Quem lança bem")}</h2>
         <ShooterTable events={all} model={model} players={s.players} />
       </div>
     </section>

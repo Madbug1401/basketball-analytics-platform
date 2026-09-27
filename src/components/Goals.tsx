@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { db, uid } from "@/lib/db";
-import { fmtGoalValue, goalProgress, goalTitle, METRIC, METRICS } from "@/lib/goals";
+import { fmtGoalValue, goalProgress, goalTitle, metricShort, METRIC, METRICS } from "@/lib/goals";
+import { fmtDate, t } from "@/lib/i18n";
 import type { SeasonData } from "@/lib/season";
 import type { Goal, GoalMetric, ID, Player } from "@/lib/types";
 import { ask } from "./Dialog";
@@ -13,7 +14,7 @@ export function GoalCard({ goal, season, players, canEdit, onEdit }: {
   const pr = goalProgress(goal, season);
   const def = METRIC[goal.metric];
   const p = goal.playerId ? players.get(goal.playerId) : undefined;
-  const name = p ? `#${p.number} ${p.name.split(" ")[0]}` : goal.playerId ? "Jogador" : "Equipa";
+  const name = p ? `#${p.number} ${p.name.split(" ")[0]}` : goal.playerId ? t("Jogador") : t("Equipa");
   const trendUp = pr.recent !== null && pr.value !== null && (def?.lowerIsBetter ? pr.recent < pr.value : pr.recent > pr.value);
   const trendDown = pr.recent !== null && pr.value !== null && (def?.lowerIsBetter ? pr.recent > pr.value : pr.recent < pr.value);
   const overdue = goal.dueDate && !pr.reached && goal.dueDate < new Date().toISOString().slice(0, 10);
@@ -23,21 +24,21 @@ export function GoalCard({ goal, season, players, canEdit, onEdit }: {
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className={`text-xs font-medium ${goal.playerId ? "text-brand" : "text-opp"}`}>{name}</div>
-          <div className="font-semibold leading-snug">{goal.title || def?.label.replace(/ \(máx\.\)/, "") || goal.metric}</div>
+          <div className="font-semibold leading-snug">{goal.title || (def ? metricShort(def) : goal.metric)}</div>
         </div>
         {pr.reached
-          ? <span className="shrink-0 rounded-full bg-good/20 px-2 py-0.5 text-xs font-semibold text-good">Atingido ✓</span>
-          : overdue ? <span className="shrink-0 rounded-full bg-bad/15 px-2 py-0.5 text-xs text-bad">Prazo passou</span> : null}
+          ? <span className="shrink-0 rounded-full bg-good/20 px-2 py-0.5 text-xs font-semibold text-good">{t("Atingido ✓")}</span>
+          : overdue ? <span className="shrink-0 rounded-full bg-bad/15 px-2 py-0.5 text-xs text-bad">{t("Prazo passou")}</span> : null}
       </div>
 
       <div className="flex items-end justify-between gap-2">
         <div className="font-mono text-2xl font-bold tabular-nums">
           {fmtGoalValue(goal.metric, pr.value)}
-          <span className="ml-1 text-sm font-normal text-muted">/ {def?.lowerIsBetter ? "máx. " : ""}{fmtGoalValue(goal.metric, goal.target)}</span>
+          <span className="ml-1 text-sm font-normal text-muted">/ {def?.lowerIsBetter ? t("máx.") + " " : ""}{fmtGoalValue(goal.metric, goal.target)}</span>
         </div>
         {pr.recent !== null && (
           <div className={`text-right text-xs ${trendUp ? "text-good" : trendDown ? "text-bad" : "text-muted"}`}>
-            {trendUp ? "▲" : trendDown ? "▼" : "•"} últimos 3: {fmtGoalValue(goal.metric, pr.recent)}
+            {trendUp ? "▲" : trendDown ? "▼" : "•"} {t("últimos 3: {v}", { v: fmtGoalValue(goal.metric, pr.recent) })}
           </div>
         )}
       </div>
@@ -47,8 +48,8 @@ export function GoalCard({ goal, season, players, canEdit, onEdit }: {
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted">
-        <span>{pr.sample}{goal.dueDate ? ` · até ${new Date(goal.dueDate + "T12:00").toLocaleDateString("pt-PT", { day: "numeric", month: "short" })}` : ""}</span>
-        {canEdit && onEdit && <button className="tap -my-2 text-brand hover:underline" onClick={() => onEdit(goal)}>Editar</button>}
+        <span>{pr.sample}{goal.dueDate ? ` · ${t("até {date}", { date: fmtDate(goal.dueDate, { day: "numeric", month: "short" }) })}` : ""}</span>
+        {canEdit && onEdit && <button className="tap -my-2 text-brand hover:underline" onClick={() => onEdit(goal)}>{t("Editar")}</button>}
       </div>
     </div>
   );
@@ -76,9 +77,9 @@ export function GoalForm({ teamId, players, initial, defaultPlayer, onDone }: {
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     const target = Number(d.target.replace(",", "."));
-    if (!isFinite(target) || target < 0) return setErr("Escreve um valor válido.");
-    if (def.unit === "%" && target > 100) return setErr("A percentagem não pode passar de 100.");
-    if (d.scope === "player" && !d.playerId) return setErr("Escolhe o jogador.");
+    if (!isFinite(target) || target < 0) return setErr(t("Escreve um valor válido."));
+    if (def.unit === "%" && target > 100) return setErr(t("A percentagem não pode passar de 100."));
+    if (d.scope === "player" && !d.playerId) return setErr(t("Escolhe o jogador."));
     const row: Goal = {
       id: d.id ?? uid(), teamId, playerId: d.scope === "player" ? d.playerId : undefined, metric: d.metric, target,
       title: d.title.trim() || undefined, dueDate: d.dueDate || undefined, active: d.active, createdAt: initial?.createdAt ?? Date.now(),
@@ -89,58 +90,58 @@ export function GoalForm({ teamId, players, initial, defaultPlayer, onDone }: {
 
   const remove = async () => {
     if (!d.id) return;
-    if (!(await ask("Apagar este objetivo?", { confirmText: "Apagar", danger: true }))) return;
+    if (!(await ask(t("Apagar este objetivo?"), { confirmText: t("Apagar"), danger: true }))) return;
     await db.goals.delete(d.id);
     onDone();
   };
 
   return (
     <form onSubmit={save} className="card grid gap-3 p-4">
-      <h2 className="font-semibold">{d.id ? "Editar objetivo" : "Novo objetivo"}</h2>
+      <h2 className="font-semibold">{d.id ? t("Editar objetivo") : t("Novo objetivo")}</h2>
       <div className="grid grid-cols-2 gap-1">
-        <button type="button" className={`btn ${d.scope === "team" ? "btn-primary" : ""}`} onClick={() => setScope("team")}>Equipa</button>
-        <button type="button" className={`btn ${d.scope === "player" ? "btn-primary" : ""}`} onClick={() => setScope("player")}>Jogador</button>
+        <button type="button" className={`btn ${d.scope === "team" ? "btn-primary" : ""}`} onClick={() => setScope("team")}>{t("Equipa")}</button>
+        <button type="button" className={`btn ${d.scope === "player" ? "btn-primary" : ""}`} onClick={() => setScope("player")}>{t("Jogador")}</button>
       </div>
       {d.scope === "player" && (
         <div>
-          <label className="label">Jogador</label>
+          <label className="label">{t("Jogador")}</label>
           <select className="input" value={d.playerId} onChange={(e) => setD({ ...d, playerId: e.target.value })}>
             {players.map((p) => <option key={p.id} value={p.id}>#{p.number} {p.name}</option>)}
           </select>
         </div>
       )}
       <div>
-        <label className="label">Estatística</label>
+        <label className="label">{t("Estatística")}</label>
         <select className="input" value={d.metric} onChange={(e) => { const m = e.target.value as GoalMetric; setD({ ...d, metric: m, target: String(METRIC[m].suggest) }); }}>
-          {metrics.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
+          {metrics.map(({ id, label }) => <option key={id} value={id}>{t(label)}</option>)}
         </select>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="label">{def.lowerIsBetter ? "Máximo" : "Meta"} {def.unit && `(${def.unit.replace("/", "por ")})`}</label>
+          <label className="label">{def.lowerIsBetter ? t("Máximo") : t("Meta")} {def.unit === "%" ? "(%)" : def.unit ? `(${t("por jogo")})` : ""}</label>
           <input className="input" inputMode="decimal" value={d.target} onChange={(e) => setD({ ...d, target: e.target.value })} />
         </div>
         <div>
-          <label className="label">Prazo (opcional)</label>
+          <label className="label">{t("Prazo (opcional)")}</label>
           <input type="date" className="input" value={d.dueDate} onChange={(e) => setD({ ...d, dueDate: e.target.value })} />
         </div>
       </div>
       <div>
-        <label className="label">Título (opcional)</label>
+        <label className="label">{t("Título (opcional)")}</label>
         <input className="input" placeholder={goalTitle({ id: "", teamId, metric: d.metric, target: Number(d.target) || 0, active: true, createdAt: 0, playerId: d.scope === "player" ? d.playerId : undefined },
           d.scope === "player" ? players.find((p) => p.id === d.playerId)?.name.split(" ")[0] : undefined)}
           value={d.title} onChange={(e) => setD({ ...d, title: e.target.value })} />
       </div>
       {d.id && (
         <label className="flex min-h-10 cursor-pointer items-center gap-2 text-sm text-muted">
-          <input type="checkbox" className="h-4 w-4" checked={!d.active} onChange={(e) => setD({ ...d, active: !e.target.checked })} /> Arquivar (deixa de aparecer no painel)
+          <input type="checkbox" className="h-4 w-4" checked={!d.active} onChange={(e) => setD({ ...d, active: !e.target.checked })} /> {t("Arquivar (deixa de aparecer no painel)")}
         </label>
       )}
       {err && <p className="text-sm text-bad">{err}</p>}
       <div className="flex flex-wrap gap-2">
-        <button className="btn btn-primary flex-1">Guardar</button>
-        <button type="button" className="btn" onClick={onDone}>Cancelar</button>
-        {d.id && <button type="button" className="btn btn-danger" onClick={remove}>Apagar</button>}
+        <button className="btn btn-primary flex-1">{t("Guardar")}</button>
+        <button type="button" className="btn" onClick={onDone}>{t("Cancelar")}</button>
+        {d.id && <button type="button" className="btn btn-danger" onClick={remove}>{t("Apagar")}</button>}
       </div>
     </form>
   );

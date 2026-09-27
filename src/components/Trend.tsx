@@ -1,12 +1,14 @@
 "use client";
 
+import { t } from "@/lib/i18n";
+
 export interface Series { label: string; color: string; values: (number | null)[] }
 
 /** Minimal responsive line chart for per-game trends. */
 export function Trend({ labels, series, height = 180 }: { labels: string[]; series: Series[]; height?: number }) {
   const W = 600, H = height, pl = 32, pr = 12, pt = 12, pb = 26;
   const all = series.flatMap((s) => s.values.filter((v): v is number => v !== null));
-  if (!labels.length || !all.length) return <p className="py-8 text-center text-sm text-muted">Sem dados suficientes ainda.</p>;
+  if (!labels.length || !all.length) return <p className="py-8 text-center text-sm text-muted">{t("Sem dados suficientes ainda.")}</p>;
   const max = Math.max(1, ...all);
   const niceMax = Math.ceil(max / 5) * 5;
   const x = (i: number) => pl + (labels.length === 1 ? (W - pl - pr) / 2 : (i * (W - pl - pr)) / (labels.length - 1));
@@ -15,10 +17,10 @@ export function Trend({ labels, series, height = 180 }: { labels: string[]; seri
   return (
     <div>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img">
-        {ticks.map((t) => (
-          <g key={t}>
-            <line x1={pl} x2={W - pr} y1={y(t)} y2={y(t)} stroke="#263044" strokeDasharray={t ? "3 4" : undefined} />
-            <text x={pl - 6} y={y(t) + 4} textAnchor="end" fontSize="10" fill="#8a96ab">{t}</text>
+        {ticks.map((tk) => (
+          <g key={tk}>
+            <line x1={pl} x2={W - pr} y1={y(tk)} y2={y(tk)} stroke="#263044" strokeDasharray={tk ? "3 4" : undefined} />
+            <text x={pl - 6} y={y(tk) + 4} textAnchor="end" fontSize="10" fill="#8a96ab">{tk}</text>
           </g>
         ))}
         {labels.map((l, i) => (

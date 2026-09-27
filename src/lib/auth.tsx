@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { L, t } from "./i18n";
 import type { Session } from "@supabase/supabase-js";
 import { cloudConfigured, supabase } from "./supabase";
 import { clearAllLocal } from "./db";
@@ -93,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const claimInvite = useCallback(async (code: string) => {
-    if (!supabase) throw new Error("Sem ligação ao servidor");
+    if (!supabase) throw new Error(t("Sem ligação ao servidor"));
     const { data, error } = await supabase.rpc("claim_invite", { p_code: code.trim() });
     if (error) throw new Error(error.message);
     try { localStorage.removeItem(PENDING_INVITE_KEY); } catch {}
@@ -222,9 +223,9 @@ export function useAccess(teamId?: string): Access {
 }
 
 export const ROLE_LABEL: Record<string, string> = {
-  owner: "Dono / treinador principal",
-  coach: "Treinador",
-  analyst: "Analista",
-  player: "Jogador",
-  admin: "Administrador",
+  owner: L("Dono / treinador principal"),
+  coach: L("Treinador"),
+  analyst: L("Analista"),
+  player: L("Jogador"),
+  admin: L("Administrador"),
 };

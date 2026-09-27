@@ -72,6 +72,13 @@
 - [x] Notificações: terminar sessão liberta o telemóvel; nova chave VAPID → volta a subscrever sozinho
 - [x] Acesso offline guardado sempre que muda (equipa criada ou convite aceite)
 
+## v0.10 — Idiomas
+- [x] Toda a interface em português, inglês e francês (Definições → Idioma, menu da conta, ecrã de entrada)
+- [x] Datas no formato da língua; notificações e textos gerados (relatórios, "o que rever", game plan) na língua de quem os cria
+- [x] Verificação automática das traduções (`scripts/i18n-check.ts`) e teste que percorre todas as páginas em EN e FR
+- [x] Atlas e apresentação à direção também em PT · EN · FR
+- [ ] Traduzir os 16 exercícios base (hoje são criados em português, como dados da equipa)
+
 ## Fase 3: vídeo
 - [x] Clips/playlist: "todos os turnovers do #7" → sequência de jogadas (v0.2)
 - [x] Marcadores e notas no vídeo (v0.6)

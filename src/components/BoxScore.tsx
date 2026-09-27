@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { ID, Player } from "@/lib/types";
 import { eff, fmtMin, fmtPct, reb, type Line } from "@/lib/stats";
+import { t } from "@/lib/i18n";
 
 export function BoxTable({
   rows,
@@ -42,8 +43,8 @@ export function BoxTable({
       <table className="tbl">
         <thead>
           <tr>
-            <th>Jogador</th>{perGame && <th>J</th>}<th title="Minutos estimados pelo tempo de vídeo">MIN</th><th>PTS</th><th>LC</th><th>%</th><th>3P</th><th>%</th><th>LL</th><th>%</th>
-            <th>RO</th><th>RD</th><th>RT</th><th>AST</th><th>ROU</th><th>DES</th><th>PB</th><th>F</th><th>+/-</th><th>EF</th>
+            <th>{t("Jogador")}</th>{perGame && <th>{t("J")}</th>}<th title={t("Minutos estimados pelo tempo de vídeo")}>{t("MIN")}</th><th>{t("PTS")}</th><th>{t("LC")}</th><th>%</th><th>{t("3P")}</th><th>%</th><th>{t("LL")}</th><th>%</th>
+            <th>{t("RO")}</th><th>{t("RD")}</th><th>{t("RT")}</th><th>{t("AST")}</th><th>{t("ROU")}</th><th>{t("DES")}</th><th>{t("PB")}</th><th>{t("F")}</th><th>+/-</th><th>{t("EF")}</th>
           </tr>
         </thead>
         <tbody>
@@ -59,14 +60,14 @@ export function BoxTable({
           ))}
           {total && (
             <tr className="bg-panel-2/60 font-semibold">
-              <td>Equipa</td>
+              <td>{t("Equipa")}</td>
               {cells(total, perGame ? total.gp : 1)}
             </tr>
           )}
         </tbody>
       </table>
       <p className="border-t border-line px-3 py-2 text-[11px] text-muted">
-        LC lançamentos de campo · RO/RD/RT ressaltos of./def./total · ROU roubos · DES desarmes · PB perdas de bola · EF eficiência (PTS+RT+AST+ROU+DES−falhados−PB) · MIN estimados pelo tempo de vídeo (±1–2 min)
+        {t("LC lançamentos de campo · RO/RD/RT ressaltos of./def./total · ROU roubos · DES desarmes · PB perdas de bola · EF eficiência (PTS+RT+AST+ROU+DES−falhados−PB) · MIN estimados pelo tempo de vídeo (±1–2 min)")}
       </p>
     </div>
   );

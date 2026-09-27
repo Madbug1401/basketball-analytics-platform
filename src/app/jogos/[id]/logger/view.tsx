@@ -6,7 +6,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, uid } from "@/lib/db";
 import type { EventType, Game, GameEvent, ID, Player, Side, VideoNote } from "@/lib/types";
-import { describe, fmtTs, pointsOf, sortEvents, walk } from "@/lib/stats";
+import { describe, fmtTs, periodLabel, pointsOf, sortEvents, walk } from "@/lib/stats";
+import { t } from "@/lib/i18n";
 import { isThree } from "@/lib/court";
 import { Court } from "@/components/Court";
 import { EventLog } from "@/components/EventLog";
@@ -46,7 +47,7 @@ function LoggerPage() {
   const notes = useLiveQuery(() => db.notes.where("gameId").equals(id).toArray(), [id]);
 
   if (game === undefined || !players || !events) return null;
-  if (!game) return <p className="text-muted">Jogo não encontrado.</p>;
+  if (!game) return <p className="text-muted">{t("Jogo não encontrado.")}</p>;
   return <Access game={game} players={players} events={events} notes={notes ?? []} />;
 }
 
@@ -75,10 +76,10 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
   const addNote = async () => {
     const ts = video.current?.getTime() ?? now;
     video.current?.pause();
-    const text = await askText(`Nota em ${fmtTs(ts)} (só a equipa técnica vê)`, { confirmText: "Guardar" });
+    const text = await askText(t("Nota em {time} (só a equipa técnica vê)", { time: fmtTs(ts) }), { confirmText: t("Guardar") });
     if (!text?.trim()) return;
     await db.notes.add({ id: uid(), teamId: game.teamId, gameId: game.id, videoTs: ts, period: periodNow, text: text.trim(), author: profile?.fullName || undefined, createdAt: nowMs() });
-    toast("Nota guardada");
+    toast(t("Nota guardada"));
   };
 
   const byId = useMemo(() => new Map(players.map((p) => [p.id, p])), [players]);
@@ -137,7 +138,7 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
   const doAction = async (def: ActionDef, a: Actor = actor) => {
     const side = actorSide(a);
     const pid = actorPlayer(a);
-    if (side === "us" && !pid) return toast("Escolhe um jogador (1–5)");
+    if (side === "us" && !pid) return toast(t("Escolhe um jogador (1–5)"));
     let meta = def.meta ? { ...def.meta } : undefined;
     let loc: { x: number; y: number } | undefined;
     if (def.type === "SHOT" && pendingLoc) {
@@ -145,7 +146,7 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
       setPendingLoc(null);
     }
     const e = await log(def.type, side, pid, meta, loc);
-    toast(`${side === "opp" ? "Adversário" : name(pid)} — ${def.label}`);
+    toast(`${side === "opp" ? t("Adversário") : name(pid)} — ${t(def.label)}`);
     setFollow(null);
     setLastPlay(def.type === "SHOT" || def.type === "TOV" || def.type === "FOUL_DRAWN" ? e.id : null);
     if (def.type === "SHOT") {
@@ -163,8 +164,8 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
       const three = isThree(x, y);
       const shot = events.find((e) => e.id === pendingShot);
       await db.events.update(pendingShot, { x, y });
-      if (shot && (shot.meta?.pts === 3) !== three) toast(`Local marcado (atenção: clique ${three ? "fora" : "dentro"} da linha de 3)`);
-      else toast("Local do lançamento marcado");
+      if (shot && (shot.meta?.pts === 3) !== three) toast(three ? t("Local marcado (atenção: clique fora da linha de 3)") : t("Local marcado (atenção: clique dentro da linha de 3)"));
+      else toast(t("Local do lançamento marcado"));
       setPendingShot(null);
       return;
     }
@@ -185,19 +186,19 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
       const pid = state.onCourt[slot];
       if (!pid || pid === follow.shooter) return false;
       await log("AST", "us", pid, { linkedTo: follow.shotId });
-      toast(`${name(pid)} — Assistência`);
+      toast(`${name(pid)} — ${t("Assistência")}`);
       setFollow(null);
       return true;
     }
     // rebound
     if (slot === "opp") {
       await log("REB", "opp", undefined, { off: follow.shotSide === "opp" });
-      toast(`Adversário — Ressalto ${follow.shotSide === "opp" ? "Of" : "Def"}`);
+      toast(`${t("Adversário")} — ${follow.shotSide === "opp" ? t("Ressalto Of") : t("Ressalto Def")}`);
     } else {
       const pid = state.onCourt[slot];
       if (!pid) return false;
       await log("REB", "us", pid, { off: follow.shotSide === "us" });
-      toast(`${name(pid)} — Ressalto ${follow.shotSide === "us" ? "Of" : "Def"}`);
+      toast(`${name(pid)} — ${follow.shotSide === "us" ? t("Ressalto Of") : t("Ressalto Def")}`);
     }
     setFollow(null);
     return true;
@@ -205,7 +206,7 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
 
   const doSub = async (outId: ID, inId: ID) => {
     await log("SUB", "us", undefined, { in: inId, out: outId });
-    toast(`Entra ${name(inId)} · Sai ${name(outId)}`);
+    toast(t("Entra {in} · Sai {out}", { in: name(inId), out: name(outId) }));
     setSub(null);
     setNumBuf("");
   };
@@ -233,7 +234,7 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
       period: next, videoTs: video.current?.getTime() ?? now, meta: { lineup }, createdAt: nowMs(),
     });
     setLineupDraft(null);
-    toast(`Início do ${next}.º período`);
+    toast(t("Início do {n}.º período", { n: next }));
   };
 
   const undo = async () => {
@@ -242,7 +243,7 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
     await db.events.delete(last.id);
     setPendingShot(null);
     setFollow(null);
-    toast(`Anulado: ${describe(last, name)}`);
+    toast(t("Anulado: {what}", { what: describe(last, name) }));
   };
 
   // keyboard
@@ -266,7 +267,7 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
     if (k === "," || k === ".") {
       const i = RATES.indexOf(rate);
       const r = RATES[Math.min(RATES.length - 1, Math.max(0, (i < 0 ? 2 : i) + (k === "." ? 1 : -1)))];
-      v?.setRate(r); setRate(r); toast(`Velocidade ${r}x`);
+      v?.setRate(r); setRate(r); toast(t("Velocidade {r}x", { r }));
       return;
     }
     if (k === "?" ) { setHelp((h) => !h); return; }
@@ -281,10 +282,10 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
     }
     if (sub && k === "enter" && numBuf) {
       const p = players.find((pl) => String(pl.number) === numBuf);
-      if (!p) { toast(`Nº ${numBuf} não encontrado`); setNumBuf(""); return; }
+      if (!p) { toast(t("Nº {n} não encontrado", { n: numBuf })); setNumBuf(""); return; }
       if (sub.out && !state.onCourt.includes(p.id)) return doSub(sub.out, p.id);
       if (sub.in && state.onCourt.includes(p.id)) return doSub(p.id, sub.in);
-      toast("Número inválido para esta troca"); setNumBuf("");
+      toast(t("Número inválido para esta troca")); setNumBuf("");
       return;
     }
     if (sub && /^[1-5]$/.test(k) && !sub.out && !sub.in) { setSub({ out: state.onCourt[Number(k) - 1] }); return; }
@@ -321,30 +322,30 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
 
   const firstStart = sorted.find((e) => e.type === "PERIOD_START");
   const lastEvent = sorted[sorted.length - 1];
-  const seekTo = (t: number) => video.current?.seek(t);
+  const seekTo = (sec: number) => video.current?.seek(sec);
 
-  const actorLabel = actor.kind === "opp" ? "Adversário" : name(actorPlayer());
+  const actorLabel = actor.kind === "opp" ? t("Adversário") : name(actorPlayer());
 
   return (
     <div className={`grid gap-4 ${readOnly ? "mx-auto max-w-5xl" : "xl:grid-cols-[1fr_440px] xl:grid-rows-[auto_1fr]"}`}>
       {/* video (top-left) */}
       <div className="min-w-0 xl:col-start-1 xl:row-start-1">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <Link href={`/jogos/${game.id}`} className="tap text-sm text-muted hover:text-fg">← Estatísticas do jogo</Link>
+          <Link href={`/jogos/${game.id}`} className="tap text-sm text-muted hover:text-fg">{t("← Estatísticas do jogo")}</Link>
           <div className="flex items-center gap-2 text-xs text-muted">
-            <span>Vídeo {fmtTs(now)} · {rate}x</span>
-            {!readOnly && <button className="btn py-1 text-xs" onClick={addNote}>📝 Nota <span className="kbd pointer-coarse:hidden">N</span></button>}
-            <button className="btn py-1 text-xs pointer-coarse:hidden" onClick={() => setHelp(true)}>Atalhos <span className="kbd">?</span></button>
+            <span>{t("Vídeo")} {fmtTs(now)} · {rate}x</span>
+            {!readOnly && <button className="btn py-1 text-xs" onClick={addNote}>{t("📝 Nota")} <span className="kbd pointer-coarse:hidden">N</span></button>}
+            <button className="btn py-1 text-xs pointer-coarse:hidden" onClick={() => setHelp(true)}>{t("Atalhos")} <span className="kbd">?</span></button>
           </div>
         </div>
         <VideoArea game={game} playerRef={video} readOnly={readOnly} />
         {game.video.kind !== "none" && (
           <div className="mt-2 hidden grid-cols-5 gap-1.5 pointer-coarse:grid">
-            <button className="btn px-1 text-xs" onClick={() => video.current?.nudge(-5)} aria-label="Recuar 5 segundos">−5s</button>
-            <button className="btn px-1 text-xs" onClick={() => video.current?.nudge(-1)} aria-label="Recuar 1 segundo">−1s</button>
-            <button className="btn btn-primary px-1" onClick={() => video.current?.toggle()} aria-label="Play / pausa">▶❚❚</button>
-            <button className="btn px-1 text-xs" onClick={() => video.current?.nudge(1)} aria-label="Avançar 1 segundo">+1s</button>
-            <button className="btn px-1 text-xs" onClick={() => video.current?.nudge(5)} aria-label="Avançar 5 segundos">+5s</button>
+            <button className="btn px-1 text-xs" onClick={() => video.current?.nudge(-5)} aria-label={t("Recuar 5 segundos")}>−5s</button>
+            <button className="btn px-1 text-xs" onClick={() => video.current?.nudge(-1)} aria-label={t("Recuar 1 segundo")}>−1s</button>
+            <button className="btn btn-primary px-1" onClick={() => video.current?.toggle()} aria-label={t("Play / pausa")}>▶❚❚</button>
+            <button className="btn px-1 text-xs" onClick={() => video.current?.nudge(1)} aria-label={t("Avançar 1 segundo")}>+1s</button>
+            <button className="btn px-1 text-xs" onClick={() => video.current?.nudge(5)} aria-label={t("Avançar 5 segundos")}>+5s</button>
             <div className="col-span-5 flex gap-1.5">
               {RATES.map((r) => (
                 <button key={r} className={`btn flex-1 px-1 text-xs ${rate === r ? "border-brand text-brand" : ""}`}
@@ -360,41 +361,41 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
       <div className="grid h-fit gap-3 xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:sticky xl:top-[4.25rem] xl:max-h-[calc(100vh-5rem)] xl:overflow-y-auto xl:pr-1">
         <div className="card flex items-center justify-between px-4 py-3">
           <div className="text-center">
-            <div className="text-xs text-muted">NÓS</div>
+            <div className="text-xs text-muted">{t("NÓS")}</div>
             <div className="font-mono text-3xl font-bold tabular-nums">{state.us}</div>
-            <div className={`text-[10px] ${state.teamFouls.us >= 4 ? "font-semibold text-bad" : "text-muted"}`}>faltas {state.teamFouls.us}{state.teamFouls.us >= 4 ? " · bónus adv." : ""}</div>
+            <div className={`text-[10px] ${state.teamFouls.us >= 4 ? "font-semibold text-bad" : "text-muted"}`}>{t("faltas {n}", { n: state.teamFouls.us })}{state.teamFouls.us >= 4 ? ` · ${t("bónus adv.")}` : ""}</div>
           </div>
           <div className="text-center">
-            <div className="rounded bg-panel-2 px-2 py-0.5 font-mono text-sm">{started ? `P${periodNow}` : "—"}</div>
+            <div className="rounded bg-panel-2 px-2 py-0.5 font-mono text-sm">{started ? periodLabel(periodNow) : "—"}</div>
             <button className="btn mt-2 px-2 py-1 text-xs" onClick={() => setLineupDraft(started ? [...state.onCourt] : [])}>
-              {started ? "Próx. período" : "Definir 5 inicial"}
+              {started ? t("Próx. período") : t("Definir 5 inicial")}
             </button>
           </div>
           <div className="text-center">
             <div className="max-w-28 truncate text-xs text-muted">{game.opponent.toUpperCase()}</div>
             <div className="font-mono text-3xl font-bold tabular-nums text-opp">{state.opp}</div>
-            <div className={`text-[10px] ${state.teamFouls.opp >= 4 ? "font-semibold text-good" : "text-muted"}`}>faltas {state.teamFouls.opp}{state.teamFouls.opp >= 4 ? " · bónus nosso" : ""}</div>
+            <div className={`text-[10px] ${state.teamFouls.opp >= 4 ? "font-semibold text-good" : "text-muted"}`}>{t("faltas {n}", { n: state.teamFouls.opp })}{state.teamFouls.opp >= 4 ? ` · ${t("bónus nosso")}` : ""}</div>
           </div>
         </div>
 
         {!started && !lineupDraft && (firstStart && lastEvent ? (
             <div className="card border-brand/50 p-4 text-sm">
-              Este jogo já tem <b>{sorted.length} eventos</b>. O vídeo está antes do início ({fmtTs(firstStart.videoTs)}).
+              {t("Este jogo já tem")} <b>{t("{n} eventos", { n: sorted.length })}</b>. {t("O vídeo está antes do início ({time}).", { time: fmtTs(firstStart.videoTs) })}
               <div className="mt-3 grid grid-cols-2 gap-2">
-                <button className="btn" onClick={() => seekTo(firstStart.videoTs)}>Ir para o início</button>
-                <button className="btn btn-primary" onClick={() => seekTo(lastEvent.videoTs + 1)}>Continuar ({fmtTs(lastEvent.videoTs)})</button>
+                <button className="btn" onClick={() => seekTo(firstStart.videoTs)}>{t("Ir para o início")}</button>
+                <button className="btn btn-primary" onClick={() => seekTo(lastEvent.videoTs + 1)}>{t("Continuar ({time})", { time: fmtTs(lastEvent.videoTs) })}</button>
               </div>
             </div>
           ) : (
             <div className="card border-brand/50 p-4 text-sm">
-              <b>Passo 1:</b> avança o vídeo até ao salto inicial e define o 5 inicial.
-              <button className="btn btn-primary mt-3 w-full" onClick={() => setLineupDraft([])}>Definir 5 inicial</button>
+              <b>{t("Passo 1:")}</b> {t("avança o vídeo até ao salto inicial e define o 5 inicial.")}
+              <button className="btn btn-primary mt-3 w-full" onClick={() => setLineupDraft([])}>{t("Definir 5 inicial")}</button>
             </div>
           ))}
 
         {lineupDraft && (
           <LineupPicker players={players} value={lineupDraft} onChange={setLineupDraft}
-            title={started ? `5 em campo no início do ${state.period + 1}.º período` : "5 inicial"}
+            title={started ? t("5 em campo no início do {n}.º período", { n: state.period + 1 }) : t("5 inicial")}
             onConfirm={() => startPeriod(lineupDraft)} onCancel={() => setLineupDraft(null)} />
         )}
 
@@ -403,19 +404,19 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
             {/* status banner */}
             <div className={`rounded-lg border px-3 py-2 text-sm ${follow || pendingShot || sub || pendingLoc ? "border-brand bg-brand/10" : "border-line bg-panel"}`}>
               {sub ? (
-                sub.out ? <>Troca: sai <b>{name(sub.out)}</b> — escolhe quem entra (clica ou escreve o nº + Enter) {numBuf && <span className="kbd">{numBuf}</span>}</>
-                  : sub.in ? <>Troca: entra <b>{name(sub.in)}</b> — escolhe quem sai (clica)</>
-                  : <>Troca: escolhe quem sai (<span className="kbd">1</span>–<span className="kbd">5</span> ou clica)</>
+                sub.out ? <>{t("Troca: sai")} <b>{name(sub.out)}</b> — {t("escolhe quem entra (clica ou escreve o nº + Enter)")} {numBuf && <span className="kbd">{numBuf}</span>}</>
+                  : sub.in ? <>{t("Troca: entra")} <b>{name(sub.in)}</b> — {t("escolhe quem sai (clica)")}</>
+                  : <>{t("Troca: escolhe quem sai")} (<span className="kbd">1</span>–<span className="kbd">5</span> {t("ou clica")})</>
               ) : pendingLoc ? (
-                <>Local marcado — <span className="kbd">Enter</span> convertido · <span className="kbd">⌫</span> falhado · ou tecla de lançamento</>
+                <>{t("Local marcado")} — <span className="kbd">Enter</span> {t("convertido")} · <span className="kbd">⌫</span> {t("falhado")} · {t("ou tecla de lançamento")}</>
               ) : follow?.kind === "assist" ? (
-                <>Assistência? <span className="kbd">1</span>–<span className="kbd">5</span> · <span className="kbd">Esc</span> sem assist.{pendingShot && " · clica no campo para o local"}</>
+                <>{t("Assistência?")} <span className="kbd">1</span>–<span className="kbd">5</span> · <span className="kbd">Esc</span> {t("sem assist.")}{pendingShot && ` · ${t("clica no campo para o local")}`}</>
               ) : follow?.kind === "rebound" ? (
-                <>Ressalto? <span className="kbd">1</span>–<span className="kbd">5</span> nós · <span className="kbd">0</span> adv.{pendingShot && " · clica no campo para o local"}</>
+                <>{t("Ressalto?")} <span className="kbd">1</span>–<span className="kbd">5</span> {t("nós")} · <span className="kbd">0</span> {t("adv.")}{pendingShot && ` · ${t("clica no campo para o local")}`}</>
               ) : pendingShot ? (
-                <>Clica no campo onde foi o lançamento (<span className="kbd">Esc</span> para saltar)</>
+                <>{t("Clica no campo onde foi o lançamento")} (<span className="kbd">Esc</span> {t("para saltar")})</>
               ) : (
-                <>A registar para: <b className={actor.kind === "opp" ? "text-opp" : "text-brand"}>{actorLabel}</b></>
+                <>{t("A registar para:")} <b className={actor.kind === "opp" ? "text-opp" : "text-brand"}>{actorLabel}</b></>
               )}
               {flash && <div className="mt-1 text-xs text-muted">✓ {flash}</div>}
             </div>
@@ -426,11 +427,11 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
               return (
                 <div className="rounded-lg border border-line bg-panel px-3 py-2">
                   <div className="mb-1.5 flex items-center justify-between text-xs text-muted">
-                    <span>Contexto da jogada <span className="opacity-70">(opcional)</span></span>
-                    <button className="tap -my-2 px-1 hover:text-fg" onClick={() => setLastPlay(null)} aria-label="Fechar contexto">✕</button>
+                    <span>{t("Contexto da jogada")} <span className="opacity-70">{t("(opcional)")}</span></span>
+                    <button className="tap -my-2 px-1 hover:text-fg" onClick={() => setLastPlay(null)} aria-label={t("Fechar contexto")}>✕</button>
                   </div>
                   <TagPicker compact value={ev.meta?.tags ?? []}
-                    onToggle={(t) => db.events.update(ev.id, { meta: { ...(ev.meta ?? {}), tags: toggleTag(ev.meta?.tags, t) } })} />
+                    onToggle={(tag) => db.events.update(ev.id, { meta: { ...(ev.meta ?? {}), tags: toggleTag(ev.meta?.tags, tag) } })} />
                 </div>
               );
             })()}
@@ -438,9 +439,9 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
             {/* on court */}
             <div>
               <div className="mb-1 flex items-center justify-between text-xs text-muted">
-                <span>EM CAMPO</span>
+                <span>{t("EM CAMPO")}</span>
                 <button className={`btn px-2 py-0.5 text-xs ${sub ? "btn-primary" : ""}`} onClick={() => setSub(sub ? null : {})}>
-                  Substituição <span className="kbd pointer-coarse:hidden">U</span>
+                  {t("Substituição")} <span className="kbd pointer-coarse:hidden">U</span>
                 </button>
               </div>
               <div className="grid grid-cols-6 gap-1.5">
@@ -463,15 +464,15 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
                 <button onClick={() => setActor({ kind: "opp" })}
                   className={`relative rounded-lg border px-1 py-2 text-center ${actor.kind === "opp" ? "border-opp bg-opp/15" : "border-line bg-panel hover:border-muted"}`}>
                   <span className="kbd absolute left-1 top-1 pointer-coarse:hidden">0</span>
-                  <div className="font-mono text-xl font-bold text-opp">ADV</div>
-                  <div className="truncate text-[11px] text-muted">equipa</div>
+                  <div className="font-mono text-xl font-bold text-opp">{t("ADV")}</div>
+                  <div className="truncate text-[11px] text-muted">{t("equipa")}</div>
                 </button>
               </div>
               <div className="mt-1.5 flex flex-wrap gap-1">
                 {bench.map((p) => (
                   <button key={p.id} onClick={() => clickBench(p)}
                     className={`rounded-md border px-2 py-1 text-xs ${sub?.in === p.id ? "border-good bg-good/15" : "border-line text-muted hover:text-fg"}`}
-                    title="Clica para fazer entrar">
+                    title={t("Clica para fazer entrar")}>
                     #{p.number} {p.name.split(" ")[0]}
                   </button>
                 ))}
@@ -483,12 +484,12 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
               <Court shots={shots} onPick={courtClick} pending={pendingLoc} className="mx-auto max-w-[340px]" />
               {pendingLoc && (
                 <div className="mt-2 grid grid-cols-2 gap-2">
-                  <button className="btn border-good text-good" onClick={() => resolveLoc(true)}>✓ Convertido</button>
-                  <button className="btn border-bad text-bad" onClick={() => resolveLoc(false)}>✗ Falhado</button>
+                  <button className="btn border-good text-good" onClick={() => resolveLoc(true)}>{t("✓ Convertido")}</button>
+                  <button className="btn border-bad text-bad" onClick={() => resolveLoc(false)}>{t("✗ Falhado")}</button>
                 </div>
               )}
               <p className="mt-1 px-1 text-[11px] text-muted">
-                Clica no campo e depois escolhe o resultado — 2 ou 3 pontos é detetado pela posição. Ou carrega na tecla e clica o local a seguir.
+                {t("Clica no campo e depois escolhe o resultado — 2 ou 3 pontos é detetado pela posição. Ou carrega na tecla e clica o local a seguir.")}
               </p>
             </div>
             {/* actions */}
@@ -496,12 +497,12 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
               {ACTIONS.map((a) => (
                 <button key={a.key} onClick={() => doAction(a)}
                   className={`flex flex-col items-center gap-0.5 rounded-lg border border-line bg-panel px-1 py-1.5 text-sm font-medium hover:border-muted active:scale-95 ${a.tone === "good" ? "text-good" : a.tone === "bad" ? "text-bad" : ""}`}>
-                  <span className="whitespace-nowrap">{a.label}</span>
+                  <span className="whitespace-nowrap">{t(a.label)}</span>
                   <span className="kbd uppercase pointer-coarse:hidden">{a.key}</span>
                 </button>
               ))}
               <button onClick={undo} className="col-span-2 rounded-lg border border-line bg-panel px-1 py-2.5 text-sm text-muted hover:border-muted">
-                Anular último <span className="kbd pointer-coarse:hidden">Ctrl Z</span>
+                {t("Anular último")} <span className="kbd pointer-coarse:hidden">Ctrl Z</span>
               </button>
             </div>
 
@@ -519,14 +520,14 @@ function Logger({ game, players, events, notes, readOnly }: { game: Game; player
       {sendingNote && (
         <FeedbackComposer teamId={game.teamId} players={players} onClose={() => setSendingNote(null)}
           initial={{ gameId: game.id, clipStart: Math.max(0, sendingNote.videoTs - CLIP_BEFORE), clipEnd: sendingNote.videoTs + CLIP_AFTER + 4, text: sendingNote.text,
-            context: `Nota em ${fmtTs(sendingNote.videoTs)} · P${sendingNote.period}` }} />
+            context: `${t("Nota em {time}", { time: fmtTs(sendingNote.videoTs) })} · ${periodLabel(sendingNote.period)}` }} />
       )}
       {sending && (
         <FeedbackComposer teamId={game.teamId} players={players} onClose={() => setSending(null)}
           initial={{
             playerId: sending.playerId ?? sending.meta?.in, gameId: game.id, eventIds: [sending.id],
             clipStart: Math.max(0, sending.videoTs - CLIP_BEFORE), clipEnd: sending.videoTs + CLIP_AFTER,
-            context: `${fmtTs(sending.videoTs)} · P${sending.period} · ${sending.side === "opp" ? "Adversário — " : ""}${describe(sending, name)}`,
+            context: `${fmtTs(sending.videoTs)} · ${periodLabel(sending.period)} · ${sending.side === "opp" ? `${t("Adversário")} — ` : ""}${describe(sending, name)}`,
           }} />
       )}
     </div>
@@ -544,7 +545,7 @@ function VideoArea({ game, playerRef, readOnly }: { game: Game; playerRef: React
 
   if (game.video.kind === "youtube") {
     const vid = youtubeId(game.video.url);
-    return vid ? <YouTubePlayer ref={playerRef} videoId={vid} /> : <p className="text-bad">Link do YouTube inválido.</p>;
+    return vid ? <YouTubePlayer ref={playerRef} videoId={vid} /> : <p className="text-bad">{t("Link do YouTube inválido.")}</p>;
   }
   if (game.video.kind === "url") return <Html5Player ref={playerRef} src={game.video.url} />;
   if (game.video.kind === "none") return <StopwatchPlayer ref={playerRef} />;
@@ -562,7 +563,7 @@ function VideoArea({ game, playerRef, readOnly }: { game: Game; playerRef: React
     const w = window as unknown as { showOpenFilePicker?: (o: unknown) => Promise<FileSystemFileHandle[]> };
     if (w.showOpenFilePicker) {
       try {
-        const [h] = await w.showOpenFilePicker({ types: [{ description: "Vídeo", accept: { "video/*": [".mp4", ".mov", ".webm", ".mkv"] } }] });
+        const [h] = await w.showOpenFilePicker({ types: [{ description: t("Vídeo"), accept: { "video/*": [".mp4", ".mov", ".webm", ".mkv"] } }] });
         await db.videoHandles.put({ gameId: game.id, handle: h });
         await loadFile(await h.getFile());
       } catch { /* cancelled */ }
@@ -582,10 +583,10 @@ function VideoArea({ game, playerRef, readOnly }: { game: Game; playerRef: React
 
   return (
     <div className="flex aspect-video w-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-line bg-panel p-6 text-center">
-      <p className="text-muted">Escolhe o ficheiro de vídeo do jogo (fica só no teu computador).</p>
+      <p className="text-muted">{t("Escolhe o ficheiro de vídeo do jogo (fica só no teu computador).")}</p>
       <div className="flex gap-2">
-        {handle && <button className="btn btn-primary" onClick={reopen}>Reabrir {game.video.kind === "file" ? game.video.fileName : "vídeo"}</button>}
-        <button className={`btn ${handle ? "" : "btn-primary"}`} onClick={pick}>Escolher MP4…</button>
+        {handle && <button className="btn btn-primary" onClick={reopen}>{t("Reabrir {name}", { name: game.video.kind === "file" ? game.video.fileName : t("vídeo") })}</button>}
+        <button className={`btn ${handle ? "" : "btn-primary"}`} onClick={pick}>{t("Escolher MP4…")}</button>
       </div>
       <input id="file-fallback" type="file" accept="video/*" className="hidden" onChange={(e) => e.target.files?.[0] && loadFile(e.target.files[0])} />
     </div>
@@ -595,28 +596,28 @@ function VideoArea({ game, playerRef, readOnly }: { game: Game; playerRef: React
 
 function HelpOverlay({ onClose }: { onClose: () => void }) {
   const rows: [string, string][] = [
-    ["1 – 5", "Escolher jogador em campo (ou assistência / ressalto logo após um lançamento)"],
-    ["0", "Adversário"],
-    ["Q / W", "2 pontos convertido / falhado"],
-    ["E / R", "3 pontos convertido / falhado"],
-    ["T / Y", "Lance livre convertido / falhado"],
-    ["O / D", "Ressalto ofensivo / defensivo"],
-    ["A S B P", "Assistência · Roubo · Desarme · Perda de bola"],
-    ["F / G", "Falta / Falta sofrida"],
-    ["U", "Substituição (depois 1–5 para quem sai e o nº de quem entra + Enter)"],
-    ["Clique no campo", "Marca o local; Enter = convertido, ⌫ = falhado"],
-    ["Espaço", "Play / pausa"],
-    ["← / →", "Recuar / avançar 5 s (Shift = 1 s)"],
-    [", / .", "Mais lento / mais rápido"],
-    ["Ctrl + Z", "Anular último evento"],
-    ["Esc", "Cancelar o que está pendente"],
-    ["✎ na lista", "Editar um evento (jogador, tipo, resultado, tempo)"],
-    ["Ver sequência", "Filtra a lista (ex.: perdas do #7) e vê as jogadas seguidas"],
+    ["1 – 5", t("Escolher jogador em campo (ou assistência / ressalto logo após um lançamento)")],
+    ["0", t("Adversário")],
+    ["Q / W", t("2 pontos convertido / falhado")],
+    ["E / R", t("3 pontos convertido / falhado")],
+    ["T / Y", t("Lance livre convertido / falhado")],
+    ["O / D", t("Ressalto ofensivo / defensivo")],
+    ["A S B P", t("Assistência · Roubo · Desarme · Perda de bola")],
+    ["F / G", t("Falta / Falta sofrida")],
+    ["U", t("Substituição (depois 1–5 para quem sai e o nº de quem entra + Enter)")],
+    [t("Clique no campo"), t("Marca o local; Enter = convertido, ⌫ = falhado")],
+    [t("Espaço"), t("Play / pausa")],
+    ["← / →", t("Recuar / avançar 5 s (Shift = 1 s)")],
+    [", / .", t("Mais lento / mais rápido")],
+    ["Ctrl + Z", t("Anular último evento")],
+    ["Esc", t("Cancelar o que está pendente")],
+    [t("✎ na lista"), t("Editar um evento (jogador, tipo, resultado, tempo)")],
+    [t("Ver sequência"), t("Filtra a lista (ex.: perdas do #7) e vê as jogadas seguidas")],
   ];
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" onClick={onClose}>
       <div className="card w-full max-w-lg p-5" onClick={(e) => e.stopPropagation()}>
-        <h3 className="mb-3 text-lg font-semibold">Atalhos de teclado</h3>
+        <h3 className="mb-3 text-lg font-semibold">{t("Atalhos de teclado")}</h3>
         <table className="w-full text-sm">
           <tbody>
             {rows.map(([k, d]) => (
@@ -627,8 +628,8 @@ function HelpOverlay({ onClose }: { onClose: () => void }) {
             ))}
           </tbody>
         </table>
-        <p className="mt-3 text-xs text-muted">Fluxo típico: <b>2</b> (jogador) → <b>Q</b> (2PT ✓) → <b>4</b> (assistência) → clique no campo. Falhado: <b>W</b> → <b>3</b> (ressalto).</p>
-        <button className="btn mt-4 w-full" onClick={onClose}>Fechar</button>
+        <p className="mt-3 text-xs text-muted">{t("Fluxo típico:")} <b>2</b> ({t("jogador")}) → <b>Q</b> (2PT ✓) → <b>4</b> ({t("assistência")}) → {t("clique no campo.")} {t("Falhado:")} <b>W</b> → <b>3</b> ({t("ressalto")}).</p>
+        <button className="btn mt-4 w-full" onClick={onClose}>{t("Fechar")}</button>
       </div>
     </div>
   );

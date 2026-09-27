@@ -7,6 +7,7 @@ import { pendingSessions, RPE_LABEL, rpeColor, saveSession, saveStatus, shortDat
 import { notify } from "@/lib/push";
 import { AVAILABILITY_LABEL, type Availability, type ID } from "@/lib/types";
 import { askText } from "./Dialog";
+import { t } from "@/lib/i18n";
 
 const ST_STYLE: Record<Availability, string> = {
   ok: "border-good bg-good/15 text-good",
@@ -17,9 +18,9 @@ const ST_STYLE: Record<Availability, string> = {
 /** 1–10 effort buttons. */
 export function RpePicker({ value, onPick, compact }: { value?: number; onPick: (v: number) => void; compact?: boolean }) {
   return (
-    <div className={`grid grid-cols-5 gap-1 ${compact ? "" : "sm:grid-cols-10"}`} role="radiogroup" aria-label="Esforço de 1 a 10">
+    <div className={`grid grid-cols-5 gap-1 ${compact ? "" : "sm:grid-cols-10"}`} role="radiogroup" aria-label={t("Esforço de 1 a 10")}>
       {Array.from({ length: 10 }, (_, i) => i + 1).map((v) => (
-        <button key={v} role="radio" aria-checked={value === v} title={RPE_LABEL[v]} onClick={() => onPick(v)}
+        <button key={v} role="radio" aria-checked={value === v} title={t(RPE_LABEL[v])} onClick={() => onPick(v)}
           className={`min-h-10 rounded-lg border font-mono text-sm font-semibold ${value === v ? `${rpeColor(v)} border-transparent text-black` : "border-line hover:bg-panel-2"}`}>
           {v}
         </button>
@@ -52,14 +53,14 @@ export function WellnessCheck({ teamId, playerId }: { teamId: ID; playerId: ID }
   const setStatus = async (st: Availability) => {
     let note: string | undefined;
     if (st !== "ok") {
-      const v = await askText(st === "out" ? "O que se passa? (só a equipa técnica vê)" : "Porquê? (só a equipa técnica vê)", { confirmText: "Guardar" });
+      const v = await askText(st === "out" ? t("O que se passa? (só a equipa técnica vê)") : t("Porquê? (só a equipa técnica vê)"), { confirmText: t("Guardar") });
       if (v === null) return;
       note = v.trim() || undefined;
     }
     await saveStatus(teamId, playerId, st, note);
     if (st !== "ok" && status?.status !== st) {
       const p = await db.players.get(playerId);
-      void notify({ teamId, staff: true, title: `${p ? `#${p.number} ${p.name.split(" ")[0]}` : "Jogador"}: ${AVAILABILITY_LABEL[st].toLowerCase()}`, body: note ?? "Atualizou a disponibilidade.", url: "/carga", tag: `status-${playerId}` });
+      void notify({ teamId, staff: true, title: `${p ? `#${p.number} ${p.name.split(" ")[0]}` : t("Jogador")}: ${t(AVAILABILITY_LABEL[st]).toLowerCase()}`, body: note ?? t("Atualizou a disponibilidade."), url: "/carga", tag: `status-${playerId}` });
     }
   };
 
@@ -67,22 +68,24 @@ export function WellnessCheck({ teamId, playerId }: { teamId: ID; playerId: ID }
     <section className="card grid gap-3 p-4">
       {s ? (
         <div>
-          <div className="font-semibold">Como foi o {s.kind === "game" ? "jogo" : "treino"} de {shortDate(s.date)}?</div>
-          <p className="mb-2 text-xs text-muted">{s.title} · 1 = muito leve, 10 = o máximo que consegues. Ajuda o treinador a gerir o cansaço.</p>
+          <div className="font-semibold">{s.kind === "game" ? t("Como foi o jogo de {date}?", { date: shortDate(s.date) }) : t("Como foi o treino de {date}?", { date: shortDate(s.date) })}</div>
+          <p className="mb-2 text-xs text-muted">{s.title} · {t("1 = muito leve, 10 = o máximo que consegues. Ajuda o treinador a gerir o cansaço.")}</p>
           <RpePicker onPick={async (v) => { await saveSession(teamId, playerId, s, v); setJustRated({ s, v }); }} />
         </div>
       ) : justRated ? (
-        <p className="text-sm text-good">✓ Obrigado! {justRated.s.kind === "game" ? "Jogo" : "Treino"} de {shortDate(justRated.s.date)}: {justRated.v} — {RPE_LABEL[justRated.v].toLowerCase()}.</p>
+        <p className="text-sm text-good">{justRated.s.kind === "game"
+          ? t("✓ Obrigado! Jogo de {date}: {v} — {label}.", { date: shortDate(justRated.s.date), v: justRated.v, label: t(RPE_LABEL[justRated.v]).toLowerCase() })
+          : t("✓ Obrigado! Treino de {date}: {v} — {label}.", { date: shortDate(justRated.s.date), v: justRated.v, label: t(RPE_LABEL[justRated.v]).toLowerCase() })}</p>
       ) : null}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm text-muted">Como estás?</span>
+        <span className="text-sm text-muted">{t("Como estás?")}</span>
         {(Object.keys(AVAILABILITY_LABEL) as Availability[]).map((st) => (
           <button key={st} onClick={() => setStatus(st)} aria-pressed={(status?.status ?? "ok") === st}
             className={`min-h-9 rounded-full border px-3 text-sm ${(status?.status ?? "ok") === st ? ST_STYLE[st] : "border-line text-muted"}`}>
-            {AVAILABILITY_LABEL[st]}
+            {t(AVAILABILITY_LABEL[st])}
           </button>
         ))}
-        {status?.status && status.status !== "ok" && status.date < today() && <span className="text-[11px] text-muted">desde {shortDate(status.date)} — atualiza quando melhorares</span>}
+        {status?.status && status.status !== "ok" && status.date < today() && <span className="text-[11px] text-muted">{t("desde {date} — atualiza quando melhorares", { date: shortDate(status.date) })}</span>}
       </div>
     </section>
   );

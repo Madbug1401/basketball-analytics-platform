@@ -25,6 +25,7 @@ import { PlayerReports } from "@/components/PlayerReport";
 import { GameTimeline } from "@/components/GameTimeline";
 import { possessions as countPossessions } from "@/lib/possessions";
 import { reviewItems } from "@/lib/review";
+import { L, locale, t } from "@/lib/i18n";
 
 export function GamePage() {
   const id = useRouteId();
@@ -55,7 +56,7 @@ export function GamePage() {
   }, [data, stats, season]);
 
   if (!data) return null;
-  if (!data.game || !stats) return <p className="text-muted">Jogo não encontrado.</p>;
+  if (!data.game || !stats) return <p className="text-muted">{t("Jogo não encontrado.")}</p>;
   const { game, players = [], events = [] } = data;
   const rows = sortRows(players, stats.players);
   const seasonAvg = season ? new Map([...season.totals].map(([pid, l]) => [pid, { ...l, games: l.gp }])) : undefined;
@@ -68,16 +69,16 @@ export function GamePage() {
     <div className="grid gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <Link href="/jogos" className="tap text-sm text-muted hover:text-fg print:hidden">← Jogos</Link>
+          <Link href="/jogos" className="tap text-sm text-muted hover:text-fg print:hidden">← {t("Jogos")}</Link>
           <h1 className="mt-1 text-2xl font-semibold">{game.home ? "vs" : "@"} {game.opponent}</h1>
           <p className="text-sm text-muted">
-            {new Date(game.date + "T12:00").toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+            {new Date(game.date + "T12:00").toLocaleDateString(locale(), { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
             {game.competition ? ` · ${game.competition}` : ""}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-4 sm:gap-6">
           <div className="text-center">
-            <div className="text-xs text-muted">NÓS</div>
+            <div className="text-xs text-muted">{t("NÓS")}</div>
             <div className="font-mono text-4xl font-bold">{stats.us.pts}</div>
           </div>
           <div className="text-muted">—</div>
@@ -86,10 +87,10 @@ export function GamePage() {
             <div className="font-mono text-4xl font-bold text-opp">{stats.opp.pts}</div>
           </div>
           <div className="grid w-full grid-cols-2 gap-2 whitespace-nowrap sm:flex sm:w-auto print:hidden">
-            {shareData && <button className="btn btn-primary" onClick={() => setSharing(true)}>Partilhar</button>}
-            <button className="btn" onClick={() => window.print()}>Imprimir</button>
-            {access.canEdit && <Link href={`/jogos/${id}/ao-vivo`} className={`btn ${game.video.kind === "none" ? "btn-primary" : ""}`}>Ao vivo</Link>}
-            {access.canEdit && <Link href={`/jogos/${id}/logger`} className={`btn ${game.video.kind === "none" ? "" : "btn-primary"}`}>{game.video.kind === "none" ? "Registo" : "Abrir registo"}</Link>}
+            {shareData && <button className="btn btn-primary" onClick={() => setSharing(true)}>{t("Partilhar")}</button>}
+            <button className="btn" onClick={() => window.print()}>{t("Imprimir")}</button>
+            {access.canEdit && <Link href={`/jogos/${id}/ao-vivo`} className={`btn ${game.video.kind === "none" ? "btn-primary" : ""}`}>{t("Ao vivo")}</Link>}
+            {access.canEdit && <Link href={`/jogos/${id}/logger`} className={`btn ${game.video.kind === "none" ? "" : "btn-primary"}`}>{game.video.kind === "none" ? t("Registo") : t("Abrir registo")}</Link>}
             {access.canEdit && <DeleteGameButton game={game} className={shareData ? "col-span-2 sm:col-span-1" : ""} onDeleted={() => router.push("/jogos")} />}
           </div>
         </div>
@@ -100,9 +101,9 @@ export function GamePage() {
 
       {events.length === 0 ? (
         <div className="card p-10 text-center text-muted">
-          <Link href={`/adversarios?nome=${encodeURIComponent(game.opponent)}`} className="btn mb-4">Scouting de {game.opponent}</Link>
+          <Link href={`/adversarios?nome=${encodeURIComponent(game.opponent)}`} className="btn mb-4">{t("Scouting de {name}", { name: game.opponent })}</Link>
           <br />
-          Ainda sem eventos. <Link href={`/jogos/${id}/logger`} className="text-brand">Abre o registo</Link> e começa pelo 5 inicial.
+          {t("Ainda sem eventos.")} <Link href={`/jogos/${id}/logger`} className="text-brand">{t("Abre o registo")}</Link> {t("e começa pelo 5 inicial.")}
         </div>
       ) : (
         <>
@@ -110,10 +111,10 @@ export function GamePage() {
             <div className="card overflow-x-auto">
               <table className="tbl">
                 <thead>
-                  <tr><th>Parcial</th>{stats.byPeriod.map((_, i) => <th key={i}>{i < 4 ? `${i + 1}º` : `P${i - 3}`}</th>)}<th>T</th></tr>
+                  <tr><th>{t("Parcial")}</th>{stats.byPeriod.map((_, i) => <th key={i}>{i < 4 ? t("{n}º", { n: i + 1 }) : stats.byPeriod.length === 5 ? t("Prol.") : t("Prol. {n}", { n: i - 3 })}</th>)}<th>{t("T")}</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td>Nós</td>{stats.byPeriod.map((p, i) => <td key={i}>{p.us}</td>)}<td className="font-bold">{stats.us.pts}</td></tr>
+                  <tr><td>{t("Nós")}</td>{stats.byPeriod.map((p, i) => <td key={i}>{p.us}</td>)}<td className="font-bold">{stats.us.pts}</td></tr>
                   <tr><td className="text-opp">{game.opponent}</td>{stats.byPeriod.map((p, i) => <td key={i}>{p.opp}</td>)}<td className="font-bold">{stats.opp.pts}</td></tr>
                 </tbody>
               </table>
@@ -128,15 +129,15 @@ export function GamePage() {
           {access.canEdit && notes && notes.length > 0 && (
             <section className="card overflow-hidden">
               <div className="border-b border-line px-3 py-2">
-                <h2 className="font-semibold">Notas de vídeo</h2>
-                <p className="text-xs text-muted">Só a equipa técnica vê. Adiciona-as no registo com o botão 📝 (tecla N).</p>
+                <h2 className="font-semibold">{t("Notas de vídeo")}</h2>
+                <p className="text-xs text-muted">{t("Só a equipa técnica vê. Adiciona-as no registo com o botão 📝 (tecla N).")}</p>
               </div>
               <ul className="divide-y divide-line/60">
                 {notes.map((n) => (
                   <li key={n.id} className="flex items-center gap-3 px-3 py-2 text-sm">
                     <Link href={`/jogos/${id}/logger?${new URLSearchParams({ janela: `${Math.max(0, Math.floor(n.videoTs - 6))}-${Math.ceil(n.videoTs + 6)}`, play: "1" })}`}
                       className="tap shrink-0 font-mono text-xs text-brand">▶ {fmtTs(n.videoTs)}</Link>
-                    <span className="w-6 shrink-0 font-mono text-xs text-muted">P{n.period}</span>
+                    <span className="w-6 shrink-0 font-mono text-xs text-muted">{t("P{n}", { n: n.period })}</span>
                     <span className="min-w-0 flex-1">{n.text}</span>
                     {n.author && <span className="hidden shrink-0 text-xs text-muted sm:inline">{n.author}</span>}
                   </li>
@@ -152,7 +153,7 @@ export function GamePage() {
           {insights.length > 0 && <Report insights={insights} gameId={id} />}
 
           <section>
-            <h2 className="mb-3 text-lg font-semibold">Box score</h2>
+            <h2 className="mb-3 text-lg font-semibold">{t("Box score")}</h2>
             <BoxTable rows={rows} total={stats.us} />
           </section>
 
@@ -164,11 +165,11 @@ export function GamePage() {
           <section className="grid gap-4 lg:grid-cols-[420px_1fr]">
             <div className="card p-3">
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                <h2 className="font-semibold">Lançamentos e qualidade</h2>
-                <select className="input w-full py-1 sm:w-auto" value={shotFilter} onChange={(e) => setShotFilter(e.target.value)} aria-label="De quem">
-                  <option value="us">Equipa</option>
+                <h2 className="font-semibold">{t("Lançamentos e qualidade")}</h2>
+                <select className="input w-full py-1 sm:w-auto" value={shotFilter} onChange={(e) => setShotFilter(e.target.value)} aria-label={t("De quem")}>
+                  <option value="us">{t("Equipa")}</option>
                   {rows.map(({ p }) => <option key={p.id} value={p.id}>#{p.number} {p.name}</option>)}
-                  <option value="opp">Adversário</option>
+                  <option value="opp">{t("Adversário")}</option>
                 </select>
               </div>
               <ShotQuality shots={shotEvents} model={model} opp={shotFilter === "opp"}
@@ -189,22 +190,22 @@ export function GamePage() {
 
 function TeamCompare({ us, opp, opponent, poss }: { us: Line; opp: Line; opponent: string; poss: { us: number; opp: number } }) {
   const rows: [string, string, string, number, number][] = [
-    ["Lançamentos campo", `${us.fgm}/${us.fga} (${fmtPct(us.fgm, us.fga)})`, `${opp.fgm}/${opp.fga} (${fmtPct(opp.fgm, opp.fga)})`, us.fgm / (us.fga || 1), opp.fgm / (opp.fga || 1)],
-    ["Triplos", `${us.p3m}/${us.p3a} (${fmtPct(us.p3m, us.p3a)})`, `${opp.p3m}/${opp.p3a} (${fmtPct(opp.p3m, opp.p3a)})`, us.p3m / (us.p3a || 1), opp.p3m / (opp.p3a || 1)],
-    ["Lances livres", `${us.ftm}/${us.fta} (${fmtPct(us.ftm, us.fta)})`, `${opp.ftm}/${opp.fta} (${fmtPct(opp.ftm, opp.fta)})`, us.ftm / (us.fta || 1), opp.ftm / (opp.fta || 1)],
-    ["Ressaltos (of.)", `${reb(us)} (${us.oreb})`, `${reb(opp)} (${opp.oreb})`, reb(us), reb(opp)],
-    ["Perdas de bola", String(us.tov), String(opp.tov), -us.tov, -opp.tov],
-    ["Faltas", String(us.pf), String(opp.pf), -us.pf, -opp.pf],
-    ["Posses", String(poss.us || Math.round(possessions(us))), String(poss.opp || Math.round(possessions(opp))), 0, 0],
+    [L("Lançamentos campo"), `${us.fgm}/${us.fga} (${fmtPct(us.fgm, us.fga)})`, `${opp.fgm}/${opp.fga} (${fmtPct(opp.fgm, opp.fga)})`, us.fgm / (us.fga || 1), opp.fgm / (opp.fga || 1)],
+    [L("Triplos"), `${us.p3m}/${us.p3a} (${fmtPct(us.p3m, us.p3a)})`, `${opp.p3m}/${opp.p3a} (${fmtPct(opp.p3m, opp.p3a)})`, us.p3m / (us.p3a || 1), opp.p3m / (opp.p3a || 1)],
+    [L("Lances livres"), `${us.ftm}/${us.fta} (${fmtPct(us.ftm, us.fta)})`, `${opp.ftm}/${opp.fta} (${fmtPct(opp.ftm, opp.fta)})`, us.ftm / (us.fta || 1), opp.ftm / (opp.fta || 1)],
+    [L("Ressaltos (of.)"), `${reb(us)} (${us.oreb})`, `${reb(opp)} (${opp.oreb})`, reb(us), reb(opp)],
+    [L("Perdas de bola"), String(us.tov), String(opp.tov), -us.tov, -opp.tov],
+    [L("Faltas"), String(us.pf), String(opp.pf), -us.pf, -opp.pf],
+    [L("Posses"), String(poss.us || Math.round(possessions(us))), String(poss.opp || Math.round(possessions(opp))), 0, 0],
   ];
   return (
     <div className="card overflow-x-auto">
       <table className="tbl">
-        <thead><tr><th></th><th>Nós</th><th className="text-opp!">{opponent}</th></tr></thead>
+        <thead><tr><th></th><th>{t("Nós")}</th><th className="text-opp!">{opponent}</th></tr></thead>
         <tbody>
           {rows.map(([k, a, b, va, vb]) => (
             <tr key={k}>
-              <td className="text-muted">{k}</td>
+              <td className="text-muted">{t(k)}</td>
               <td className={va > vb ? "font-semibold text-good" : ""}>{a}</td>
               <td className={vb > va ? "font-semibold text-opp" : ""}>{b}</td>
             </tr>
@@ -222,18 +223,18 @@ function GameInfo({ gameId, onDelete }: { gameId: string; onDelete: () => void }
   const upd = (patch: Parameters<typeof db.games.update>[1]) => db.games.update(gameId, patch);
   return (
     <section className="card p-4">
-      <button className="tap w-full text-left text-sm font-semibold" onClick={() => setOpen(!open)}>{open ? "▾" : "▸"} Dados do jogo e notas</button>
+      <button className="tap w-full text-left text-sm font-semibold" onClick={() => setOpen(!open)}>{open ? "▾" : "▸"} {t("Dados do jogo e notas")}</button>
       {open && (
         <div className="mt-3 grid gap-3 sm:grid-cols-4">
-          <div><label className="label">Adversário</label><input className="input" value={game.opponent} onChange={(e) => upd({ opponent: e.target.value })} /></div>
-          <div><label className="label">Data</label><input type="date" className="input" value={game.date} onChange={(e) => upd({ date: e.target.value })} /></div>
-          <div><label className="label">Competição</label><input className="input" value={game.competition ?? ""} onChange={(e) => upd({ competition: e.target.value })} /></div>
+          <div><label className="label">{t("Adversário")}</label><input className="input" value={game.opponent} onChange={(e) => upd({ opponent: e.target.value })} /></div>
+          <div><label className="label">{t("Data")}</label><input type="date" className="input" value={game.date} onChange={(e) => upd({ date: e.target.value })} /></div>
+          <div><label className="label">{t("Competição")}</label><input className="input" value={game.competition ?? ""} onChange={(e) => upd({ competition: e.target.value })} /></div>
           <div>
-            <label className="label">Vídeo YouTube</label>
+            <label className="label">{t("Vídeo YouTube")}</label>
             <input className="input" placeholder="https://youtube.com/…" value={game.video.kind === "youtube" ? game.video.url : ""}
               onChange={(e) => upd({ video: e.target.value ? { kind: "youtube", url: e.target.value } : { kind: "file" } })} />
           </div>
-          <div className="sm:col-span-4"><label className="label">Notas do treinador</label>
+          <div className="sm:col-span-4"><label className="label">{t("Notas do treinador")}</label>
             <textarea className="input" rows={3} value={game.notes ?? ""} onChange={(e) => upd({ notes: e.target.value })} /></div>
           <div className="sm:col-span-4"><DeleteGameButton game={game} onDeleted={onDelete} /></div>
         </div>
@@ -251,15 +252,15 @@ const TONE: Record<Insight["tone"], string> = {
 function Report({ insights, gameId }: { insights: Insight[]; gameId: string }) {
   return (
     <section>
-      <h2 className="mb-1 text-lg font-semibold">Relatório do jogo</h2>
-      <p className="mb-3 text-xs text-muted">Gerado automaticamente a partir dos eventos. Os links abrem a sequência das jogadas no vídeo.</p>
+      <h2 className="mb-1 text-lg font-semibold">{t("Relatório do jogo")}</h2>
+      <p className="mb-3 text-xs text-muted">{t("Gerado automaticamente a partir dos eventos. Os links abrem a sequência das jogadas no vídeo.")}</p>
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {insights.map((it, i) => (
           <div key={i} className={`card border-l-4 px-3 py-2.5 ${TONE[it.tone]}`}>
             <div className="text-sm font-semibold">{it.title}</div>
             <p className="mt-0.5 text-xs text-muted">{it.text}</p>
             {it.clips && (
-              <Link href={`/jogos/${gameId}/logger?${it.clips}`} className="tap mt-1 inline-block text-xs text-brand print:hidden">▶ Ver jogadas</Link>
+              <Link href={`/jogos/${gameId}/logger?${it.clips}`} className="tap mt-1 inline-block text-xs text-brand print:hidden">▶ {t("Ver jogadas")}</Link>
             )}
           </div>
         ))}
