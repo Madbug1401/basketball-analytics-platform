@@ -2,7 +2,7 @@
 // no formato de "Definições → Importar".
 //
 //   node scripts/gerar-dados-teste.mjs [ficheiro] [seed] [hoje AAAA-MM-DD]
-//   ex.: node scripts/gerar-dados-teste.mjs dados-teste/abc-sub16-demo.json 7 2026-09-27
+//   ex.: node scripts/gerar-dados-teste.mjs dados-teste/abc-sub16-demo.json 2026 2026-09-27   (← o ficheiro de demonstração)
 //
 // Os 10 jogos são nos 10 sábados antes de "hoje"; a agenda tem os próximos jogos e treinos.
 //
@@ -440,9 +440,36 @@ players.forEach((pl, i) => {
   pl.heightCm = Math.round(h0 + grow * 2);
 });
 
+// ---------- v0.11: posições secundárias, ids no plano, anexos e um treino acompanhado ao vivo ----------
+// Tudo aqui é determinístico e fica DEPOIS do último rnd(): os dados de antes não mudam com a mesma seed.
+let n011 = 0;
+const id011 = () => `00000000-0011-4000-a000-${String(++n011).padStart(12, "0")}`;
+players[0].secondaryPositions = ["SG"];
+players[2].secondaryPositions = ["SG", "PF"];
+players[3].secondaryPositions = ["C"];
+players[7].secondaryPositions = ["SG"];
+drills[6].media = [{ id: id011(), kind: "link", url: "https://www.youtube.com/results?search_query=shell+drill+basketball", title: "Exemplos de shell drill (YouTube)", createdAt: now0 }];
+const lastPractice = pastPractices[pastPractices.length - 1];
+let lastInfo = agenda.find((x) => x.id === lastPractice.id);
+if (!lastInfo) { lastInfo = { id: lastPractice.id, teamId, kind: "practice", time: "18:30", location: PAV }; agenda.push(lastInfo); }
+lastInfo.plan = plan([0, 4, 6, 7]);
+for (const a of agenda) if (a.kind === "practice" && a.plan) a.plan = a.plan.map((it) => ({ ...it, id: it.id ?? id011() }));
+const at = (hhmm) => Date.parse(`${lastPractice.date}T${hhmm}:00Z`);
+const [i0, i1, i2, i3] = lastInfo.plan;
+const practice_runs = [{
+  id: lastPractice.id, teamId, startedAt: at("18:35"), endedAt: at("19:32"), createdAt: at("18:35"),
+  note: "Começámos 5 min tarde (pavilhão ocupado). O shell drill ficou para o próximo treino.",
+  items: {
+    [i0.id]: { status: "done", name: i0.name, plannedMin: i0.minutes, segments: [{ start: at("18:35"), end: at("18:49") }] },
+    [i1.id]: { status: "done", name: i1.name, plannedMin: i1.minutes, segments: [{ start: at("18:50"), end: at("18:57") }, { start: at("18:59"), end: at("19:08") }], note: "Pausa de 2 min: lesão ligeira do #8 (tornozelo)." },
+    [i2.id]: { status: "skipped", name: i2.name, plannedMin: i2.minutes, segments: [], reason: "Falta de tempo" },
+    [i3.id]: { status: "done", name: i3.name, plannedMin: i3.minutes, segments: [{ start: at("19:10"), end: at("19:32") }] },
+  },
+}];
+
 const data = {
   app: "basketball-analytics", version: 1, exportedAt: new Date().toISOString(), demo: true,
-  teams: [team], players, practices, attendance, games, events, goals, agenda, rsvps, drills, scouting, feedback, notes, wellness, measurements,
+  teams: [team], players, practices, attendance, games, events, goals, agenda, rsvps, drills, scouting, feedback, notes, wellness, measurements, practice_runs,
 };
 
 mkdirSync(dirname(OUT), { recursive: true });

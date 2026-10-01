@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { LanguagePicker } from "@/components/LanguagePicker";
 import { useRouter } from "next/navigation";
 import { db, exportAll, importIntoTeam } from "@/lib/db";
@@ -8,12 +8,13 @@ import { useTeam } from "@/lib/team";
 import { ROLE_LABEL, useAccess, useAuth, type Role } from "@/lib/auth";
 import { useTeamMembers } from "@/lib/members";
 import { deleteTeam, leaveTeam, teamCounts } from "@/lib/teamAdmin";
-import { seenTeamIds, uploadTeam } from "@/lib/sync";
+import { seenTeamIds, syncNow, syncStore, uploadTeam } from "@/lib/sync";
+import { APP_VERSION, BUILD_ID } from "@/lib/version";
 import { supabase } from "@/lib/supabase";
 import { openNewTeam } from "@/components/Shell";
 import { InviteDialog } from "@/components/InviteDialog";
 import { ask, notify } from "@/components/Dialog";
-import { t } from "@/lib/i18n";
+import { locale, t } from "@/lib/i18n";
 
 export default function SettingsPage() {
   const { team, teams } = useTeam();
@@ -105,8 +106,53 @@ export default function SettingsPage() {
         </section>
       )}
 
+      <VersionInfo teamId={team?.id} role={ROLE_LABEL[access.role] ? t(ROLE_LABEL[access.role]) : "—"} canResend={mode === "cloud" && access.isOwner} />
+
       {team && <DangerZone key={team.id} teamId={team.id} teamName={team.name} isOwner={access.isOwner} isMember={access.role !== "none" && access.role !== "admin"} myId={session?.user.id} />}
     </div>
+  );
+}
+
+const noSubscribe = () => () => {};
+
+/**
+ * v0.11 — feedback ABC point 4 ("no PC não vejo o que vejo no telemóvel"). Everything needed to compare two
+ * devices in one look: version + build, address, role, sync state and what the server is missing.
+ */
+function VersionInfo({ teamId, role, canResend }: { teamId?: string; role: string; canResend: boolean }) {
+  const { mode } = useAuth();
+  const s = useSyncExternalStore(syncStore.subscribe, syncStore.get, syncStore.get);
+  const [sent, setSent] = useState(false);
+  const origin = useSyncExternalStore(noSubscribe, () => window.location.origin, () => ""); // "" while prerendering
+  return (
+    <section id="versao" className="card scroll-mt-20 p-4">
+      <h2 className="font-semibold">{t("Versão e sincronização")}</h2>
+      <p className="mt-1 text-sm text-muted">{t("Abre esta secção no telemóvel e no PC: a versão e o endereço devem ser iguais. Se o PC mostra uma versão mais antiga, recarrega a página (Ctrl+Shift+R) ou abre o endereço do telemóvel.")}</p>
+      <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+        <dt className="text-muted">{t("Versão")}</dt><dd className="font-mono">v{APP_VERSION} · {BUILD_ID.slice(0, 12)}</dd>
+        <dt className="text-muted">{t("Endereço")}</dt><dd className="break-all font-mono">{origin}</dd>
+        <dt className="text-muted">{t("Modo")}</dt><dd>{mode === "cloud" ? t("Online (conta)") : t("Local (só neste browser)")}</dd>
+        <dt className="text-muted">{t("Papel")}</dt><dd>{role}</dd>
+        {mode === "cloud" && <>
+          <dt className="text-muted">{t("Última sincronização")}</dt><dd>{s.lastSync ? new Date(s.lastSync).toLocaleString(locale()) : "—"}</dd>
+          <dt className="text-muted">{t("Por enviar")}</dt><dd>{s.pending}</dd>
+        </>}
+      </dl>
+      {s.error && <p className="mt-2 text-xs text-bad">{s.error}</p>}
+      {!!s.missing?.length && (
+        <div className="mt-3 rounded-lg border border-bad/40 bg-bad/10 p-3 text-sm">
+          <p className="font-medium text-bad">{t("O servidor ainda não tem: {what}", { what: s.missing.join(", ") })}</p>
+          <p className="mt-1 text-muted">{t("Falta correr uma migração no Supabase (pasta supabase/migrations, ver docs/DEPLOY.md). Até lá, estes dados ficam guardados só neste dispositivo e os outros não os veem.")}</p>
+          {canResend && teamId && (
+            <>
+              <p className="mt-2 text-muted">{t("Depois de correr a migração, recarrega a app e reenvia os dados desta equipa para o servidor receber o que ficou para trás.")}</p>
+              <button className="btn mt-2" disabled={sent} onClick={async () => { await uploadTeam(teamId); setSent(true); }}>{sent ? t("A enviar… vê o indicador no topo") : t("Reenviar os dados desta equipa")}</button>
+            </>
+          )}
+        </div>
+      )}
+      {mode === "cloud" && <button className="btn mt-3" onClick={() => void syncNow()}>{t("Sincronizar agora")}</button>}
+    </section>
   );
 }
 

@@ -21,7 +21,9 @@ export interface Player {
   teamId: ID;
   name: string;
   number: number;
-  position: Position;
+  position: Position; // main position (shown in compact tables)
+  // v0.11: other roles the athlete plays NOW (not a permanent label). Never contains `position`.
+  secondaryPositions?: Position[];
   birthYear?: number;
   heightCm?: number;
   active: boolean;
@@ -284,15 +286,67 @@ export interface Drill {
   focus: DrillFocus[];
   minutes?: number;
   description?: string;
+  media?: DrillMedia[]; // v0.11: images, short videos, YouTube or other links (see src/lib/media.ts)
+  createdAt: number;
+}
+
+/**
+ * One attachment of a drill (v0.11).
+ * - "youtube" / "link": only the address is stored (`url`).
+ * - "image" / "video": the file lives in Supabase Storage (bucket `drill-media`) at `path`
+ *   = `${teamId}/${drillId}/${id}.${ext}`. Until it is uploaded (offline, local mode) the bytes stay
+ *   on the device in the local-only `mediaFiles` table, keyed by the same `id`.
+ */
+export interface DrillMedia {
+  id: ID;
+  kind: "youtube" | "link" | "image" | "video";
+  url?: string;
+  path?: string;
+  title?: string;
+  mime?: string;
+  size?: number; // bytes (files)
   createdAt: number;
 }
 
 export interface PlanItem {
+  id?: ID; // v0.11: stable id, so the practice run (PracticeRun.items) can point to it. Old plans get one on first save (lib/practiceRun.ts withIds)
   drillId?: ID;
   name: string;
   minutes: number;
   focus?: DrillFocus[];
   note?: string;
+}
+
+/* ---------- following the plan during practice (v0.11) ---------- */
+
+export type RunStatus = "todo" | "running" | "paused" | "done" | "skipped";
+
+/** A stretch of effective time on one exercise (epoch ms). `end` missing = still running. */
+export interface RunSegment { start: number; end?: number }
+
+/** What happened to one plan item. `name`/`plannedMin` are a snapshot, so the summary survives later plan edits. */
+export interface RunItem {
+  status: RunStatus;
+  name: string;
+  plannedMin: number;
+  segments: RunSegment[]; // effective time = sum of segments (pauses are the gaps)
+  reason?: string; // skipped: why (optional)
+  note?: string;
+}
+
+/**
+ * How a practice actually went, next to its plan (agenda.plan). One row per practice, id = practice id.
+ * Kept apart from the plan so editing the plan and logging the practice never overwrite each other.
+ * Staff only (see supabase/migrations/2026-10-01-v11.sql).
+ */
+export interface PracticeRun {
+  id: ID; // = practice id
+  teamId: ID;
+  items: Record<ID, RunItem>; // by PlanItem.id (items still "todo" may be missing)
+  note?: string; // general note at the end
+  startedAt?: number;
+  endedAt?: number;
+  createdAt: number;
 }
 
 /* ---------- scouting ---------- */
@@ -327,3 +381,12 @@ export const ATTENDANCE_LABEL: Record<AttendanceStatus, string> = {
 };
 
 export const POSITIONS: Position[] = ["PG", "SG", "SF", "PF", "C"];
+
+/** Full name of each position (the short code stays in compact tables). v0.11 */
+export const POSITION_LABEL: Record<Exclude<Position, "">, string> = {
+  PG: L("Base"), SG: L("Lançador"), SF: L("Extremo"), PF: L("Extremo-poste"), C: L("Poste|posição"),
+};
+
+/** Secondary positions without duplicates and without the main one (v0.11). */
+export const secondaryOf = (p: Pick<Player, "position" | "secondaryPositions">): Position[] =>
+  [...new Set(p.secondaryPositions ?? [])].filter((x) => x && x !== p.position);

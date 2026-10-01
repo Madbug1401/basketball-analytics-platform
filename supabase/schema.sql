@@ -46,6 +46,7 @@ create table if not exists public.players (
   name text not null,
   number smallint not null,
   position text not null default '',
+  secondary_positions jsonb, -- v0.11: outras posições (a principal é position)
   birth_year smallint,
   height_cm smallint,
   active boolean not null default true,
@@ -218,6 +219,7 @@ create table if not exists public.drills (
   focus jsonb,
   minutes smallint,
   description text,
+  media jsonb, -- v0.11: anexos (links/YouTube; ficheiros no bucket drill-media)
   created_at bigint not null default 0,
   updated_at timestamptz not null default now()
 );
@@ -285,6 +287,19 @@ create table if not exists public.measurements (
   updated_at timestamptz not null default now()
 );
 create index if not exists measurements_team on public.measurements(team_id, updated_at);
+
+-- v0.11: como correu cada treino face ao plano (id = id do treino; só equipa técnica)
+create table if not exists public.practice_runs (
+  id uuid primary key references public.practices(id) on delete cascade,
+  team_id uuid not null references public.teams(id) on delete cascade,
+  items jsonb not null default '{}'::jsonb,
+  note text,
+  started_at bigint,
+  ended_at bigint,
+  created_at bigint not null default 0,
+  updated_at timestamptz not null default now()
+);
+create index if not exists practice_runs_team on public.practice_runs(team_id, updated_at);
 
 -- notificações push: uma subscrição por dispositivo
 create table if not exists public.push_subs (
@@ -376,7 +391,7 @@ end $$;
 do $$
 declare t text;
 begin
-  foreach t in array array['teams','players','players_private','practices','attendance','games','games_private','events','goals','agenda','rsvps','feedback','seen','drills','scouting','notes','wellness','measurements'] loop
+  foreach t in array array['teams','players','players_private','practices','attendance','games','games_private','events','goals','agenda','rsvps','feedback','seen','drills','scouting','notes','wellness','measurements','practice_runs'] loop
     execute format('drop trigger if exists touch_%1$s on public.%1$s', t);
     execute format('create trigger touch_%1$s before insert or update on public.%1$s for each row execute function public.touch_updated_at()', t);
     execute format('drop trigger if exists tomb_%1$s on public.%1$s', t);
@@ -397,7 +412,7 @@ end $$;
 do $$
 declare t text;
 begin
-  foreach t in array array['games','practices','players','events'] loop
+  foreach t in array array['games','practices','players','events','practice_runs'] loop
     execute format('drop trigger if exists skip_deleted_%1$s on public.%1$s', t);
     execute format('create trigger skip_deleted_%1$s before insert on public.%1$s for each row execute function public.skip_deleted()', t);
   end loop;
@@ -450,6 +465,7 @@ alter table public.notes enable row level security;
 alter table public.wellness enable row level security;
 alter table public.push_subs enable row level security;
 alter table public.measurements enable row level security;
+alter table public.practice_runs enable row level security;
 alter table public.invites enable row level security;
 alter table public.tombstones enable row level security;
 
@@ -546,6 +562,9 @@ create policy measurements_select on public.measurements for select using (
 create policy measurements_write on public.measurements for insert with check (public.is_staff(team_id));
 create policy measurements_update on public.measurements for update using (public.is_staff(team_id));
 create policy measurements_delete on public.measurements for delete using (public.is_staff(team_id));
+
+-- v0.11: registo do treino ao vivo: só staff
+create policy practice_runs_all on public.practice_runs for all using (public.is_staff(team_id)) with check (public.is_staff(team_id));
 
 -- subscrições push: cada utilizador gere as suas
 create policy push_subs_own on public.push_subs for all using (user_id = auth.uid()) with check (user_id = auth.uid());
@@ -652,6 +671,33 @@ begin
         from public.team_members m join public.teams t on t.id = m.team_id where m.user_id = p.id), '')
     from public.profiles p order by p.created_at desc;
 end $$;
+
+-- ---------- v0.11: anexos dos exercícios (Storage) ----------
+-- bucket privado; caminho = <team_id>/<drill_id>/<ficheiro>; a equipa vê, a equipa técnica envia/apaga
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('drill-media', 'drill-media', false, 52428800, array['image/*', 'video/*'])
+on conflict (id) do update set public = false, file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
+
+create or replace function public.media_team(object_name text) returns uuid
+language plpgsql immutable as $$
+begin
+  return split_part(object_name, '/', 1)::uuid;
+exception when others then
+  return null;
+end $$;
+
+drop policy if exists drill_media_select on storage.objects;
+drop policy if exists drill_media_insert on storage.objects;
+drop policy if exists drill_media_update on storage.objects;
+drop policy if exists drill_media_delete on storage.objects;
+create policy drill_media_select on storage.objects for select to authenticated
+  using (bucket_id = 'drill-media' and public.is_member(public.media_team(name)));
+create policy drill_media_insert on storage.objects for insert to authenticated
+  with check (bucket_id = 'drill-media' and public.is_staff(public.media_team(name)));
+create policy drill_media_update on storage.objects for update to authenticated
+  using (bucket_id = 'drill-media' and public.is_staff(public.media_team(name)));
+create policy drill_media_delete on storage.objects for delete to authenticated
+  using (bucket_id = 'drill-media' and public.is_staff(public.media_team(name)));
 
 grant usage on schema public to anon, authenticated;
 grant all on all tables in schema public to authenticated;

@@ -9,11 +9,12 @@ import { useTeam } from "@/lib/team";
 import { useAccess, useAuth } from "@/lib/auth";
 import { useTeamMembers } from "@/lib/members";
 import { InviteDialog } from "@/components/InviteDialog";
-import { POSITIONS, type Player, type Position, type Team } from "@/lib/types";
+import { POSITIONS, POSITION_LABEL, secondaryOf, type Player, type Position, type Team } from "@/lib/types";
 import { t } from "@/lib/i18n";
 
-type Draft = { name: string; number: string; position: Position; birthYear: string; heightCm: string; notes: string };
-const blank: Draft = { name: "", number: "", position: "", birthYear: "", heightCm: "", notes: "" };
+// v0.11: `position` = main position, `secondary` = other roles the athlete plays now (feedback ABC point 3)
+type Draft = { name: string; number: string; position: Position; secondary: Position[]; birthYear: string; heightCm: string; notes: string };
+const blank: Draft = { name: "", number: "", position: "", secondary: [], birthYear: "", heightCm: "", notes: "" };
 
 export default function RosterPage() {
   const { team, teams, setTeamId } = useTeam();
@@ -43,6 +44,8 @@ export default function RosterPage() {
       name: draft.name.trim(),
       number: Number(draft.number),
       position: draft.position,
+      // an empty list is stored as undefined (keeps old rows and the sync payload clean)
+      secondaryPositions: draft.position ? (draft.secondary.filter((x) => x !== draft.position).length ? draft.secondary.filter((x) => x !== draft.position) : undefined) : undefined,
       birthYear: draft.birthYear ? Number(draft.birthYear) : undefined,
       heightCm: draft.heightCm ? Number(draft.heightCm) : undefined,
       notes: draft.notes || undefined,
@@ -62,7 +65,7 @@ export default function RosterPage() {
   const edit = (p: Player) => {
     setEditing(p.id);
     setDraft({
-      name: p.name, number: String(p.number), position: p.position,
+      name: p.name, number: String(p.number), position: p.position, secondary: secondaryOf(p),
       birthYear: p.birthYear ? String(p.birthYear) : "", heightCm: p.heightCm ? String(p.heightCm) : "", notes: p.notes ?? "",
     });
   };
@@ -97,7 +100,10 @@ export default function RosterPage() {
                       {p.name}
                     </Link>
                   </td>
-                  <td>{p.position || "–"}</td>
+                  <td title={[p.position, ...secondaryOf(p)].filter(Boolean).map((x) => t(POSITION_LABEL[x as Exclude<Position, "">])).join(" · ")}>
+                    {p.position || "–"}
+                    {secondaryOf(p).length > 0 && <span className="ml-1 text-xs text-muted">+{secondaryOf(p).join("/")}</span>}
+                  </td>
                   <td>{p.birthYear ?? "–"}</td>
                   <td>{p.heightCm ? `${p.heightCm} cm` : "–"}</td>
                   <td className="whitespace-nowrap">
@@ -144,10 +150,10 @@ export default function RosterPage() {
         {taken && <p className="text-xs text-bad">{t("Já existe um jogador ativo com o nº {n}.", { n: draft.number })}</p>}
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="label">{t("Posição")}</label>
-            <select className="input" value={draft.position} onChange={(e) => setDraft({ ...draft, position: e.target.value as Position })}>
+            <label className="label">{t("Posição principal")}</label>
+            <select className="input" value={draft.position} onChange={(e) => { const position = e.target.value as Position; setDraft({ ...draft, position, secondary: draft.secondary.filter((x) => x !== position) }); }}>
               <option value="">–</option>
-              {POSITIONS.map((p) => <option key={p}>{p}</option>)}
+              {POSITIONS.map((p) => <option key={p} value={p}>{p} · {t(POSITION_LABEL[p as Exclude<Position, "">])}</option>)}
             </select>
           </div>
           <div>
@@ -159,6 +165,22 @@ export default function RosterPage() {
             <input className="input" inputMode="numeric" placeholder="cm" value={draft.heightCm} onChange={(e) => setDraft({ ...draft, heightCm: e.target.value })} />
           </div>
         </div>
+        {draft.position && (
+          <div>
+            <label className="label">{t("Também joga como")}</label>
+            <div className="flex flex-wrap gap-1.5">
+              {POSITIONS.filter((p) => p !== draft.position).map((p) => {
+                const on = draft.secondary.includes(p);
+                return (
+                  <button type="button" key={p} aria-pressed={on} title={t(POSITION_LABEL[p as Exclude<Position, "">])}
+                    onClick={() => setDraft({ ...draft, secondary: on ? draft.secondary.filter((x) => x !== p) : [...draft.secondary, p] })}
+                    className={`rounded-full border px-3 py-1 text-xs pointer-coarse:py-1.5 ${on ? "border-brand bg-brand/15 text-brand" : "border-line text-muted"}`}>{p}</button>
+                );
+              })}
+            </div>
+            <p className="mt-1 text-[11px] text-muted">{t("Como é utilizado agora. Podes mudar ao longo da época.")}</p>
+          </div>
+        )}
         <div>
           <label className="label">{t("Notas")}</label>
           <textarea className="input" rows={2} value={draft.notes} onChange={(e) => setDraft({ ...draft, notes: e.target.value })} />

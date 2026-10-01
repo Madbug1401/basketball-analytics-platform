@@ -9,9 +9,10 @@ import preparacao from "./parts/preparacao";
 import epoca from "./parts/epoca";
 import treino from "./parts/treino";
 import contas from "./parts/contas";
+import v011 from "./parts/v011";
 
 // later parts win on duplicate keys; core is last so shared words stay consistent
-const PARTS: Part[] = [registo, jogo, preparacao, epoca, treino, contas, core];
+const PARTS: Part[] = [registo, jogo, preparacao, epoca, treino, contas, v011, core];
 
 export const DICT: { en: Record<string, string>; fr: Record<string, string> } = { en: {}, fr: {} };
 for (const p of PARTS) {

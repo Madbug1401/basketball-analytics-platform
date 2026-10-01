@@ -87,3 +87,12 @@
 ## Fase 4: intelligence
 - [x] Relatório automático pós-jogo (regras simples, v0.2)
 - [ ] Assistente da época (perguntas em linguagem natural sobre os dados)
+
+## v0.11 — Feedback do ABC (29 set 2026) — detalhes em [docs/FEEDBACK-2026-09-29.md](FEEDBACK-2026-09-29.md)
+- [x] PC vs telemóvel: menu do PC com "Mais ▾" (antes cortava itens sem aviso), versão e estado da sincronização visíveis, aviso de versão nova, aviso de migração em falta + "Reenviar os dados desta equipa"
+- [x] Várias posições por atleta (principal + secundárias)
+- [x] Menu ⋯ com Editar / Eliminar nas listas de Agenda, Jogos e Treinos; confirmação do treino diz o que se perde
+- [x] Anexos nos exercícios: foto, vídeo curto (Supabase Storage), YouTube ou link
+- [x] Acompanhar o plano durante o treino: estados, notas, cronómetro com pausas, corrigir horas, previsto vs real
+- [ ] Pré-visualizar/limpar ficheiros órfãos no Storage (anexo removido sem internet)
+- [ ] Comparar previsto vs real ao longo da época (tempo real por área, exercícios mais saltados)

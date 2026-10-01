@@ -93,6 +93,9 @@ Quando uma versão nova traz tabelas novas, há um ficheiro em `supabase/migrati
 | `2026-09-27-v07.sql` | Rotação planeada (`agenda.rotation`), relatório individual (`feedback.report`), carga e disponibilidade (`wellness`, o jogador escreve as suas) e notificações push (`push_subs`, `push_targets`, `push_drop`) |
 | `2026-09-28-v08-fisico.sql` | Perfil físico (`measurements`: staff regista; o jogador vê as suas, exceto o peso) e ligação ao escalão anterior (`players.prev_id`) |
 | `2026-09-28-v09-apagados.sql` | O que foi apagado não volta: um dispositivo que ainda não sabia do apagão não consegue recriar um jogo, treino, atleta ou evento (`skip_deleted`) |
+| `2026-10-01-v11.sql` | Posições secundárias (`players.secondary_positions`), anexos dos exercícios (`drills.media` + bucket privado **`drill-media`** no Storage: a equipa vê, a equipa técnica envia/apaga, até 50 MB por ficheiro) e treino ao vivo (`practice_runs`, só equipa técnica) |
+
+**Como saber se falta alguma migração:** desde a v0.11, quando o servidor não tem uma tabela/coluna/bucket, a equipa técnica vê uma barra vermelha no topo e o detalhe em **Definições → Versão e sincronização**. Depois de correr a migração: recarregar a app e carregar em **Reenviar os dados desta equipa** (o que foi enviado sem a coluna nova sobe outra vez).
 
 Uma instalação nova só precisa do `schema.sql` (já inclui tudo).
 

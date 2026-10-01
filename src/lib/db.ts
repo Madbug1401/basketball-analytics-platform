@@ -1,14 +1,14 @@
 import Dexie, { type EntityTable, type Transaction } from "dexie";
-import type { Agenda, Attendance, Drill, Feedback, Game, GameEvent, Goal, Player, Practice, Rsvp, Scouting, Seen, Measurement, Team, VideoNote, Wellness } from "./types";
+import type { Agenda, Attendance, Drill, Feedback, Game, GameEvent, Goal, Player, Practice, PracticeRun, Rsvp, Scouting, Seen, Measurement, Team, VideoNote, Wellness } from "./types";
 import { cloudConfigured } from "./supabase";
 import { t } from "./i18n";
 
 // Local-first storage (IndexedDB). In cloud mode every local write is also queued
 // in `outbox` and pushed to Supabase by src/lib/sync.ts.
 
-export type SyncedTable = "teams" | "players" | "practices" | "attendance" | "games" | "events" | "goals" | "agenda" | "rsvps" | "feedback" | "seen" | "drills" | "scouting" | "notes" | "wellness" | "measurements";
+export type SyncedTable = "teams" | "players" | "practices" | "attendance" | "games" | "events" | "goals" | "agenda" | "rsvps" | "feedback" | "seen" | "drills" | "scouting" | "notes" | "wellness" | "measurements" | "practice_runs";
 // order matters for uploads (foreign keys): parents first
-export const SYNCED_TABLES: SyncedTable[] = ["teams", "players", "practices", "games", "attendance", "events", "goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes", "wellness", "measurements"];
+export const SYNCED_TABLES: SyncedTable[] = ["teams", "players", "practices", "games", "attendance", "events", "goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes", "wellness", "measurements", "practice_runs"];
 
 export interface OutboxEntry {
   seq?: number;
@@ -35,6 +35,8 @@ export const db = new Dexie("basketball-analytics") as Dexie & {
   notes: EntityTable<VideoNote, "id">;
   wellness: EntityTable<Wellness, "id">;
   measurements: EntityTable<Measurement, "id">;
+  practice_runs: EntityTable<PracticeRun, "id">; // same name as the server table (sync uses one name for both)
+  mediaFiles: EntityTable<MediaFile, "id">; // local only, never synced as rows (see src/lib/media.ts)
   pushQueue: EntityTable<PushJob, "seq">;
   videoHandles: EntityTable<{ gameId: string; handle: FileSystemFileHandle }, "gameId">;
   outbox: EntityTable<OutboxEntry, "seq">;
@@ -75,6 +77,24 @@ db.version(6).stores({
 db.version(7).stores({
   measurements: "id, teamId, playerId, sessionId, date",
 });
+// v0.11: how each practice went (practice_runs) and drill attachments waiting to upload / kept offline (mediaFiles)
+db.version(8).stores({
+  practice_runs: "id, teamId",
+  mediaFiles: "id, teamId",
+});
+
+/**
+ * Bytes of a drill attachment (image / short video) kept on this device: until it reaches Supabase Storage
+ * (offline, or local mode where it never leaves the device). `id` = DrillMedia.id.
+ */
+export interface MediaFile {
+  id: string;
+  teamId: string;
+  path: string; // storage path, same as DrillMedia.path
+  blob: Blob;
+  mime: string;
+  uploaded: boolean; // true once in Storage (the local copy is then dropped, see media.ts)
+}
 
 /** A notification waiting to be sent (kept on this device until online; see src/lib/push.ts). */
 export interface PushJob {
@@ -158,8 +178,10 @@ export async function deleteGame(gameId: string) {
 }
 
 export async function deletePractice(practiceId: string) {
-  await localOnly(["attendance"], async () => {
+  // the server cascades attendance and the practice run (FK on delete cascade): remove locally without queueing
+  await localOnly(["attendance", "practice_runs"], async () => {
     await db.attendance.where("practiceId").equals(practiceId).delete();
+    await db.practice_runs.delete(practiceId);
   });
   await db.practices.delete(practiceId);
   await db.agenda.delete(practiceId);
@@ -170,10 +192,10 @@ export async function deletePractice(practiceId: string) {
 /** Removes every local row of a team without queueing anything (used after a server-side delete). */
 export async function purgeTeamLocal(teamId: string) {
   const gameIds = await db.games.where("teamId").equals(teamId).primaryKeys();
-  await localOnly(["teams", "players", "practices", "attendance", "games", "events", "goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes", "wellness", "measurements", "videoHandles", "outbox"], async () => {
+  await localOnly(["teams", "players", "practices", "attendance", "games", "events", "goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes", "wellness", "measurements", "practice_runs", "mediaFiles", "videoHandles", "outbox"], async () => {
     await db.events.where("teamId").equals(teamId).delete();
     await db.goals.where("teamId").equals(teamId).delete();
-    for (const t of [db.agenda, db.rsvps, db.feedback, db.seen, db.drills, db.scouting, db.notes, db.wellness, db.measurements]) await t.where("teamId").equals(teamId).delete();
+    for (const t of [db.agenda, db.rsvps, db.feedback, db.seen, db.drills, db.scouting, db.notes, db.wellness, db.measurements, db.practice_runs, db.mediaFiles]) await t.where("teamId").equals(teamId).delete();
     await db.attendance.where("teamId").equals(teamId).delete();
     await db.games.where("teamId").equals(teamId).delete();
     await db.practices.where("teamId").equals(teamId).delete();
@@ -185,14 +207,14 @@ export async function purgeTeamLocal(teamId: string) {
 }
 
 export async function clearAllLocal() {
-  await localOnly(["teams", "players", "practices", "attendance", "games", "events", "goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes", "wellness", "measurements", "pushQueue", "videoHandles", "outbox", "meta"], async () => {
-    await Promise.all([db.teams, db.players, db.practices, db.attendance, db.games, db.events, db.goals, db.agenda, db.rsvps, db.feedback, db.seen, db.drills, db.scouting, db.notes, db.wellness, db.measurements, db.pushQueue, db.videoHandles, db.outbox, db.meta].map((t) => t.clear()));
+  await localOnly(["teams", "players", "practices", "attendance", "games", "events", "goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes", "wellness", "measurements", "practice_runs", "mediaFiles", "pushQueue", "videoHandles", "outbox", "meta"], async () => {
+    await Promise.all([db.teams, db.players, db.practices, db.attendance, db.games, db.events, db.goals, db.agenda, db.rsvps, db.feedback, db.seen, db.drills, db.scouting, db.notes, db.wellness, db.measurements, db.practice_runs, db.mediaFiles, db.pushQueue, db.videoHandles, db.outbox, db.meta].map((t) => t.clear()));
   });
 }
 
 export async function exportAll(teamId?: string) {
   const byTeam = <T extends { teamId: string }>(rows: T[]) => (teamId ? rows.filter((r) => r.teamId === teamId) : rows);
-  const [teams, players, practices, attendance, games, events, goals, agenda, rsvps, feedback, seen, drills, scouting, notes, wellness, measurements] = await Promise.all([
+  const [teams, players, practices, attendance, games, events, goals, agenda, rsvps, feedback, seen, drills, scouting, notes, wellness, measurements, practice_runs] = await Promise.all([
     db.teams.toArray(),
     db.players.toArray(),
     db.practices.toArray(),
@@ -209,20 +231,22 @@ export async function exportAll(teamId?: string) {
     db.notes.toArray(),
     db.wellness.toArray(),
     db.measurements.toArray(),
+    db.practice_runs.toArray(),
   ]);
   return {
     app: "basketball-analytics", version: 1, exportedAt: new Date().toISOString(),
     teams: teamId ? teams.filter((t) => t.id === teamId) : teams,
     players: byTeam(players), practices: byTeam(practices), attendance: byTeam(attendance), games: byTeam(games), events: byTeam(events), goals: byTeam(goals),
     agenda: byTeam(agenda), rsvps: byTeam(rsvps), feedback: byTeam(feedback), seen: byTeam(seen), drills: byTeam(drills), scouting: byTeam(scouting), notes: byTeam(notes), wellness: byTeam(wellness), measurements: byTeam(measurements),
+    practice_runs: byTeam(practice_runs),
   };
 }
 
 type Export = Awaited<ReturnType<typeof exportAll>>;
-type Optional = "goals" | "agenda" | "rsvps" | "feedback" | "seen" | "drills" | "scouting" | "notes" | "wellness" | "measurements";
+type Optional = "goals" | "agenda" | "rsvps" | "feedback" | "seen" | "drills" | "scouting" | "notes" | "wellness" | "measurements" | "practice_runs";
 export async function importAll(data: Omit<Export, Optional> & Partial<Pick<Export, Optional>>) {
   if (data?.app !== "basketball-analytics") throw new Error(t("Ficheiro inválido"));
-  await db.transaction("rw", [db.teams, db.players, db.practices, db.attendance, db.games, db.events, db.goals, db.agenda, db.rsvps, db.feedback, db.seen, db.drills, db.scouting, db.notes, db.wellness, db.measurements], async () => {
+  await db.transaction("rw", [db.teams, db.players, db.practices, db.attendance, db.games, db.events, db.goals, db.agenda, db.rsvps, db.feedback, db.seen, db.drills, db.scouting, db.notes, db.wellness, db.measurements, db.practice_runs], async () => {
     await db.teams.bulkPut(data.teams);
     await db.players.bulkPut(data.players);
     await db.practices.bulkPut(data.practices);
@@ -239,13 +263,16 @@ export async function importAll(data: Omit<Export, Optional> & Partial<Pick<Expo
     if (data.notes?.length) await db.notes.bulkPut(data.notes);
     if (data.wellness?.length) await db.wellness.bulkPut(data.wellness);
     if (data.measurements?.length) await db.measurements.bulkPut(data.measurements);
+    if (data.practice_runs?.length) await db.practice_runs.bulkPut(data.practice_runs);
   });
 }
 
 /* ---------- import into a team (new ids) ---------- */
 
 const ID_TABLES = ["players", "practices", "games", "events", "goals", "feedback", "drills", "scouting", "notes", "measurements"] as const;
-const DATA_TABLES = ["players", "practices", "attendance", "games", "events", "goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes", "wellness", "measurements"] as const;
+// practice_runs: id = practice id, remapped like agenda rows. Drill attachments that are files keep their old
+// storage path (old team/drill ids): they only open for members of the original team — links/YouTube always work.
+const DATA_TABLES = ["players", "practices", "attendance", "games", "events", "goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes", "wellness", "measurements", "practice_runs"] as const;
 type DataTable = (typeof DATA_TABLES)[number];
 
 export interface ImportSummary { players: number; games: number; events: number; practices: number; total: number }

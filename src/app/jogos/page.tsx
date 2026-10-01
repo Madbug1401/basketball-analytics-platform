@@ -10,7 +10,8 @@ import { useAccess } from "@/lib/auth";
 import { gameStats } from "@/lib/stats";
 import { youtubeId } from "@/components/VideoPlayer";
 import type { VideoSource } from "@/lib/types";
-import { DeleteGameButton } from "@/components/DeleteGame";
+import { confirmDeleteGame } from "@/components/DeleteGame";
+import { RowActions } from "@/components/RowActions";
 import { L, locale, t } from "@/lib/i18n";
 
 export default function GamesPage() {
@@ -77,7 +78,11 @@ export default function GamesPage() {
                   {access.canEdit && (g.video.kind === "none"
                     ? <Link href={`/jogos/${g.id}/ao-vivo`} className="btn btn-primary flex-1 sm:flex-none">{t("Ao vivo")}</Link>
                     : <Link href={`/jogos/${g.id}/logger`} className="btn btn-primary flex-1 sm:flex-none">{t("Registar")}</Link>)}
-                  {access.canEdit && <DeleteGameButton game={g} compact className="flex-none px-3" />}
+                  {/* v0.11: edit/delete from the list (feedback ABC point 2) */}
+                  {access.canEdit && <RowActions label={t("Ações do jogo {game}", { game: `${g.home ? "vs" : "@"} ${g.opponent}` })} actions={[
+                    { label: t("Editar dados do jogo"), href: `/jogos/${g.id}#dados` },
+                    { label: t("Eliminar…"), danger: true, onClick: () => confirmDeleteGame(g) },
+                  ]} />}
                 </div>
               </div>
             );

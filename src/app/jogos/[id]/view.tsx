@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRouteId } from "@/lib/route";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { DeleteGameButton } from "@/components/DeleteGame";
@@ -218,11 +218,15 @@ function TeamCompare({ us, opp, opponent, poss }: { us: Line; opp: Line; opponen
 
 function GameInfo({ gameId, onDelete }: { gameId: string; onDelete: () => void }) {
   const game = useLiveQuery(() => db.games.get(gameId), [gameId]);
-  const [open, setOpen] = useState(false);
+  // v0.11: "Editar" in the games list / agenda opens /jogos/<id>#dados → this panel starts open and in view
+  const [open, setOpen] = useState(() => typeof window !== "undefined" && window.location.hash === "#dados");
+  const ref = useRef<HTMLElement>(null);
+  const loaded = !!game;
+  useEffect(() => { if (loaded && window.location.hash === "#dados") ref.current?.scrollIntoView({ block: "start" }); }, [loaded]);
   if (!game) return null;
   const upd = (patch: Parameters<typeof db.games.update>[1]) => db.games.update(gameId, patch);
   return (
-    <section className="card p-4">
+    <section id="dados" ref={ref} className="card scroll-mt-20 p-4">
       <button className="tap w-full text-left text-sm font-semibold" onClick={() => setOpen(!open)}>{open ? "▾" : "▸"} {t("Dados do jogo e notas")}</button>
       {open && (
         <div className="mt-3 grid gap-3 sm:grid-cols-4">

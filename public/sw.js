@@ -9,7 +9,7 @@ const CACHE = `courtside-${VERSION}`;
 const ROUTES = [
   "/", "/agenda", "/equipa", "/treinos", "/treinos/exercicios", "/jogos", "/adversarios", "/estatisticas", "/objetivos", "/carga", "/fisico", "/definicoes",
   "/conta", "/convite", "/admin",
-  "/jogos/_", "/jogos/_/logger", "/jogos/_/ao-vivo", "/treinos/_", "/jogadores/_",
+  "/jogos/_", "/jogos/_/logger", "/jogos/_/ao-vivo", "/treinos/_", "/treinos/_/ao-vivo", "/jogadores/_", // v0.11: live practice
 ];
 const EXTRA = ["/manifest.webmanifest", "/icon-192.png", "/icon-512.png", "/icon-maskable.png"];
 

@@ -24,13 +24,14 @@ Precisas do Node 20 ou mais recente.
 
 Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/outra.json 42 2026-10-15` (seed e "hoje").
 
-## O que já faz (v0.10)
+## O que já faz (v0.11)
 
 | Área | Funcionalidades |
 |---|---|
 | **Idiomas** | Toda a aplicação em **português, inglês ou francês**: escolhe-se em Definições → Idioma, no menu da conta ou no ecrã de entrada, e fica guardado no dispositivo · datas no formato da língua · os dados (nomes, notas, mensagens) ficam como foram escritos · como traduzir: [docs/I18N.md](docs/I18N.md) |
-| **Plantel** | Jogadores com nº, posição, ano, altura e notas; ativar/desativar; várias equipas |
-| **Treinos** | Criar treino, presenças (presente / atrasado / falta / justificada), intensidade, exercícios, assiduidade da época |
+| **Plantel** | Jogadores com nº, posição principal **e posições secundárias** ("também joga como", editáveis ao longo da época), ano, altura e notas; ativar/desativar; várias equipas |
+| **Treinos** | Criar treino, presenças (presente / atrasado / falta / justificada), intensidade, exercícios, assiduidade da época · menu ⋯ em cada treino (editar, acompanhar, eliminar com confirmação do que se perde) |
+| **Treino ao vivo** | Abrir o plano durante o treino e marcar cada exercício: iniciar, pausa/retomar (tempo efetivo), concluir, não realizado (motivo opcional), nota por exercício e nota geral · corrigir horas marcadas por engano · previsto vs real no fim · funciona sem internet e mantém o ecrã ligado |
 | **Game Logger** | Vídeo do YouTube, MP4 local, link direto ou sem vídeo (cronómetro) · 5 inicial e substituições · atalhos de teclado · mapa de lançamentos (2/3 pontos detetado pela posição) · adversário · anular · "▶ ver jogada" em cada evento · contexto da jogada |
 | **Ao vivo (banco)** | Registo no telemóvel durante o jogo, sem vídeo: relógio de jogo (minutos exatos), 5 em campo com pontos e faltas, aviso na 4.ª e 5.ª falta, bónus (no prolongamento as faltas de equipa continuam as do 4.º período, regra FIBA), descontos de tempo (FIBA), fim de período e prolongamento, anular (também o "terminar período", que devolve o relógio), ecrã sempre ligado |
 | **Contexto das jogadas** | Etiquetas opcionais (transição, pick & roll, 1x1, poste, 2.ª oportunidade, sem bola, vs zona, vs pressão) · pontos por jogada em cada contexto, no jogo e na época · filtro e sequência de vídeo por contexto |
@@ -38,7 +39,7 @@ Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/out
 | **Partilhar** | Imagem do jogo (1080×1350) com resultado, parciais, líderes e box score para WhatsApp/Instagram · resumo em texto |
 | **Agenda** | Treinos e jogos com hora, concentração e local · convocatória (rascunho/publicada) · cada jogador responde "vou / talvez / não posso" com nota · resumo de quem vem · mensagem pronta para o WhatsApp · respostas visíveis na folha de presenças |
 | **Feedback** | O treinador envia a um jogador uma nota com a jogada do vídeo (botão ➤ no registo) · o jogador vê a jogada no telemóvel (YouTube/link) e fica marcado como "visto" |
-| **Planeador de treinos** | Biblioteca de exercícios (16 de base) · plano de cada treino com minutos · sugestões a partir dos jogos (perdas, lances livres, ressalto, pressão…) · tempo por área na época |
+| **Planeador de treinos** | Biblioteca de exercícios (16 de base) com **anexos: fotos, vídeos curtos, YouTube ou links** · plano de cada treino com minutos · sugestões a partir dos jogos (perdas, lances livres, ressalto, pressão…) · tempo por área na época |
 | **Scouting** | Notas e jogadores a vigiar por adversário · chaves do jogo automáticas · relatório pré-jogo em imagem/texto |
 | **Quintetos** | Saldo por 100 posses de quintetos, duplas e trios · equipa com/sem cada jogador · gestão de minutos com alertas de carga |
 | **Posses** | Os eventos agrupados em posses (sem registar nada a mais): pontos por posse, eFG%, % perdas, % ressalto ofensivo, lances livres por lançamento, transição vs ataque organizado, 2.ª oportunidade · quintetos com posses reais (ataque/defesa por 100) |
@@ -53,6 +54,8 @@ Para gerar outra variação: `node scripts/gerar-dados-teste.mjs dados-teste/out
 | **Perfil físico** | Histórico datado de altura, peso (só staff), envergadura, alcance, salto parado, salto com balanço, lane agility e sprint ¾ · sessão de testes por estação com 3 tentativas (conta a melhor; o salto é calculado a partir do alcance) · checklist de protocolo (fora do protocolo fica marcado) · evolução, velocidade de crescimento (pico de crescimento) e envergadura − altura · "Subir de escalão" leva o histórico físico para a nova equipa |
 | **Carga** | Cada jogador diz o esforço (1–10) depois do treino/jogo e se está disponível/condicionado/indisponível · carga dos últimos 7 dias vs média de 4 semanas com alertas · disponibilidade na convocatória · o treinador pode registar por quem não tem telemóvel |
 | **Offline** | A app abre e funciona sem internet (service worker); tudo fica no telemóvel e sincroniza quando voltar a ligação |
+| **Ações nas listas** | Menu ⋯ em cada linha de Agenda, Jogos e Treinos (editar / eliminar sem abrir o registo, também no telemóvel) · a confirmação diz o que se perde |
+| **Versão e sincronização** | Definições → "Versão e sincronização" e o menu da conta mostram a versão, o endereço, o papel e o estado da sincronização (para comparar telemóvel e PC) · aviso "há uma versão nova" · aviso quando falta correr uma migração no servidor · menu do PC com "Mais ▾" (nada fica escondido) |
 | **Apagar jogo** | Botão 🗑 em cada jogo da lista e no topo da página do jogo (só equipa técnica) · a confirmação diz o que se perde (eventos, notas de vídeo, game plan, rotação, convocatória e esforço desse jogo) · as mensagens já enviadas aos jogadores ficam, sem ligação ao jogo · o apagão chega a todos os dispositivos e não volta |
 | **Jogo** | Relatório automático (parciais decisivos, perdas, ressaltos, LL, quintetos, jogadores acima/abaixo da média) com "▶ ver jogadas" · parciais · box score com minutos estimados, +/-, eficiência · mapa de lançamentos · quintetos · imprimir em A4 |
 | **Vídeo** | Editar qualquer evento (✎) · filtrar por jogador/tipo e **ver a sequência** das jogadas (ex.: todas as perdas do #7) · links do relatório abrem a sequência certa |

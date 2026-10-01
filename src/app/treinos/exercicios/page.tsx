@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, uid } from "@/lib/db";
 import { useTeam } from "@/lib/team";
 import { useSeason } from "@/lib/season";
 import { BASE_DRILLS, suggestions } from "@/lib/planner";
-import { FOCUS_LABEL, type Drill, type DrillFocus } from "@/lib/types";
+import { FOCUS_LABEL, type Drill, type DrillFocus, type DrillMedia } from "@/lib/types";
+import { MediaEditor, MediaStrip } from "@/components/DrillMedia";
+import { deleteDrill, dropMediaFile } from "@/lib/media";
 import { StaffOnly } from "@/components/Guard";
 import { ask } from "@/components/Dialog";
 import { t } from "@/lib/i18n";
@@ -77,10 +79,11 @@ function Drills() {
               {d.minutes ? <span className="shrink-0 rounded bg-panel-2 px-2 py-0.5 font-mono text-xs">{d.minutes}′</span> : null}
             </div>
             <div className="flex flex-wrap gap-1">{d.focus.map((f) => <span key={f} className="rounded-full bg-panel-2 px-2 py-0.5 text-[11px] text-muted">{t(FOCUS_LABEL[f])}</span>)}</div>
-            {d.description && <p className="text-sm text-muted">{d.description}</p>}
+            {d.description && <p className="whitespace-pre-line text-sm text-muted">{d.description}</p>}
+            <MediaStrip media={d.media} />
             <div className="mt-auto flex justify-end gap-3 pt-1 text-xs">
               <button className="tap -my-2 text-brand" onClick={() => { setEditing(d); window.scrollTo({ top: 0, behavior: "smooth" }); }}>{t("Editar")}</button>
-              <button className="tap -my-2 text-muted hover:text-bad" onClick={async () => { if (await ask(t("Apagar \"{name}\"?", { name: d.name }), { confirmText: t("Apagar"), danger: true })) await db.drills.delete(d.id); }}>{t("Apagar")}</button>
+              <button className="tap -my-2 text-muted hover:text-bad" onClick={async () => { if (await ask(t("Apagar \"{name}\"?", { name: d.name }) + (d.media?.length ? `\n\n${t("Os anexos ({n}) também são apagados. Os planos de treino que já o usam mantêm o nome e os minutos.", { n: d.media.length })}` : ""), { confirmText: t("Apagar"), danger: true })) await deleteDrill(d); }}>{t("Apagar")}</button>
             </div>
           </div>
         ))}
@@ -98,12 +101,30 @@ function Drills() {
 
 function DrillForm({ teamId, initial, onDone }: { teamId: string; initial?: Drill; onDone: () => void }) {
   const [f, setF] = useState({ name: initial?.name ?? "", minutes: String(initial?.minutes ?? 10), description: initial?.description ?? "", focus: initial?.focus ?? [] as DrillFocus[] });
+  // v0.11: the id exists before saving, so attached files get their final storage path (team/drill/file)
+  const [id] = useState(() => initial?.id ?? uid());
+  const [media, setMedia] = useState<DrillMedia[]>(initial?.media ?? []);
   const [err, setErr] = useState("");
+  // files attached in this form (kept on the device right away by media.ts) and what got saved: when the form
+  // goes away (Guardar, Cancelar, "Fechar" at the top, editing another drill…) unsaved files are forgotten
+  const added = useRef<DrillMedia[]>([]);
+  const savedIds = useRef<Set<string> | null>(null);
+  useEffect(() => () => {
+    const keep = savedIds.current ?? new Set((initial?.media ?? []).map((m) => m.id));
+    for (const m of added.current) if (!keep.has(m.id)) void dropMediaFile(m);
+  }, [initial]);
+  const changeMedia = (next: DrillMedia[]) => {
+    for (const m of next) if (!media.some((x) => x.id === m.id)) added.current.push(m);
+    setMedia(next);
+  };
   const toggle = (x: DrillFocus) => setF({ ...f, focus: f.focus.includes(x) ? f.focus.filter((y) => y !== x) : [...f.focus, x] });
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!f.name.trim()) return setErr(t("Dá um nome ao exercício."));
-    await db.drills.put({ id: initial?.id ?? uid(), teamId, name: f.name.trim(), minutes: Number(f.minutes) || undefined, description: f.description.trim() || undefined, focus: f.focus, createdAt: initial?.createdAt ?? Date.now() });
+    await db.drills.put({ id, teamId, name: f.name.trim(), minutes: Number(f.minutes) || undefined, description: f.description.trim() || undefined, focus: f.focus, media: media.length ? media : undefined, createdAt: initial?.createdAt ?? Date.now() });
+    savedIds.current = new Set(media.map((m) => m.id));
+    // files that were attached before and removed in this edit
+    for (const m of initial?.media ?? []) if (!media.some((x) => x.id === m.id)) await dropMediaFile(m);
     onDone();
   };
   return (
@@ -122,6 +143,7 @@ function DrillForm({ teamId, initial, onDone }: { teamId: string; initial?: Dril
         </div>
       </div>
       <div><label className="label">{t("Descrição")}</label><textarea className="input" rows={3} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></div>
+      <MediaEditor teamId={teamId} drillId={id} value={media} onChange={changeMedia} />
       {err && <p className="text-sm text-bad">{err}</p>}
       <div className="flex gap-2"><button className="btn btn-primary flex-1">{t("Guardar")}</button><button type="button" className="btn" onClick={onDone}>{t("Cancelar")}</button></div>
     </form>

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, today, uid } from "@/lib/db";
 import { useTeam } from "@/lib/team";
+import { RowActions } from "@/components/RowActions";
+import { confirmDeletePractice } from "@/components/DeletePractice";
 import { StaffOnly } from "@/components/Guard";
 import { timeByFocus } from "@/lib/planner";
 import { FOCUS_LABEL } from "@/lib/types";
@@ -68,15 +70,23 @@ function PracticesPage() {
           {practices.map((p) => {
             const s = byPractice.get(p.id);
             return (
-              <Link key={p.id} href={`/treinos/${p.id}`} className="flex items-center justify-between px-4 py-3 hover:bg-panel-2">
-                <div>
-                  <div className="font-medium">{p.title || t("Treino")}</div>
-                  <div className="text-xs text-muted">{new Date(p.date + "T12:00").toLocaleDateString(locale(), { weekday: "short", day: "numeric", month: "short" })}</div>
-                </div>
-                <div className="text-right text-sm tabular-nums">
-                  {s ? <>{s.present}/{s.total}</> : <span className="text-muted">{t("sem registo")}</span>}
-                </div>
-              </Link>
+              <div key={p.id} className="flex items-center hover:bg-panel-2">
+                <Link href={`/treinos/${p.id}`} className="flex min-w-0 flex-1 items-center justify-between py-3 pl-4 pr-2">
+                  <div className="min-w-0">
+                    <div className="truncate font-medium">{p.title || t("Treino")}</div>
+                    <div className="text-xs text-muted">{new Date(p.date + "T12:00").toLocaleDateString(locale(), { weekday: "short", day: "numeric", month: "short" })}</div>
+                  </div>
+                  <div className="text-right text-sm tabular-nums">
+                    {s ? <>{s.present}/{s.total}</> : <span className="text-muted">{t("sem registo")}</span>}
+                  </div>
+                </Link>
+                {/* v0.11: actions without opening the practice (feedback ABC point 2) */}
+                <RowActions className="mr-2" label={t("Ações do treino {title}", { title: p.title || t("Treino") })} actions={[
+                  { label: t("Editar e plano"), href: `/treinos/${p.id}` },
+                  { label: t("Acompanhar ao vivo"), href: `/treinos/${p.id}/ao-vivo` },
+                  { label: t("Eliminar…"), danger: true, onClick: () => confirmDeletePractice(p) },
+                ]} />
+              </div>
             );
           })}
           {practices.length === 0 && <p className="p-6 text-center text-sm text-muted">{t("Nenhum treino registado.")}</p>}

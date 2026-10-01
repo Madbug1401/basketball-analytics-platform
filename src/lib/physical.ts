@@ -152,7 +152,7 @@ export async function movePlayer(player: Player, from: Team, to: Team, opts: { n
   const now = Date.now();
   await db.players.add({
     id, teamId: to.id, name: player.name, number: opts.number ?? player.number, position: player.position,
-    birthYear: player.birthYear, heightCm: player.heightCm, active: true, prevId: player.id, createdAt: now,
+    secondaryPositions: player.secondaryPositions, birthYear: player.birthYear, heightCm: player.heightCm, active: true, prevId: player.id, createdAt: now,
   });
   const hist = await db.measurements.where("playerId").equals(player.id).toArray();
   if (hist.length) {

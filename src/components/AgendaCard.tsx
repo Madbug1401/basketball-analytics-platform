@@ -7,6 +7,9 @@ import { callupText, dayLabel, expected, rsvpCounts, type AgendaItem } from "@/l
 import { readPlan } from "@/lib/gameplan";
 import { RSVP_LABEL, type Agenda, type ID, type Player, type RsvpStatus } from "@/lib/types";
 import { askText } from "./Dialog";
+import { RowActions } from "./RowActions";
+import { confirmDeleteGame } from "./DeleteGame";
+import { confirmDeletePractice } from "./DeletePractice";
 import { notify } from "@/lib/push";
 import { useLiveQuery } from "dexie-react-hooks";
 import { AVAILABILITY_LABEL } from "@/lib/types";
@@ -76,6 +79,18 @@ export function AgendaCard({ it, players, teamId, teamName, canEdit, myPlayerId,
           {it.info?.location && <div className="truncate text-xs text-muted">📍 {it.info.location}</div>}
           {it.info?.note && !compact && <div className="mt-1 text-sm text-muted">{it.info.note}</div>}
         </div>
+        {/* v0.11: edit / delete from the agenda list (feedback ABC point 2). The agenda shows games and
+            practices, so deleting here deletes the game / practice itself, after the usual confirmation. */}
+        {canEdit && (
+          <RowActions className="-mr-1 -mt-1" label={t("Ações de {event}", { event: it.title })} actions={[
+            { label: t("Hora, local e mensagem"), onClick: () => setOpen("details") },
+            it.kind === "game"
+              ? { label: t("Editar dados do jogo"), href: `/jogos/${it.id}#dados` }
+              : { label: t("Editar treino e plano"), href: `/treinos/${it.id}` },
+            ...(it.kind === "practice" ? [{ label: t("Acompanhar ao vivo"), href: `/treinos/${it.id}/ao-vivo` }] : []),
+            { label: t("Eliminar…"), danger: true, onClick: () => (it.game ? confirmDeleteGame(it.game) : it.practice ? confirmDeletePractice(it.practice) : undefined) },
+          ]} />
+        )}
       </div>
 
       {/* player: own answer */}

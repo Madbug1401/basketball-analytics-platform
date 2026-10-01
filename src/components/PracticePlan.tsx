@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/lib/db";
+import { db, uid } from "@/lib/db";
+import { withIds } from "@/lib/practiceRun";
+import { MediaStrip } from "./DrillMedia";
 import { useSeason } from "@/lib/season";
 import { suggestions } from "@/lib/planner";
 import { FOCUS_LABEL, type Agenda, type PlanItem, type Practice } from "@/lib/types";
@@ -22,7 +24,8 @@ export function PracticePlan({ practice }: { practice: Practice }) {
   const total = plan.reduce((a, p) => a + p.minutes, 0);
   const save = (next: PlanItem[]) => {
     const base: Agenda = info ?? { id: practice.id, teamId: practice.teamId, kind: "practice" };
-    return db.agenda.put({ ...base, plan: next });
+    // v0.11: every item keeps a stable id (the live practice log points to it); old plans get ids here
+    return db.agenda.put({ ...base, plan: withIds(next) });
   };
   const move = (i: number, d: number) => {
     const j = i + d;
@@ -34,12 +37,12 @@ export function PracticePlan({ practice }: { practice: Practice }) {
   const addDrill = (id: string) => {
     const d = drills?.find((x) => x.id === id);
     if (!d) return;
-    void save([...plan, { drillId: d.id, name: d.name, minutes: d.minutes ?? 10, focus: d.focus }]);
+    void save([...plan, { id: uid(), drillId: d.id, name: d.name, minutes: d.minutes ?? 10, focus: d.focus }]);
     setPick("");
   };
   const addCustom = () => {
     if (!custom.name.trim()) return;
-    void save([...plan, { name: custom.name.trim(), minutes: Number(custom.minutes) || 10 }]);
+    void save([...plan, { id: uid(), name: custom.name.trim(), minutes: Number(custom.minutes) || 10 }]);
     setCustom({ name: "", minutes: "10" });
   };
   const sugg = s ? suggestions(s) : [];
@@ -49,6 +52,7 @@ export function PracticePlan({ practice }: { practice: Practice }) {
     <section className="card mt-4 p-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-lg font-semibold">{t("Plano do treino")}</h2>
+        {plan.length > 0 && <Link href={`/treinos/${practice.id}/ao-vivo`} className="btn btn-primary py-1 text-sm">▶ {t("Acompanhar ao vivo")}</Link>}
         <span className={`text-sm ${practice.durationMin && total > practice.durationMin ? "text-bad" : "text-muted"}`}>
           {practice.durationMin ? t("{n} min de {max}", { n: total, max: practice.durationMin }) : t("{n} min", { n: total })}
         </span>
@@ -56,12 +60,14 @@ export function PracticePlan({ practice }: { practice: Practice }) {
 
       <ol className="mt-2 grid gap-1.5">
         {plan.map((p, i) => (
-          <li key={i} className="flex items-center gap-2 rounded-lg border border-line bg-bg/40 px-2 py-1.5">
+          <li key={p.id ?? i} className="flex items-center gap-2 rounded-lg border border-line bg-bg/40 px-2 py-1.5">
             <span className="w-5 shrink-0 text-center font-mono text-xs text-muted">{i + 1}</span>
             <div className="min-w-0 flex-1">
               <div className="truncate text-sm font-medium">{p.name}</div>
               {p.focus?.length ? <div className="truncate text-[11px] text-muted">{p.focus.map((f) => t(FOCUS_LABEL[f])).join(" · ")}</div> : null}
             </div>
+            {/* v0.11: the drill's attachments, one tap away while planning */}
+            <MediaStrip compact media={drills?.find((d) => d.id === p.drillId)?.media} />
             <input className="input w-16 px-2 py-1 text-center" inputMode="numeric" aria-label={t("Minutos")} value={p.minutes}
               onChange={(e) => save(plan.map((x, j) => (j === i ? { ...x, minutes: Number(e.target.value) || 0 } : x)))} />
             <div className="flex shrink-0">

@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRouteId } from "@/lib/route";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, deletePractice } from "@/lib/db";
+import { db } from "@/lib/db";
 import { ATTENDANCE_LABEL, type AttendanceStatus, type Practice } from "@/lib/types";
 import { StaffOnly } from "@/components/Guard";
-import { ask } from "@/components/Dialog";
 import { PracticePlan } from "@/components/PracticePlan";
+import { PracticeRunSummary } from "@/components/PracticeRunSummary";
+import { confirmDeletePractice } from "@/components/DeletePractice";
 import { t } from "@/lib/i18n";
 
 const ORDER: AttendanceStatus[] = ["present", "late", "absent", "excused"];
@@ -29,17 +30,19 @@ function PracticeDetail() {
   const data = useLiveQuery(async () => {
     const practice = await db.practices.get(id);
     if (!practice) return { practice: null };
-    const [players, attendance, rsvps] = await Promise.all([
+    const [players, attendance, rsvps, info, run] = await Promise.all([
       db.players.where("teamId").equals(practice.teamId).filter((p) => p.active).sortBy("number"),
       db.attendance.where("practiceId").equals(id).toArray(),
       db.rsvps.where("refId").equals(id).toArray(),
+      db.agenda.get(id),
+      db.practice_runs.get(id), // v0.11: how it went (logged in /treinos/<id>/ao-vivo)
     ]);
-    return { practice, players, attendance, rsvps };
+    return { practice, players, attendance, rsvps, info, run };
   }, [id]);
 
   if (!data) return null;
   if (!data.practice) return <p className="text-muted">{t("Treino não encontrado.")}</p>;
-  const { practice, players = [], attendance = [], rsvps = [] } = data;
+  const { practice, players = [], attendance = [], rsvps = [], info, run } = data;
   const answers = new Map(rsvps.map((r) => [r.playerId, r]));
   const status = new Map(attendance.map((a) => [a.playerId, a]));
 
@@ -83,6 +86,7 @@ function PracticeDetail() {
       </div>
 
       <PracticePlan practice={practice} />
+      {run && <div className="mt-4"><PracticeRunSummary plan={(info?.plan ?? []).filter((p) => p.id)} run={run} /></div>}
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-semibold">{t("Presenças")}</h2>
@@ -120,7 +124,7 @@ function PracticeDetail() {
         {players.length === 0 && <p className="text-muted">{t("Adiciona jogadores no")} <Link className="text-brand" href="/equipa">{t("Plantel")}</Link>.</p>}
       </div>
 
-      <button className="btn btn-danger mt-8" onClick={async () => { if (await ask(t("Apagar este treino?"), { confirmText: t("Apagar"), danger: true })) { await deletePractice(id); router.push("/treinos"); } }}>
+      <button className="btn btn-danger mt-8" onClick={async () => { if (await confirmDeletePractice(practice)) router.push("/treinos"); }}>
         {t("Apagar treino")}
       </button>
     </div>

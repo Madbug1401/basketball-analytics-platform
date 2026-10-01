@@ -8,7 +8,7 @@ import { t } from "./i18n";
 
 const COLUMNS: Record<SyncedTable, string[]> = {
   teams: ["id", "name", "category", "gender", "season", "createdAt"],
-  players: ["id", "teamId", "name", "number", "position", "birthYear", "heightCm", "active", "prevId", "createdAt"],
+  players: ["id", "teamId", "name", "number", "position", "secondaryPositions", "birthYear", "heightCm", "active", "prevId", "createdAt"],
   practices: ["id", "teamId", "date", "title", "durationMin", "intensity", "notes", "createdAt"],
   attendance: ["id", "teamId", "practiceId", "playerId", "status", "note"],
   games: ["id", "teamId", "date", "opponent", "home", "competition", "periods", "periodMinutes", "video", "createdAt"],
@@ -18,18 +18,26 @@ const COLUMNS: Record<SyncedTable, string[]> = {
   rsvps: ["id", "teamId", "refId", "playerId", "status", "note", "answeredAt"],
   feedback: ["id", "teamId", "playerId", "gameId", "clipStart", "clipEnd", "eventIds", "text", "author", "report", "createdAt"],
   seen: ["id", "teamId", "playerId", "seenAt"],
-  drills: ["id", "teamId", "name", "focus", "minutes", "description", "createdAt"],
+  drills: ["id", "teamId", "name", "focus", "minutes", "description", "media", "createdAt"],
   scouting: ["id", "teamId", "name", "notes", "keyPlayers", "editedAt"],
   notes: ["id", "teamId", "gameId", "videoTs", "period", "text", "author", "createdAt"],
   wellness: ["id", "teamId", "playerId", "kind", "refId", "date", "rpe", "minutes", "status", "note", "answeredAt"],
   measurements: ["id", "teamId", "playerId", "type", "value", "date", "sessionId", "attempts", "base", "evaluator", "protocolOk", "notes", "fromTeam", "createdAt"],
+  practice_runs: ["id", "teamId", "items", "note", "startedAt", "endedAt", "createdAt"],
 };
 // tables added after the first release: if the server hasn't been migrated yet, skip them
 // quietly (their changes stay queued) instead of breaking the whole sync
-const OPTIONAL: SyncedTable[] = ["goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes", "wellness", "measurements"];
+const OPTIONAL: SyncedTable[] = ["goals", "agenda", "rsvps", "feedback", "seen", "drills", "scouting", "notes", "wellness", "measurements", "practice_runs"];
 const missingTable = (e: { code?: string; message?: string } | null) =>
   !!e && (e.code === "PGRST205" || e.code === "42P01" || /could not find the table|does not exist/i.test(e.message ?? ""));
 const unavailable = new Set<SyncedTable>();
+// v0.11: columns the server refused because it doesn't have them yet ("players.secondary_positions").
+// Before, both cases were silent: data stayed on the phone (tables) or never left it (columns), which is
+// how the phone and the PC ended up showing different things. Now they surface in SyncStatus.missing.
+// (in memory: after running the migration, reload the app and use Definições → "Reenviar" so rows sent
+// without the column go up again — see uploadTeam below)
+const droppedColumns = new Set<string>();
+const publishMissing = () => setStatus({ missing: [...unavailable, ...droppedColumns].sort() });
 // coach notes live in separate tables that players cannot read
 const PRIVATE: Partial<Record<SyncedTable, { table: string; key: string }>> = {
   players: { table: "players_private", key: "player_id" },
@@ -61,6 +69,8 @@ export interface SyncStatus {
   pending: number;
   lastSync?: number;
   error?: string;
+  /** Tables / "table.column" the server doesn't have yet → a migration in supabase/migrations is missing (v0.11). */
+  missing?: string[];
 }
 let status: SyncStatus = { state: "off", pending: 0 };
 const listeners = new Set<() => void>();
@@ -108,7 +118,15 @@ export async function syncNow() {
   try {
     await flush();
     await pull();
+    // drill attachments (images/videos) waiting on this device go to Storage after the rows they belong to
+    const c = client;
+    if (c) {
+      const missingStorage = await import("./media").then((m) => m.flushMediaUploads(c))
+        .catch((e) => { if (isNetworkError(e)) throw e; console.warn("media upload", e); return [] as string[]; });
+      missingStorage.forEach((x) => droppedColumns.add(x));
+    }
     await refreshPending();
+    publishMissing();
     setStatus({ state: "idle", lastSync: Date.now() });
     void import("./push").then((m) => m.flushPush()); // queued notifications
   } catch (e) {
@@ -188,6 +206,7 @@ async function flush() {
       for (let tries = 0; error && tries < 3; tries++) {
         const col = (error.code === "PGRST204" || /column/i.test(error.message ?? "")) && error.message?.match(/'([a-z_]+)' column/)?.[1];
         if (!col || !(col in rows[0])) break;
+        droppedColumns.add(`${table}.${col}`);
         rows = rows.map((r) => Object.fromEntries(Object.entries(r).filter(([k]) => k !== col)));
         ({ error } = await client.from(table).upsert(rows, { onConflict: "id" }));
       }

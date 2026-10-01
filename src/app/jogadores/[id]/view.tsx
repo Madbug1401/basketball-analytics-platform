@@ -16,6 +16,7 @@ import { useAccess } from "@/lib/auth";
 import { PhysicalProfile } from "@/components/Physical";
 import { useState } from "react";
 import { t } from "@/lib/i18n";
+import { POSITION_LABEL, secondaryOf, type Position } from "@/lib/types";
 
 export function PlayerPage() {
   const id = useRouteId();
@@ -42,8 +43,12 @@ export function PlayerPage() {
           <div>
             <h1 className="text-2xl font-semibold">{player.name}</h1>
             <p className="text-sm text-muted">
-              {[player.position, player.heightCm && `${player.heightCm} cm`, player.birthYear && t("n. {year}", { year: player.birthYear })].filter(Boolean).join(" · ") || "—"}
+              {[player.position && `${player.position} · ${t(POSITION_LABEL[player.position])}`, player.heightCm && `${player.heightCm} cm`, player.birthYear && t("n. {year}", { year: player.birthYear })].filter(Boolean).join(" · ") || "—"}
             </p>
+            {/* v0.11: all positions on the profile (feedback ABC point 3); the main one stays first */}
+            {secondaryOf(player).length > 0 && (
+              <p className="text-xs text-muted">{t("Também joga como: {list}", { list: secondaryOf(player).map((x) => `${x} (${t(POSITION_LABEL[x as Exclude<Position, "">])})`).join(", ") })}</p>
+            )}
           </div>
         </div>
       </div>

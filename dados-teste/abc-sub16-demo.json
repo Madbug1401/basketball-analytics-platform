@@ -1,7 +1,7 @@
 {
  "app": "basketball-analytics",
  "version": 1,
- "exportedAt": "2026-09-27T10:45:56.119Z",
+ "exportedAt": "2026-10-01T16:39:40.154Z",
  "demo": true,
  "teams": [
   {
@@ -23,7 +23,10 @@
    "birthYear": 2010,
    "heightCm": 172,
    "active": true,
-   "createdAt": 1782381600000
+   "createdAt": 1782381600000,
+   "secondaryPositions": [
+    "SG"
+   ]
   },
   {
    "id": "5021fe22-794f-40f9-a398-0edfc0fe7703",
@@ -45,7 +48,11 @@
    "birthYear": 2010,
    "heightCm": 184,
    "active": true,
-   "createdAt": 1782381600002
+   "createdAt": 1782381600002,
+   "secondaryPositions": [
+    "SG",
+    "PF"
+   ]
   },
   {
    "id": "b537301f-2df1-425e-a409-9f589ae86ab2",
@@ -56,7 +63,10 @@
    "birthYear": 2010,
    "heightCm": 191,
    "active": true,
-   "createdAt": 1782381600003
+   "createdAt": 1782381600003,
+   "secondaryPositions": [
+    "C"
+   ]
   },
   {
    "id": "56612517-7234-4b51-adee-b246f84f768c",
@@ -101,7 +111,10 @@
    "birthYear": 2011,
    "heightCm": 182,
    "active": true,
-   "createdAt": 1782381600007
+   "createdAt": 1782381600007,
+   "secondaryPositions": [
+    "SG"
+   ]
   },
   {
    "id": "316181d9-6922-48ed-a6e4-5673a5118844",
@@ -53312,7 +53325,46 @@
    "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
    "kind": "practice",
    "time": "18:30",
-   "location": "Pavilhão Municipal"
+   "location": "Pavilhão Municipal",
+   "plan": [
+    {
+     "drillId": "078c7dc7-8048-47e5-a95f-232e3a6ee6ae",
+     "name": "Lançamento em 5 posições",
+     "minutes": 12,
+     "focus": [
+      "lancamento"
+     ],
+     "id": "00000000-0011-4000-a000-000000000002"
+    },
+    {
+     "drillId": "84cebd67-41ec-449b-aa05-cebed2491463",
+     "name": "Ataque contra pressão (4x4 + 1)",
+     "minutes": 12,
+     "focus": [
+      "pressao",
+      "tov"
+     ],
+     "id": "00000000-0011-4000-a000-000000000003"
+    },
+    {
+     "drillId": "d49b92c5-2f43-48cd-a75c-205fe79814c1",
+     "name": "Shell drill 4x4",
+     "minutes": 12,
+     "focus": [
+      "defesa"
+     ],
+     "id": "00000000-0011-4000-a000-000000000004"
+    },
+    {
+     "drillId": "92f24c0c-71ec-42eb-a4b9-32c4f3a8a67a",
+     "name": "5x5 com regras",
+     "minutes": 15,
+     "focus": [
+      "tatica"
+     ],
+     "id": "00000000-0011-4000-a000-000000000005"
+    }
+   ]
   },
   {
    "id": "f7428b47-aa10-4b72-a432-c431a22ded50",
@@ -53460,7 +53512,8 @@
      "minutes": 12,
      "focus": [
       "lancamento"
-     ]
+     ],
+     "id": "00000000-0011-4000-a000-000000000006"
     },
     {
      "drillId": "84cebd67-41ec-449b-aa05-cebed2491463",
@@ -53469,7 +53522,8 @@
      "focus": [
       "pressao",
       "tov"
-     ]
+     ],
+     "id": "00000000-0011-4000-a000-000000000007"
     },
     {
      "drillId": "fd0d14ae-75c1-4db8-a4db-8dfeefaba4db",
@@ -53477,7 +53531,8 @@
      "minutes": 10,
      "focus": [
       "ressalto"
-     ]
+     ],
+     "id": "00000000-0011-4000-a000-000000000008"
     },
     {
      "drillId": "92f24c0c-71ec-42eb-a4b9-32c4f3a8a67a",
@@ -53485,7 +53540,8 @@
      "minutes": 15,
      "focus": [
       "tatica"
-     ]
+     ],
+     "id": "00000000-0011-4000-a000-000000000009"
     }
    ]
   },
@@ -53502,7 +53558,8 @@
      "minutes": 10,
      "focus": [
       "ll"
-     ]
+     ],
+     "id": "00000000-0011-4000-a000-000000000010"
     },
     {
      "drillId": "8ad8a52e-d664-40a8-a554-b23564d5fdaa",
@@ -53510,7 +53567,8 @@
      "minutes": 12,
      "focus": [
       "transicao"
-     ]
+     ],
+     "id": "00000000-0011-4000-a000-000000000011"
     },
     {
      "drillId": "d49b92c5-2f43-48cd-a75c-205fe79814c1",
@@ -53518,7 +53576,8 @@
      "minutes": 12,
      "focus": [
       "defesa"
-     ]
+     ],
+     "id": "00000000-0011-4000-a000-000000000012"
     },
     {
      "drillId": "92f24c0c-71ec-42eb-a4b9-32c4f3a8a67a",
@@ -53526,7 +53585,8 @@
      "minutes": 15,
      "focus": [
       "tatica"
-     ]
+     ],
+     "id": "00000000-0011-4000-a000-000000000013"
     }
    ]
   },
@@ -53688,7 +53748,16 @@
     "defesa"
    ],
    "minutes": 12,
-   "createdAt": 1784980800006
+   "createdAt": 1784980800006,
+   "media": [
+    {
+     "id": "00000000-0011-4000-a000-000000000001",
+     "kind": "link",
+     "url": "https://www.youtube.com/results?search_query=shell+drill+basketball",
+     "title": "Exemplos de shell drill (YouTube)",
+     "createdAt": 1784980800000
+    }
+   ]
   },
   {
    "id": "92f24c0c-71ec-42eb-a4b9-32c4f3a8a67a",
@@ -59156,6 +59225,63 @@
    ],
    "protocolOk": true,
    "createdAt": 1790276400275
+  }
+ ],
+ "practice_runs": [
+  {
+   "id": "672ddbb1-12ac-4142-afc2-718308b128e0",
+   "teamId": "74a923ac-4019-4125-ae90-34cffc4464ad",
+   "startedAt": 1790361300000,
+   "endedAt": 1790364720000,
+   "createdAt": 1790361300000,
+   "note": "Começámos 5 min tarde (pavilhão ocupado). O shell drill ficou para o próximo treino.",
+   "items": {
+    "00000000-0011-4000-a000-000000000002": {
+     "status": "done",
+     "name": "Lançamento em 5 posições",
+     "plannedMin": 12,
+     "segments": [
+      {
+       "start": 1790361300000,
+       "end": 1790362140000
+      }
+     ]
+    },
+    "00000000-0011-4000-a000-000000000003": {
+     "status": "done",
+     "name": "Ataque contra pressão (4x4 + 1)",
+     "plannedMin": 12,
+     "segments": [
+      {
+       "start": 1790362200000,
+       "end": 1790362620000
+      },
+      {
+       "start": 1790362740000,
+       "end": 1790363280000
+      }
+     ],
+     "note": "Pausa de 2 min: lesão ligeira do #8 (tornozelo)."
+    },
+    "00000000-0011-4000-a000-000000000004": {
+     "status": "skipped",
+     "name": "Shell drill 4x4",
+     "plannedMin": 12,
+     "segments": [],
+     "reason": "Falta de tempo"
+    },
+    "00000000-0011-4000-a000-000000000005": {
+     "status": "done",
+     "name": "5x5 com regras",
+     "plannedMin": 15,
+     "segments": [
+      {
+       "start": 1790363400000,
+       "end": 1790364720000
+      }
+     ]
+    }
+   }
   }
  ]
 }
